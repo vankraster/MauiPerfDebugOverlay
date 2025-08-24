@@ -92,17 +92,17 @@ namespace MauiPerfDebugOverlay.Controls
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
             if (sender is not View overlay) return;
-            if (overlay.Parent is not AbsoluteLayout parent) return;
+            if (overlay.Parent.Parent is not Grid parent) return;
 
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    _currentXPosition = AbsoluteLayout.GetLayoutBounds(overlay).X;
+                    _currentXPosition = TranslationX;
                     _totalXHistory.Clear();
                     _totalXHistory.Enqueue(e.TotalX);
                     _lastAverageX = e.TotalX;
 
-                    _currentYPosition = AbsoluteLayout.GetLayoutBounds(overlay).Y;
+                    _currentYPosition = TranslationY;
                     _totalYHistory.Clear();
                     _totalYHistory.Enqueue(e.TotalY);
                     _lastAverageY = e.TotalY;
@@ -127,9 +127,7 @@ namespace MauiPerfDebugOverlay.Controls
 
                         _currentXPosition = newX;
 
-                        var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
-                        bounds.X = newX;
-                        AbsoluteLayout.SetLayoutBounds(overlay, bounds);
+                        TranslationX = newX;
 
                         _lastAverageX = currentAverageX;
                     }
@@ -147,16 +145,13 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         double newY = _currentYPosition + deltaY;
 
-                        // Limitează între 5% și 95% din înălțimea ecranului
-                        newY = Math.Max(parent.Height * 0.05, newY);
-                        newY = Math.Min(parent.Height * 0.95 - overlay.Height, newY);
+                        // Limitează între 0% și 100% din înălțimea ecranului
+                        newY = Math.Max(parent.Height * 0.00, newY);
+                        newY = Math.Min(parent.Height * 1 - overlay.Height, newY);
 
                         _currentYPosition = newY;
 
-                        var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
-                        bounds.Y = newY;
-                        AbsoluteLayout.SetLayoutBounds(overlay, bounds);
-
+                        TranslationY = newY;
                         _lastAverageY = currentAverageY;
                     }
                     #endregion
