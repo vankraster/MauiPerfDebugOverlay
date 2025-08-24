@@ -77,7 +77,7 @@ namespace MauiPerfDebugOverlay.Controls
 
                         // Memory
                         MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
-                        MemoryLabel.TextColor = _memoryUsage < 200 ? Colors.LimeGreen :
+                        MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
                                                 _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
 
                         // Threads
@@ -127,7 +127,7 @@ namespace MauiPerfDebugOverlay.Controls
             else score += 1;
 
             // Memory (max 2 puncte)
-            if (_memoryUsage < 200) score += 2;
+            if (_memoryUsage < 260) score += 2;
             else if (_memoryUsage < 400) score += 1;
             // >400 → 0
 
