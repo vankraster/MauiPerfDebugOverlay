@@ -47,12 +47,7 @@
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
-                   Text="Threads: --" />
-            <Label x:Name="FrameDropsLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="FrameDrops: --" />
+                   Text="Threads: --" /> 
 
         </VerticalStackLayout>
 

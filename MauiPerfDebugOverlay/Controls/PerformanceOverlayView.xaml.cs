@@ -12,17 +12,17 @@ namespace MauiPerfDebugOverlay.Controls
 
         private double _overallScore;
         private double _cpuUsage;
+        private TimeSpan _prevCpuTime;
         private double _memoryUsage;
-        private int _threadCount;
-        private int _frameDrops;
-
+        private int _threadCount; 
+        private int _processorCount = Environment.ProcessorCount;
 
         public PerformanceOverlayView()
         {
             InitializeComponent();
-
-            //fps
+             
             _stopwatch = new Stopwatch();
+            _stopwatchGeneral = new Stopwatch();
 
 
             // Timer pentru update metrici (simulat)
@@ -33,8 +33,8 @@ namespace MauiPerfDebugOverlay.Controls
                 MainThread.BeginInvokeOnMainThread(UpdateUI);
             };
 
-    
-             
+
+
         }
 
 
@@ -43,10 +43,9 @@ namespace MauiPerfDebugOverlay.Controls
         {
             ScoreLabel.Text = $"Overall: {_overallScore:F1}/10";
             //FpsLabel.Text = $"FPS: {_fps:F0}";
-            CpuLabel.Text = $"CPU: {_cpuUsage:F0}%";
+            //CpuLabel.Text = $"CPU: {_cpuUsage:F0}%";
             //MemoryLabel.Text = $"Memory: {_memoryUsage:F0} MB";
-            //ThreadsLabel.Text = $"Threads: {_threadCount}";
-            FrameDropsLabel.Text = $"FrameDrops: {_frameDrops}";
+            //ThreadsLabel.Text = $"Threads: {_threadCount}"; 
 
             if (_overallScore >= 8)
                 ScoreLabel.TextColor = Colors.LimeGreen;
@@ -61,10 +60,9 @@ namespace MauiPerfDebugOverlay.Controls
             var random = new Random();
             _overallScore = random.NextDouble() * 10;
             //_fps = 30 + random.Next(30);
-            _cpuUsage = random.Next(0, 100);
+            //_cpuUsage = random.Next(0, 100);
             //_memoryUsage = random.Next(100, 500);
-            //_threadCount = random.Next(1, 50);
-            _frameDrops = random.Next(0, 5);
+            //_threadCount = random.Next(1, 50); 
         }
 
 
@@ -94,12 +92,14 @@ namespace MauiPerfDebugOverlay.Controls
 
         private int _fps;
         private Stopwatch _stopwatch;
+        private Stopwatch _stopwatchGeneral;
 
         void startFPSCalc()
         {
             //FPS
             _fps = 0;
             _stopwatch.Restart();
+            _stopwatchGeneral.Restart();
 
             // Rulează pe UI thread
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
@@ -107,28 +107,114 @@ namespace MauiPerfDebugOverlay.Controls
                 _fps++;
 
 
-                // ✅ CPU & Memory & Threads
-                var process = Process.GetCurrentProcess();
-                _memoryUsage = process.WorkingSet64 / (1024 * 1024);
-                _threadCount = process.Threads.Count;
+                //// ✅ CPU & Memory & Threads
+                //var process = Process.GetCurrentProcess();
+                //_memoryUsage = process.WorkingSet64 / (1024 * 1024);
+                //_threadCount = process.Threads.Count;
 
                 if (_stopwatch.ElapsedMilliseconds >= 1000)
                 {
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
+                        // FPS
                         FpsLabel.Text = $"FPS: {_fps}";
-                        MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
-                        ThreadsLabel.Text = $"Threads: {_threadCount}";
+                        if (_fps >= 50)
+                            FpsLabel.TextColor = Colors.LimeGreen;
+                        else if (_fps >= 30)
+                            FpsLabel.TextColor = Colors.Goldenrod;
+                        else
+                            FpsLabel.TextColor = Colors.Red;
+
+                        //// Memory (în MB)
+                        //MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
+                        //if (_memoryUsage < 200)
+                        //    MemoryLabel.TextColor = Colors.LimeGreen;
+                        //else if (_memoryUsage < 400)
+                        //    MemoryLabel.TextColor = Colors.Goldenrod;
+                        //else
+                        //    MemoryLabel.TextColor = Colors.Red;
+
+                        //// Threads
+                        //ThreadsLabel.Text = $"Threads: {_threadCount}";
+                        //if (_threadCount < 50)
+                        //    ThreadsLabel.TextColor = Colors.LimeGreen;
+                        //else if (_threadCount < 100)
+                        //    ThreadsLabel.TextColor = Colors.Goldenrod;
+                        //else
+                        //    ThreadsLabel.TextColor = Colors.Red;
                     });
 
                     _fps = 0;
                     _stopwatch.Restart();
                 }
-                 
+
                 return !_stopRequested; // continuă timer-ul
             });
 
+
+            return;
+
+            Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
+            {
+                // ✅ CPU & Memory & Threads
+                var process = Process.GetCurrentProcess();
+                _memoryUsage = process.WorkingSet64 / (1024 * 1024);
+                _threadCount = process.Threads.Count;
+                var currentCpuTime = process.TotalProcessorTime;
+
+                double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
+                double interval = _stopwatchGeneral.Elapsed.TotalMilliseconds;
+
+                // CPU% per proces
+                _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
+                // actualizează prevCpuTime
+                _prevCpuTime = currentCpuTime;
+
+
+
+                if (_stopwatchGeneral.ElapsedMilliseconds >= 1000)
+                {
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+
+
+                        // Memory (în MB)
+                        MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
+                        if (_memoryUsage < 200)
+                            MemoryLabel.TextColor = Colors.LimeGreen;
+                        else if (_memoryUsage < 400)
+                            MemoryLabel.TextColor = Colors.Goldenrod;
+                        else
+                            MemoryLabel.TextColor = Colors.Red;
+
+                        // Threads
+                        ThreadsLabel.Text = $"Threads: {_threadCount}";
+                        if (_threadCount < 50)
+                            ThreadsLabel.TextColor = Colors.LimeGreen;
+                        else if (_threadCount < 100)
+                            ThreadsLabel.TextColor = Colors.Goldenrod;
+                        else
+                            ThreadsLabel.TextColor = Colors.Red;
+
+
+                        CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
+
+                        // culoare
+                        if (_cpuUsage < 30)
+                            CpuLabel.TextColor = Colors.LimeGreen;
+                        else if (_cpuUsage < 60)
+                            CpuLabel.TextColor = Colors.Goldenrod;
+                        else
+                            CpuLabel.TextColor = Colors.Red;
+                    });
+
+                    _stopwatchGeneral.Restart();
+                }
+
+                return !_stopRequested; // continuă timer-ul
+            });
         }
         #endregion
 
