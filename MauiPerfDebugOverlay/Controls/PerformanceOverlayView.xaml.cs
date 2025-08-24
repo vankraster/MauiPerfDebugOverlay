@@ -42,8 +42,13 @@ namespace MauiPerfDebugOverlay.Controls
         private bool _stopRequested = false;
 
         private int _fps;
-        private Stopwatch _stopwatch; 
+        private Stopwatch _stopwatch;
 
+
+        private readonly Queue<double> _fpsHistory = new();
+        private const int MaxFpsHistory = 5; // ultimele 5 secunde
+        private double _smoothedFps;
+         
         private void StartMetrics()
         {
             _fps = 0;
@@ -52,9 +57,17 @@ namespace MauiPerfDebugOverlay.Controls
 
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
             {
-                _fps++; // increment rapid, doar count
+                _fps++;
 
-                // Calcul CPU / Memory / Threads doar dacă a trecut 1 sec
+                // freeze detect: dacă UI-ul a stat blocat prea mult
+                if (_stopwatch.ElapsedMilliseconds > 2000)
+                {
+                    _smoothedFps = 0;
+                    _fps = 0;
+                    _stopwatch.Restart();
+                    return !_stopRequested;
+                }
+
                 if (_stopwatch.ElapsedMilliseconds >= 1000)
                 {
                     var process = Process.GetCurrentProcess();
@@ -66,14 +79,22 @@ namespace MauiPerfDebugOverlay.Controls
                     double interval = _stopwatch.Elapsed.TotalMilliseconds;
                     _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
                     _prevCpuTime = currentCpuTime;
+
+                    // FPS smoothing
+                    double currentFps = Math.Min(_fps, 60); // clamp la 60
+                    _fpsHistory.Enqueue(currentFps);
+                    if (_fpsHistory.Count > MaxFpsHistory)
+                        _fpsHistory.Dequeue();
+                    _smoothedFps = _fpsHistory.Average();
+
                     _overallScore = CalculateOverallScore();
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         // FPS
-                        FpsLabel.Text = $"FPS: {_fps}";
-                        FpsLabel.TextColor = _fps >= 50 ? Colors.LimeGreen :
-                                             _fps >= 30 ? Colors.Goldenrod : Colors.Red;
+                        FpsLabel.Text = $"FPS: {Math.Round(_smoothedFps)}";
+                        FpsLabel.TextColor = _smoothedFps >= 50 ? Colors.LimeGreen :
+                                             _smoothedFps >= 30 ? Colors.Goldenrod : Colors.Red;
 
                         // Memory
                         MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
@@ -83,34 +104,27 @@ namespace MauiPerfDebugOverlay.Controls
                         // Threads
                         ThreadsLabel.Text = $"Threads: {_threadCount}";
                         ThreadsLabel.TextColor = _threadCount < 50 ? Colors.LimeGreen :
-                                                _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
+                                                 _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
 
                         // CPU
                         CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
                         CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
                                              _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
 
-
-
+                        // Overall
                         ScoreLabel.Text = $"Overall: {_overallScore:F1}/10";
-
-                        // culoare
-                        if (_overallScore >= 8)
-                            ScoreLabel.TextColor = Colors.LimeGreen;
-                        else if (_overallScore >= 5)
-                            ScoreLabel.TextColor = Colors.Goldenrod;
-                        else
-                            ScoreLabel.TextColor = Colors.Red;
-
+                        ScoreLabel.TextColor = _overallScore >= 8 ? Colors.LimeGreen :
+                                               _overallScore >= 5 ? Colors.Goldenrod : Colors.Red;
                     });
 
-                    _fps = 0; // reset pentru următoarea secundă
+                    _fps = 0;
                     _stopwatch.Restart();
                 }
 
                 return !_stopRequested;
             });
         }
+
 
         private double CalculateOverallScore()
         {
