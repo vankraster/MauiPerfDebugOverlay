@@ -1,4 +1,8 @@
-﻿using System.Timers;
+﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Dispatching;
+using System;
+using System.Diagnostics;
+using System.Timers;
 using Timer = System.Timers.Timer;
 namespace MauiPerfDebugOverlay.Controls
 {
@@ -7,16 +11,19 @@ namespace MauiPerfDebugOverlay.Controls
         private readonly Timer _updateTimer;
 
         private double _overallScore;
-        private double _fps;
         private double _cpuUsage;
         private double _memoryUsage;
         private int _threadCount;
         private int _frameDrops;
-         
+
 
         public PerformanceOverlayView()
         {
             InitializeComponent();
+
+            //fps
+            _stopwatch = new Stopwatch();
+
 
             // Timer pentru update metrici (simulat)
             _updateTimer = new Timer(1000);
@@ -26,24 +33,19 @@ namespace MauiPerfDebugOverlay.Controls
                 MainThread.BeginInvokeOnMainThread(UpdateUI);
             };
 
-            // Gesture pentru drag & move
-            var panGesture = new PanGestureRecognizer();
-            panGesture.PanUpdated += OnPanUpdated;
-            GestureRecognizers.Add(panGesture);
-
-            Margin = new Thickness(10);
+    
+             
         }
 
-        public void Start() => _updateTimer.Start();
-        public void Stop() => _updateTimer.Stop();
+
 
         private void UpdateUI()
         {
             ScoreLabel.Text = $"Overall: {_overallScore:F1}/10";
-            FpsLabel.Text = $"FPS: {_fps:F0}";
+            //FpsLabel.Text = $"FPS: {_fps:F0}";
             CpuLabel.Text = $"CPU: {_cpuUsage:F0}%";
-            MemoryLabel.Text = $"Memory: {_memoryUsage:F0} MB";
-            ThreadsLabel.Text = $"Threads: {_threadCount}";
+            //MemoryLabel.Text = $"Memory: {_memoryUsage:F0} MB";
+            //ThreadsLabel.Text = $"Threads: {_threadCount}";
             FrameDropsLabel.Text = $"FrameDrops: {_frameDrops}";
 
             if (_overallScore >= 8)
@@ -58,21 +60,77 @@ namespace MauiPerfDebugOverlay.Controls
         {
             var random = new Random();
             _overallScore = random.NextDouble() * 10;
-            _fps = 30 + random.Next(30);
+            //_fps = 30 + random.Next(30);
             _cpuUsage = random.Next(0, 100);
-            _memoryUsage = random.Next(100, 500);
-            _threadCount = random.Next(1, 50);
+            //_memoryUsage = random.Next(100, 500);
+            //_threadCount = random.Next(1, 50);
             _frameDrops = random.Next(0, 5);
         }
 
 
 
 
+        public void Start()
+        {
+            startFPSCalc();
+
+
+            _updateTimer.Start();
+
+        }
+        public void Stop()
+        {
+            //FPS   
+            _stopRequested = true;
+
+
+            _updateTimer.Stop();
+        }
 
 
 
+        #region FPS Calculation
+        private bool _stopRequested = false;
+
+        private int _fps;
+        private Stopwatch _stopwatch;
+
+        void startFPSCalc()
+        {
+            //FPS
+            _fps = 0;
+            _stopwatch.Restart();
+
+            // Rulează pe UI thread
+            Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
+            {
+                _fps++;
 
 
+                // ✅ CPU & Memory & Threads
+                var process = Process.GetCurrentProcess();
+                _memoryUsage = process.WorkingSet64 / (1024 * 1024);
+                _threadCount = process.Threads.Count;
+
+                if (_stopwatch.ElapsedMilliseconds >= 1000)
+                {
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        FpsLabel.Text = $"FPS: {_fps}";
+                        MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
+                        ThreadsLabel.Text = $"Threads: {_threadCount}";
+                    });
+
+                    _fps = 0;
+                    _stopwatch.Restart();
+                }
+                 
+                return !_stopRequested; // continuă timer-ul
+            });
+
+        }
+        #endregion
 
 
 
@@ -161,7 +219,7 @@ namespace MauiPerfDebugOverlay.Controls
                 case GestureStatus.Canceled:
                     break;
             }
-        } 
+        }
         #endregion
     }
 }
