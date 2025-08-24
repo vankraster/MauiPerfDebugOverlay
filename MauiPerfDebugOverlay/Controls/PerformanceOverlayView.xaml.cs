@@ -16,8 +16,7 @@ namespace MauiPerfDebugOverlay.Controls
         {
             InitializeComponent();
              
-            _stopwatch = new Stopwatch();
-            _stopwatchGeneral = new Stopwatch(); 
+            _stopwatch = new Stopwatch(); 
         }
 
 
@@ -43,8 +42,7 @@ namespace MauiPerfDebugOverlay.Controls
         private bool _stopRequested = false;
 
         private int _fps;
-        private Stopwatch _stopwatch;
-        private Stopwatch _stopwatchGeneral;
+        private Stopwatch _stopwatch; 
 
         private void StartMetrics()
         {
@@ -66,7 +64,7 @@ namespace MauiPerfDebugOverlay.Controls
                     var currentCpuTime = process.TotalProcessorTime;
                     double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
                     double interval = _stopwatch.Elapsed.TotalMilliseconds;
-                    _cpuUsage = (cpuDelta / interval) * 100 / Environment.ProcessorCount;
+                    _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
                     _prevCpuTime = currentCpuTime;
                     _overallScore = CalculateOverallScore();
 
