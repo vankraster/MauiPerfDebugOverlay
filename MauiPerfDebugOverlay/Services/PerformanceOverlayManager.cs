@@ -55,18 +55,35 @@ namespace MauiPerfDebugOverlay.Services
 
         private void AddOverlayToLayout(Layout layout)
         {
-            if (!_overlay!.IsVisibleInLayout(layout))
+            if (_overlay?.Parent != null && _overlay.Parent != layout)
             {
-                // Scoate dacă există deja și adaugă la final → on top
-                if (layout.Children.Contains(_overlay))
-                    layout.Children.Remove(_overlay);
-
-                layout.Children.Add(_overlay);
-                _overlay.Start();
+                // s-a "pierdut" în alt părinte dispărut → recrează-l
+                _overlay = new PerformanceOverlayView();
             }
+
+            // Elimină toate instanțele existente de PerformanceOverlayView
+            foreach (var child in layout.Children.OfType<PerformanceOverlayView>().ToList())
+            {
+                layout.Children.Remove(child);
+            }
+
+            //Adauga overlay
+            layout.Children.Add(_overlay);
+            _overlay.Start();
+
+
+            //if (!_overlay!.IsVisibleInLayout(layout))
+            //{
+            //    // Scoate dacă există deja și adaugă la final → on top
+            //    if (layout.Children.Contains(_overlay))
+            //        layout.Children.Remove(_overlay);
+
+            //    layout.Children.Add(_overlay);
+            //    _overlay.Start();
+            //}
         }
     }
 }
 
- 
+
 
