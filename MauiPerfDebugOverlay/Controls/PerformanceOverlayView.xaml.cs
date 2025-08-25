@@ -46,6 +46,7 @@ namespace MauiPerfDebugOverlay.Controls
         private double _allocPerSec = 0;
 
         private readonly Process _currentProcess = Process.GetCurrentProcess();
+        private long _lastAllocatedBytes = GC.GetTotalAllocatedBytes(false);
 
 
         public PerformanceOverlayView()
@@ -89,27 +90,8 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
-        private void UpdateAllocMetrics()
-        {
-            long currentMemory = GC.GetTotalMemory(false); // în bytes
-            _allocPerSec = (currentMemory - _lastTotalMemory) / 1024.0 / 1024.0; // MB/sec
-            _lastTotalMemory = currentMemory; 
-        }
+      
 
-        private void UpdateGcMetrics()
-        {
-            int gen0 = GC.CollectionCount(0);
-            int gen1 = GC.CollectionCount(1);
-            int gen2 = GC.CollectionCount(2);
-
-            _gc0Delta = gen0 - _gc0Prev;
-            _gc1Delta = gen1 - _gc1Prev;
-            _gc2Delta = gen2 - _gc2Prev;
-
-            _gc0Prev = gen0;
-            _gc1Prev = gen1;
-            _gc2Prev = gen2; 
-        }
 
 
         public void Start()
@@ -124,7 +106,31 @@ namespace MauiPerfDebugOverlay.Controls
         }
 
 
+        private void UpdateGcAndAllocMetrics()
+        {
+            double elapsedSec = _stopwatch.Elapsed.TotalSeconds;
+            if (elapsedSec <= 0) elapsedSec = 1; // fallback
 
+            // Alloc/sec
+            long currentAllocated = GC.GetTotalAllocatedBytes(false);
+            long deltaAllocated = currentAllocated - _lastAllocatedBytes;
+            _allocPerSec = (deltaAllocated / (1024.0 * 1024.0)) / elapsedSec; // MB/sec
+            _lastAllocatedBytes = currentAllocated;
+
+            // GC counts
+            int gen0 = GC.CollectionCount(0);
+            int gen1 = GC.CollectionCount(1);
+            int gen2 = GC.CollectionCount(2);
+
+            _gc0Delta = gen0 - _gc0Prev;
+            _gc1Delta = gen1 - _gc1Prev;
+            _gc2Delta = gen2 - _gc2Prev;
+
+            _gc0Prev = gen0;
+            _gc1Prev = gen1;
+            _gc2Prev = gen2;
+             
+        }
         private void UpdateUi()
         { 
             FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
@@ -174,8 +180,7 @@ namespace MauiPerfDebugOverlay.Controls
 
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
-                UpdateGcMetrics();
-                UpdateAllocMetrics();
+                UpdateGcAndAllocMetrics();
 
                 _memoryUsage = _currentProcess.WorkingSet64 / (1024 * 1024);
                 _threadCount = _currentProcess.Threads.Count;
