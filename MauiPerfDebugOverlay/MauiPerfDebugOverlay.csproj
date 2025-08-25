@@ -22,11 +22,15 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>1.0.0</Version>
+		<Version>1.0.1</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
-		<Description>A lightweight, drag-and-move performance HUD for .NET MAUI apps, showing FPS, CPU, memory, threads, GC, allocations/sec, hitches, and overall score.</Description>
+		<Description>
+			MAUI Performance Overlay lightweight, drag-and-move performance HUD for .NET MAUI apps.
+			It shows real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, and UI thread hitches.
+			Ideal for diagnostics and profiling MAUI applications on Android, iOS, MacCatalyst, Tizen, and Windows.
+			Easily integrates into your app to monitor performance and responsiveness.</Description>
 		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;Diagnostics</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/vankraster/MauiPerfDebugOverlay</RepositoryUrl>
