@@ -14,7 +14,7 @@ namespace MauiPerfDebugOverlay.Controls
         private int _processorCount = Environment.ProcessorCount;
 
 
-        private bool _stopRequested = false;         
+        private bool _stopRequested = false;
         private Stopwatch _stopwatch;
 
 
@@ -24,6 +24,13 @@ namespace MauiPerfDebugOverlay.Controls
         private const double _emaAlpha = 0.9;
 
 
+        //hitch
+        private const double HitchThresholdMs = 200;
+        private double _emaHitch = 0;
+        private const double _emaHitchAlpha = 0.7; // mai reactiv decât FPS/FrameTime
+
+
+
         public PerformanceOverlayView()
         {
             InitializeComponent();
@@ -31,7 +38,7 @@ namespace MauiPerfDebugOverlay.Controls
             _stopwatch = new Stopwatch();
 
 
-             
+
             _fpsService = new FpsService();
             _fpsService.OnFrameTimeCalculated += frameTimeMs =>
             {
@@ -48,6 +55,13 @@ namespace MauiPerfDebugOverlay.Controls
                 else
                     _emaFps = (_emaAlpha * _emaFps) + ((1 - _emaAlpha) * fps);
 
+                // Hitch EMA
+                double hitchValue = frameTimeMs >= HitchThresholdMs ? frameTimeMs : 0;
+                if (_emaHitch == 0)
+                    _emaHitch = hitchValue;
+                else
+                    _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
+
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
@@ -57,6 +71,18 @@ namespace MauiPerfDebugOverlay.Controls
                     FpsLabel.Text = $"FPS: {_emaFps:F1}";
                     FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
                                           _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
+
+
+
+                    //HitchLabel.Text = _emaHitch >= HitchThresholdMs
+                    //    ? $"Hitch EMA: {_emaHitch:F0} ms"
+                    //    : "Hitch: none";
+
+                    if (_emaHitch >= HitchThresholdMs)
+                    {
+                        HitchLabel.Text = $"Last Hitch EMA: {_emaHitch:F0} ms";
+                        HitchLabel.TextColor = Colors.Red;
+                    }
                 });
             };
 
@@ -82,17 +108,17 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
-  
+
 
 
 
         private void StartMetrics()
-        { 
+        {
             _stopwatch.Restart();
             _prevCpuTime = Process.GetCurrentProcess().TotalProcessorTime;
 
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
-            { 
+            {
 
                 // freeze detect: dacă UI-ul a stat blocat prea mult
                 if (_stopwatch.ElapsedMilliseconds > 2000)
@@ -141,7 +167,7 @@ namespace MauiPerfDebugOverlay.Controls
                         ScoreLabel.TextColor = _overallScore >= 8 ? Colors.LimeGreen :
                                                _overallScore >= 5 ? Colors.Goldenrod : Colors.Red;
                     });
-                     
+
                     _stopwatch.Restart();
                 }
 
