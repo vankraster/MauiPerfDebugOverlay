@@ -3,42 +3,42 @@ using Timer = System.Timers.Timer;
 namespace MauiPerfDebugOverlay.Controls
 {
     public partial class PerformanceOverlayView : ContentView
-    { 
+    {
 
         private double _overallScore;
         private double _cpuUsage;
         private TimeSpan _prevCpuTime;
         private double _memoryUsage;
-        private int _threadCount; 
+        private int _threadCount;
         private int _processorCount = Environment.ProcessorCount;
 
         public PerformanceOverlayView()
         {
             InitializeComponent();
-             
-            _stopwatch = new Stopwatch(); 
+
+            _stopwatch = new Stopwatch();
         }
 
 
 
-      
+
 
 
 
 
         public void Start()
         {
-            StartMetrics(); 
+            StartMetrics();
 
         }
         public void Stop()
         {
             //FPS   
-            _stopRequested = true; 
+            _stopRequested = true;
         }
 
 
-         
+
         private bool _stopRequested = false;
 
         private int _fps;
@@ -48,7 +48,7 @@ namespace MauiPerfDebugOverlay.Controls
         private readonly Queue<double> _fpsHistory = new();
         private const int MaxFpsHistory = 5; // ultimele 5 secunde
         private double _smoothedFps;
-         
+
         private void StartMetrics()
         {
             _fps = 0;
@@ -242,5 +242,42 @@ namespace MauiPerfDebugOverlay.Controls
             }
         }
         #endregion
+
+
+        #region Toggle Min/Max
+        private bool _isCompact = false;
+        private void OnToggleCompactTapped(object sender, EventArgs e)
+        {
+            _isCompact = !_isCompact;
+
+            if (_isCompact)
+            {
+                // ascundem totul în afară de scor + FPS
+                foreach (var child in MetricsStack.Children)
+                {
+                    if (child is Label lbl &&
+                        lbl != ScoreLabel &&
+                        lbl != FpsLabel)
+                    {
+                        lbl.IsVisible = false;
+                    }
+
+                }
+
+                //ToggleButton.Text = "▲"; // simbol expand
+            }
+            else
+            {
+                // afișăm tot
+                foreach (var child in MetricsStack.Children)
+                {
+                    (child as View).IsVisible = true;
+                }
+
+                //ToggleButton.Text = "▼"; // simbol compact
+            }
+        }
     }
+    #endregion
 }
+

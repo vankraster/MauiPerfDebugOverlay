@@ -2,7 +2,7 @@
 <ContentView x:Class="MauiPerfDebugOverlay.Controls.PerformanceOverlayView"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Name="Root" 
+             x:Name="Root"
              IsVisible="True"
              Opacity="0.95">
 
@@ -13,40 +13,70 @@
            HasShadow="True"
            HorizontalOptions="Start"
            VerticalOptions="Start">
-    <Frame.GestureRecognizers>
-        <PanGestureRecognizer PanUpdated="OnPanUpdated" />
-        <!--<TapGestureRecognizer Tapped="OnTappedToggleCompact"
-                              NumberOfTapsRequired="2" />-->
-    </Frame.GestureRecognizers>
+
+        <Frame.GestureRecognizers>
+            <PanGestureRecognizer PanUpdated="OnPanUpdated" />
+            <TapGestureRecognizer Tapped="OnToggleCompactTapped" />
+        </Frame.GestureRecognizers>
+
 
         <VerticalStackLayout x:Name="MetricsStack"
-                             Spacing="2">
+                             Spacing="2"
+                             Margin="0,0,0,0">
 
             <Label x:Name="ScoreLabel"
                    FontAttributes="Bold"
                    FontSize="16"
                    TextColor="Gray"
                    Text="Overall: --/10" />
+
             <Label x:Name="FpsLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
                    Text="FPS: --" />
+
+            <Label x:Name="FrameTimeLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="FrameTime: -- ms" />
+
             <Label x:Name="CpuLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
                    Text="CPU: --%" />
+
             <Label x:Name="MemoryLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
                    Text="Memory: -- MB" />
+
             <Label x:Name="ThreadsLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
-                   Text="Threads: --" /> 
+                   Text="Threads: --" />
+
+            <Label x:Name="GcLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="GC: --" />
+
+            <Label x:Name="AllocLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="Alloc/sec: -- MB" />
+
+            <Label x:Name="HitchLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="Hitch: none" />
 
         </VerticalStackLayout>
 
