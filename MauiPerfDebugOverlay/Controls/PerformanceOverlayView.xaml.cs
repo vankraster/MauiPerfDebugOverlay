@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
-using Timer = System.Timers.Timer;
+﻿using MauiPerfDebugOverlay.Interfaces;
+using System.Diagnostics;
 namespace MauiPerfDebugOverlay.Controls
 {
     public partial class PerformanceOverlayView : ContentView
     {
+        private readonly IFpsService _fpsService;
 
         private double _overallScore;
         private double _cpuUsage;
@@ -17,6 +18,28 @@ namespace MauiPerfDebugOverlay.Controls
             InitializeComponent();
 
             _stopwatch = new Stopwatch();
+
+
+
+#if ANDROID || IOS || MACCATALYST || WINDOWS || TIZEN
+            _fpsService = new FpsService();
+            _fpsService.OnFrameTimeCalculated += frameTimeMs =>
+            {
+                _frameTime = frameTimeMs;
+                _fps = (int)(1000.0 / frameTimeMs);
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    FrameTimeLabel.Text = $"FrameTime: {_frameTime:F1} ms";
+                    FrameTimeLabel.TextColor = _frameTime <= 16 ? Colors.LimeGreen :
+                                                      _frameTime <= 33 ? Colors.Goldenrod : Colors.Red;
+
+                    FpsLabel.Text = $"FPS: {_fps}";
+                    FpsLabel.TextColor = _fps >= 50 ? Colors.LimeGreen :
+                                            _fps >= 30 ? Colors.Goldenrod : Colors.Red;
+                });
+            };
+#endif
         }
 
 
@@ -28,12 +51,12 @@ namespace MauiPerfDebugOverlay.Controls
 
         public void Start()
         {
+            _fpsService?.Start();
             StartMetrics();
-
         }
         public void Stop()
         {
-            //FPS   
+            _fpsService?.Stop();
             _stopRequested = true;
         }
 
@@ -42,12 +65,11 @@ namespace MauiPerfDebugOverlay.Controls
         private bool _stopRequested = false;
 
         private int _fps;
+        private double _frameTime;
         private Stopwatch _stopwatch;
 
 
-        private readonly Queue<double> _fpsHistory = new();
-        private const int MaxFpsHistory = 5; // ultimele 5 secunde
-        private double _smoothedFps;
+
 
         private void StartMetrics()
         {
@@ -62,8 +84,6 @@ namespace MauiPerfDebugOverlay.Controls
                 // freeze detect: dacă UI-ul a stat blocat prea mult
                 if (_stopwatch.ElapsedMilliseconds > 2000)
                 {
-                    _smoothedFps = 0;
-                    _fps = 0;
                     _stopwatch.Restart();
                     return !_stopRequested;
                 }
@@ -80,21 +100,13 @@ namespace MauiPerfDebugOverlay.Controls
                     _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
                     _prevCpuTime = currentCpuTime;
 
-                    // FPS smoothing
-                    double currentFps = Math.Min(_fps, 60); // clamp la 60
-                    _fpsHistory.Enqueue(currentFps);
-                    if (_fpsHistory.Count > MaxFpsHistory)
-                        _fpsHistory.Dequeue();
-                    _smoothedFps = _fpsHistory.Average();
 
                     _overallScore = CalculateOverallScore();
 
+
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        // FPS
-                        FpsLabel.Text = $"FPS: {Math.Round(_smoothedFps)}";
-                        FpsLabel.TextColor = _smoothedFps >= 50 ? Colors.LimeGreen :
-                                             _smoothedFps >= 30 ? Colors.Goldenrod : Colors.Red;
+
 
                         // Memory
                         MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
