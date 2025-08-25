@@ -4,15 +4,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="Root"
              IsVisible="True"
-             Opacity="0.95">
+             Opacity="0.95" >
 
     <Frame x:Name="OverlayFrame"
            BackgroundColor="#99000000"
            Padding="8"
            CornerRadius="10"
            HasShadow="True"
-           HorizontalOptions="Start"
-           VerticalOptions="Start">
+           AbsoluteLayout.LayoutBounds="10,10,AutoSize,AutoSize"
+           AbsoluteLayout.LayoutFlags="None">
 
         <Frame.GestureRecognizers>
             <PanGestureRecognizer PanUpdated="OnPanUpdated" />

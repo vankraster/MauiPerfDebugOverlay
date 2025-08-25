@@ -38,11 +38,13 @@ namespace MauiPerfDebugOverlay.Services
                     AbsoluteLayout.SetLayoutFlags(contentPage.Content, AbsoluteLayoutFlags.All);
                     AbsoluteLayout.SetLayoutBounds(contentPage.Content, new Rect(0, 0, 1, 1));
                     abs.Children.Add(contentPage.Content);
+                    AddOverlayToLayout(abs);
 
                     contentPage.Content = abs;
                 }
+                else
+                    AddOverlayToLayout(abs);
 
-                AddOverlayToLayout(abs);
             }
         }
 

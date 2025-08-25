@@ -266,8 +266,8 @@ namespace MauiPerfDebugOverlay.Controls
         private const int HistorySize = 5;
         private const double MovementThreshold = 1.0;
 
-        private readonly Queue<double> _totalXHistory = new Queue<double>();
-        private readonly Queue<double> _totalYHistory = new Queue<double>();
+        private readonly Queue<double> _totalXHistory = new();
+        private readonly Queue<double> _totalYHistory = new();
         private double _lastAverageX;
         private double _lastAverageY;
         private double _currentXPosition;
@@ -275,14 +275,15 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
-            if (sender is not View overlay) return;
-            if (overlay.Parent.Parent is not AbsoluteLayout parent) return; // schimbat aici
+            if (sender is not Frame frame) return;
+            if (frame.Parent is not AbsoluteLayout parent) return;
 
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    _currentXPosition = AbsoluteLayout.GetLayoutBounds(overlay).X;
-                    _currentYPosition = AbsoluteLayout.GetLayoutBounds(overlay).Y;
+                    var bounds = AbsoluteLayout.GetLayoutBounds(frame);
+                    _currentXPosition = bounds.X;
+                    _currentYPosition = bounds.Y;
 
                     _totalXHistory.Clear();
                     _totalXHistory.Enqueue(e.TotalX);
@@ -296,8 +297,7 @@ namespace MauiPerfDebugOverlay.Controls
                 case GestureStatus.Running:
                     #region X Axis
                     _totalXHistory.Enqueue(e.TotalX);
-                    if (_totalXHistory.Count > HistorySize)
-                        _totalXHistory.Dequeue();
+                    if (_totalXHistory.Count > HistorySize) _totalXHistory.Dequeue();
 
                     double currentAverageX = _totalXHistory.Average();
                     double deltaX = currentAverageX - _lastAverageX;
@@ -305,16 +305,13 @@ namespace MauiPerfDebugOverlay.Controls
                     if (Math.Abs(deltaX) >= MovementThreshold)
                     {
                         double newX = _currentXPosition + deltaX;
-
-                        // Limitează la marginea ecranului
                         newX = Math.Max(0, newX);
-                        newX = Math.Min(parent.Width - overlay.Width, newX);
-
+                        newX = Math.Min(parent.Width - frame.Width, newX);
                         _currentXPosition = newX;
 
-                        var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
-                        bounds.X = newX;
-                        AbsoluteLayout.SetLayoutBounds(overlay, bounds);
+                        var boundsX = AbsoluteLayout.GetLayoutBounds(frame);
+                        boundsX.X = newX;
+                        AbsoluteLayout.SetLayoutBounds(frame, boundsX);
 
                         _lastAverageX = currentAverageX;
                     }
@@ -322,8 +319,7 @@ namespace MauiPerfDebugOverlay.Controls
 
                     #region Y Axis
                     _totalYHistory.Enqueue(e.TotalY);
-                    if (_totalYHistory.Count > HistorySize)
-                        _totalYHistory.Dequeue();
+                    if (_totalYHistory.Count > HistorySize) _totalYHistory.Dequeue();
 
                     double currentAverageY = _totalYHistory.Average();
                     double deltaY = currentAverageY - _lastAverageY;
@@ -331,15 +327,13 @@ namespace MauiPerfDebugOverlay.Controls
                     if (Math.Abs(deltaY) >= MovementThreshold)
                     {
                         double newY = _currentYPosition + deltaY;
-
                         newY = Math.Max(0, newY);
-                        newY = Math.Min(parent.Height - overlay.Height, newY);
-
+                        newY = Math.Min(parent.Height - frame.Height, newY);
                         _currentYPosition = newY;
 
-                        var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
-                        bounds.Y = newY;
-                        AbsoluteLayout.SetLayoutBounds(overlay, bounds);
+                        var boundsY = AbsoluteLayout.GetLayoutBounds(frame);
+                        boundsY.Y = newY;
+                        AbsoluteLayout.SetLayoutBounds(frame, boundsY);
 
                         _lastAverageY = currentAverageY;
                     }
@@ -353,6 +347,7 @@ namespace MauiPerfDebugOverlay.Controls
         }
 
         #endregion
+
 
 
         #region Toggle Min/Max
