@@ -30,6 +30,22 @@ namespace MauiPerfDebugOverlay.Controls
         private const double _emaHitchAlpha = 0.7; // mai reactiv decât FPS/FrameTime
 
 
+        //GC
+        private int _gc0Prev = 0;
+        private int _gc1Prev = 0;
+        private int _gc2Prev = 0;
+
+        private int _gc0Delta = 0;
+        private int _gc1Delta = 0;
+        private int _gc2Delta = 0;
+
+
+
+        //Alloc/sec
+        private long _lastTotalMemory = 0;
+        private double _allocPerSec = 0;
+
+
 
         public PerformanceOverlayView()
         {
@@ -90,9 +106,41 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
+        private void UpdateAllocMetrics()
+        {
+            long currentMemory = GC.GetTotalMemory(false); // în bytes
+            _allocPerSec = (currentMemory - _lastTotalMemory) / 1024.0 / 1024.0; // MB/sec
+            _lastTotalMemory = currentMemory;
 
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
+                AllocLabel.TextColor = _allocPerSec < 5 ? Colors.LimeGreen :
+                                       _allocPerSec < 10 ? Colors.Goldenrod : Colors.Red;
+            });
+        }
 
+        private void UpdateGcMetrics()
+        {
+            int gen0 = GC.CollectionCount(0);
+            int gen1 = GC.CollectionCount(1);
+            int gen2 = GC.CollectionCount(2);
 
+            _gc0Delta = gen0 - _gc0Prev;
+            _gc1Delta = gen1 - _gc1Prev;
+            _gc2Delta = gen2 - _gc2Prev;
+
+            _gc0Prev = gen0;
+            _gc1Prev = gen1;
+            _gc2Prev = gen2;
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                GcLabel.Text = $"GC: Gen0 {_gc0Delta}, Gen1 {_gc1Delta}, Gen2 {_gc2Delta}";
+                // culori simple
+                GcLabel.TextColor = (_gc0Delta + _gc1Delta + _gc2Delta) == 0 ? Colors.LimeGreen : Colors.Goldenrod;
+            });
+        }
 
 
         public void Start()
@@ -107,7 +155,24 @@ namespace MauiPerfDebugOverlay.Controls
         }
 
 
+        private void UpdateUi()
+        {
+            MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
+            MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
+                                    _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
 
+            ThreadsLabel.Text = $"Threads: {_threadCount}";
+            ThreadsLabel.TextColor = _threadCount < 50 ? Colors.LimeGreen :
+                                     _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
+
+            CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
+            CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
+                                 _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
+
+            //ScoreLabel.Text = $"Overall: {_overallScore:F1}/10";
+            //ScoreLabel.TextColor = _overallScore >= 8 ? Colors.LimeGreen :
+            //                       _overallScore >= 5 ? Colors.Goldenrod : Colors.Red;
+        }
 
 
 
@@ -117,59 +182,25 @@ namespace MauiPerfDebugOverlay.Controls
             _stopwatch.Restart();
             _prevCpuTime = Process.GetCurrentProcess().TotalProcessorTime;
 
-            Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
+            Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
+                UpdateGcMetrics();
+                UpdateAllocMetrics();
 
-                // freeze detect: dacă UI-ul a stat blocat prea mult
-                if (_stopwatch.ElapsedMilliseconds > 2000)
-                {
-                    _stopwatch.Restart();
-                    return !_stopRequested;
-                }
+                var process = Process.GetCurrentProcess();
+                _memoryUsage = process.WorkingSet64 / (1024 * 1024);
+                _threadCount = process.Threads.Count;
 
-                if (_stopwatch.ElapsedMilliseconds >= 1000)
-                {
-                    var process = Process.GetCurrentProcess();
-                    _memoryUsage = process.WorkingSet64 / (1024 * 1024);
-                    _threadCount = process.Threads.Count;
+                var currentCpuTime = process.TotalProcessorTime;
+                double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
+                double interval = 1000; // secunda curenta
+                _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
+                _prevCpuTime = currentCpuTime;
 
-                    var currentCpuTime = process.TotalProcessorTime;
-                    double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
-                    double interval = _stopwatch.Elapsed.TotalMilliseconds;
-                    _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
-                    _prevCpuTime = currentCpuTime;
+                _overallScore = CalculateOverallScore();
+                UpdateOverallScore(_overallScore);
 
-
-                    _overallScore = CalculateOverallScore();
-
-
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-
-
-                        // Memory
-                        MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
-                        MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
-                                                _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
-
-                        // Threads
-                        ThreadsLabel.Text = $"Threads: {_threadCount}";
-                        ThreadsLabel.TextColor = _threadCount < 50 ? Colors.LimeGreen :
-                                                 _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
-
-                        // CPU
-                        CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
-                        CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
-                                             _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
-
-                        // Overall
-                        ScoreLabel.Text = $"Overall: {_overallScore:F1}/10";
-                        ScoreLabel.TextColor = _overallScore >= 8 ? Colors.LimeGreen :
-                                               _overallScore >= 5 ? Colors.Goldenrod : Colors.Red;
-                    });
-
-                    _stopwatch.Restart();
-                }
+                MainThread.BeginInvokeOnMainThread(UpdateUi);
 
                 return !_stopRequested;
             });
@@ -203,7 +234,24 @@ namespace MauiPerfDebugOverlay.Controls
             return score; // max 10
         }
 
+        private double _emaOverallScore = 0;
+        private const double _emaOverallAlpha = 0.6; // 0–1, mai mare = mai reactiv
 
+        private void UpdateOverallScore(double rawScore)
+        { 
+
+            if (_emaOverallScore == 0)
+                _emaOverallScore = rawScore;
+            else
+                _emaOverallScore = (_emaOverallAlpha * _emaOverallScore) + ((1 - _emaOverallAlpha) * rawScore);
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
+                ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
+                                       _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
+            });
+        }
 
 
         #region Drag && Move
