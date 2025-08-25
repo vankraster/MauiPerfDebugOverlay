@@ -13,6 +13,17 @@ namespace MauiPerfDebugOverlay.Controls
         private int _threadCount;
         private int _processorCount = Environment.ProcessorCount;
 
+
+        private bool _stopRequested = false;         
+        private Stopwatch _stopwatch;
+
+
+        //variabile cara calculeaza fps cu EMA (Exponential Moving Average)
+        private double _emaFrameTime = 0;
+        private double _emaFps = 0;
+        private const double _emaAlpha = 0.9;
+
+
         public PerformanceOverlayView()
         {
             InitializeComponent();
@@ -20,26 +31,35 @@ namespace MauiPerfDebugOverlay.Controls
             _stopwatch = new Stopwatch();
 
 
-
-#if ANDROID || IOS || MACCATALYST || WINDOWS || TIZEN
+             
             _fpsService = new FpsService();
             _fpsService.OnFrameTimeCalculated += frameTimeMs =>
             {
-                _frameTime = frameTimeMs;
-                _fps = (int)(1000.0 / frameTimeMs);
+                // EMA FrameTime
+                if (_emaFrameTime == 0)
+                    _emaFrameTime = frameTimeMs;
+                else
+                    _emaFrameTime = (_emaAlpha * _emaFrameTime) + ((1 - _emaAlpha) * frameTimeMs);
+
+                // EMA FPS
+                double fps = 1000.0 / frameTimeMs;
+                if (_emaFps == 0)
+                    _emaFps = fps;
+                else
+                    _emaFps = (_emaAlpha * _emaFps) + ((1 - _emaAlpha) * fps);
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    FrameTimeLabel.Text = $"FrameTime: {_frameTime:F1} ms";
-                    FrameTimeLabel.TextColor = _frameTime <= 16 ? Colors.LimeGreen :
-                                                      _frameTime <= 33 ? Colors.Goldenrod : Colors.Red;
+                    FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
+                    FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
+                                              _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
 
-                    FpsLabel.Text = $"FPS: {_fps}";
-                    FpsLabel.TextColor = _fps >= 50 ? Colors.LimeGreen :
-                                            _fps >= 30 ? Colors.Goldenrod : Colors.Red;
+                    FpsLabel.Text = $"FPS: {_emaFps:F1}";
+                    FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
+                                          _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
                 });
             };
-#endif
+
         }
 
 
@@ -62,24 +82,17 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
-        private bool _stopRequested = false;
-
-        private int _fps;
-        private double _frameTime;
-        private Stopwatch _stopwatch;
-
+  
 
 
 
         private void StartMetrics()
-        {
-            _fps = 0;
+        { 
             _stopwatch.Restart();
             _prevCpuTime = Process.GetCurrentProcess().TotalProcessorTime;
 
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(16), () =>
-            {
-                _fps++;
+            { 
 
                 // freeze detect: dacă UI-ul a stat blocat prea mult
                 if (_stopwatch.ElapsedMilliseconds > 2000)
@@ -128,8 +141,7 @@ namespace MauiPerfDebugOverlay.Controls
                         ScoreLabel.TextColor = _overallScore >= 8 ? Colors.LimeGreen :
                                                _overallScore >= 5 ? Colors.Goldenrod : Colors.Red;
                     });
-
-                    _fps = 0;
+                     
                     _stopwatch.Restart();
                 }
 
@@ -143,8 +155,8 @@ namespace MauiPerfDebugOverlay.Controls
             double score = 0;
 
             // FPS (max 3 puncte)
-            if (_fps >= 50) score += 3;
-            else if (_fps >= 30) score += 2;
+            if (_emaFps >= 50) score += 3;
+            else if (_emaFps >= 30) score += 2;
             else score += 1;
 
             // CPU (max 3 puncte)
