@@ -14,7 +14,7 @@ namespace MauiPerfDebugOverlay.Controls
         private int _processorCount = Environment.ProcessorCount;
 
 
-        private bool _stopRequested = false;
+        private volatile bool _stopRequested = false;
         private Stopwatch _stopwatch;
 
 
@@ -45,6 +45,7 @@ namespace MauiPerfDebugOverlay.Controls
         private long _lastTotalMemory = 0;
         private double _allocPerSec = 0;
 
+        private readonly Process _currentProcess = Process.GetCurrentProcess();
 
 
         public PerformanceOverlayView()
@@ -80,32 +81,7 @@ namespace MauiPerfDebugOverlay.Controls
                     _emaHitch = hitchValue;
                 else
                     _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
-
-                // Actualizare UI
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    // FrameTime
-                    FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
-                    FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
-                                               _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
-
-                    // FPS
-                    FpsLabel.Text = $"FPS: {_emaFps:F1}";
-                    FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
-                                         _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
-
-                    // Hitch
-                    if (_emaHitch >= HitchThresholdMs)
-                    {
-                        HitchLabel.Text = $"Last Hitch EMA: {_emaHitch:F0} ms";
-                        HitchLabel.TextColor = Colors.Red;
-                    }
-                    //else
-                    //{
-                    //    HitchLabel.Text = "Hitch: none";
-                    //    HitchLabel.TextColor = Colors.Gray;
-                    //}
-                });
+                 
             };
 
 
@@ -117,14 +93,7 @@ namespace MauiPerfDebugOverlay.Controls
         {
             long currentMemory = GC.GetTotalMemory(false); // în bytes
             _allocPerSec = (currentMemory - _lastTotalMemory) / 1024.0 / 1024.0; // MB/sec
-            _lastTotalMemory = currentMemory;
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
-                AllocLabel.TextColor = _allocPerSec < 5 ? Colors.LimeGreen :
-                                       _allocPerSec < 10 ? Colors.Goldenrod : Colors.Red;
-            });
+            _lastTotalMemory = currentMemory; 
         }
 
         private void UpdateGcMetrics()
@@ -139,14 +108,7 @@ namespace MauiPerfDebugOverlay.Controls
 
             _gc0Prev = gen0;
             _gc1Prev = gen1;
-            _gc2Prev = gen2;
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                GcLabel.Text = $"GC: Gen0 {_gc0Delta}, Gen1 {_gc1Delta}, Gen2 {_gc2Delta}";
-                // culori simple
-                GcLabel.TextColor = (_gc0Delta + _gc1Delta + _gc2Delta) == 0 ? Colors.LimeGreen : Colors.Goldenrod;
-            });
+            _gc2Prev = gen2; 
         }
 
 
@@ -162,8 +124,31 @@ namespace MauiPerfDebugOverlay.Controls
         }
 
 
+
         private void UpdateUi()
-        {
+        { 
+            FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
+            FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
+                                       _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
+
+            FpsLabel.Text = $"FPS: {_emaFps:F1}";
+            FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
+                                 _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
+
+            if (_emaHitch >= HitchThresholdMs)
+            {
+                HitchLabel.Text = $"Last Hitch EMA: {_emaHitch:F0} ms";
+                HitchLabel.TextColor = Colors.Red;
+            }
+
+            AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
+            AllocLabel.TextColor = _allocPerSec < 5 ? Colors.LimeGreen :
+                                   _allocPerSec < 10 ? Colors.Goldenrod : Colors.Red;
+
+            GcLabel.Text = $"GC: Gen0 {_gc0Delta}, Gen1 {_gc1Delta}, Gen2 {_gc2Delta}";
+            GcLabel.TextColor = (_gc0Delta + _gc1Delta + _gc2Delta) == 0
+                ? Colors.LimeGreen : Colors.Goldenrod;
+
             MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
             MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
                                     _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
@@ -176,33 +161,33 @@ namespace MauiPerfDebugOverlay.Controls
             CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
                                  _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
 
-            //ScoreLabel.Text = $"Overall: {_overallScore:F1}/10";
-            //ScoreLabel.TextColor = _overallScore >= 8 ? Colors.LimeGreen :
-            //                       _overallScore >= 5 ? Colors.Goldenrod : Colors.Red;
+            ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
+            ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
+                                   _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
         }
-
-
 
 
         private void StartMetrics()
         {
             _stopwatch.Restart();
-            _prevCpuTime = Process.GetCurrentProcess().TotalProcessorTime;
+            _prevCpuTime = _currentProcess.TotalProcessorTime;
 
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
                 UpdateGcMetrics();
                 UpdateAllocMetrics();
 
-                var process = Process.GetCurrentProcess();
-                _memoryUsage = process.WorkingSet64 / (1024 * 1024);
-                _threadCount = process.Threads.Count;
+                _memoryUsage = _currentProcess.WorkingSet64 / (1024 * 1024);
+                _threadCount = _currentProcess.Threads.Count;
 
-                var currentCpuTime = process.TotalProcessorTime;
+                var currentCpuTime = _currentProcess.TotalProcessorTime;
                 double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
-                double interval = 1000; // secunda curenta
+
+                double interval = _stopwatch.Elapsed.TotalMilliseconds; // ⬅️ real interval
                 _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
+
                 _prevCpuTime = currentCpuTime;
+                _stopwatch.Restart();
 
                 _overallScore = CalculateOverallScore();
                 UpdateOverallScore(_overallScore);
@@ -212,7 +197,6 @@ namespace MauiPerfDebugOverlay.Controls
                 return !_stopRequested;
             });
         }
-
 
         private double CalculateOverallScore()
         {
@@ -250,14 +234,7 @@ namespace MauiPerfDebugOverlay.Controls
             if (_emaOverallScore == 0)
                 _emaOverallScore = rawScore;
             else
-                _emaOverallScore = (_emaOverallAlpha * _emaOverallScore) + ((1 - _emaOverallAlpha) * rawScore);
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
-                ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
-                                       _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
-            });
+                _emaOverallScore = (_emaOverallAlpha * _emaOverallScore) + ((1 - _emaOverallAlpha) * rawScore); 
         }
 
 
