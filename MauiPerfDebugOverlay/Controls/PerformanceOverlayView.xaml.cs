@@ -58,6 +58,9 @@ namespace MauiPerfDebugOverlay.Controls
             _fpsService = new FpsService();
             _fpsService.OnFrameTimeCalculated += frameTimeMs =>
             {
+                const double MinFrameTime = 0.1; // ms, pentru a evita diviziunea la zero
+                frameTimeMs = Math.Max(frameTimeMs, MinFrameTime);
+
                 // EMA FrameTime
                 if (_emaFrameTime == 0)
                     _emaFrameTime = frameTimeMs;
@@ -78,29 +81,33 @@ namespace MauiPerfDebugOverlay.Controls
                 else
                     _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
 
+                // Actualizare UI
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
+                    // FrameTime
                     FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
                     FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
-                                              _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
+                                               _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
 
+                    // FPS
                     FpsLabel.Text = $"FPS: {_emaFps:F1}";
                     FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
-                                          _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
+                                         _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
 
-
-
-                    //HitchLabel.Text = _emaHitch >= HitchThresholdMs
-                    //    ? $"Hitch EMA: {_emaHitch:F0} ms"
-                    //    : "Hitch: none";
-
+                    // Hitch
                     if (_emaHitch >= HitchThresholdMs)
                     {
                         HitchLabel.Text = $"Last Hitch EMA: {_emaHitch:F0} ms";
                         HitchLabel.TextColor = Colors.Red;
                     }
+                    //else
+                    //{
+                    //    HitchLabel.Text = "Hitch: none";
+                    //    HitchLabel.TextColor = Colors.Gray;
+                    //}
                 });
             };
+
 
         }
 
