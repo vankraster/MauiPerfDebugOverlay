@@ -1,5 +1,6 @@
 ﻿using MauiPerfDebugOverlay.Controls;
 using MauiPerfDebugOverlay.Utils;
+using Microsoft.Maui.Layouts;
 
 namespace MauiPerfDebugOverlay.Services
 {
@@ -24,70 +25,47 @@ namespace MauiPerfDebugOverlay.Services
 
         private void OnPageAppearing(object? sender, Page page)
         {
-            if (page is ContentPage contentPage)
+            if (page is ContentPage contentPage && contentPage.Content != null)
             {
                 EnsureOverlayCreated();
 
-                if (contentPage.Content is Layout layout)
+                // Dacă contentul paginii nu e deja AbsoluteLayout
+                if (contentPage.Content is not AbsoluteLayout abs)
                 {
-                    AddOverlayToLayout(layout);
-                }
-                else if (contentPage.Content != null)
-                {
-                    // Dacă pagina nu are Layout, împachetează conținutul într-un Grid
-                    var grid = new Grid();
-                    grid.Children.Add(contentPage.Content);
-                    grid.Children.Add(_overlay!);
-                    contentPage.Content = grid;
+                    abs = new AbsoluteLayout();
 
-                    _overlay!.Start();
+                    // Adaugă conținutul existent full screen
+                    AbsoluteLayout.SetLayoutFlags(contentPage.Content, AbsoluteLayoutFlags.All);
+                    AbsoluteLayout.SetLayoutBounds(contentPage.Content, new Rect(0, 0, 1, 1));
+                    abs.Children.Add(contentPage.Content);
+
+                    contentPage.Content = abs;
                 }
+
+                AddOverlayToLayout(abs);
             }
         }
 
         private void EnsureOverlayCreated()
         {
-            if (_overlay == null)
+            if (_overlay == null || _overlay?.Parent == null)
             {
                 _overlay = new PerformanceOverlayView();
             }
         }
 
-        private void AddOverlayToLayout(Layout layout)
+        private void AddOverlayToLayout(AbsoluteLayout layout)
         {
-            if (_overlay?.Parent != null && _overlay.Parent != layout)
-            {
-                // s-a "pierdut" în alt părinte dispărut → recrează-l
-                _overlay = new PerformanceOverlayView();
+            // Elimină instanțele vechi ale overlay-ului
+            foreach (var child in layout.Children.OfType<PerformanceOverlayView>().ToList())
+                layout.Children.Remove(child);
 
-                // Elimină toate instanțele existente de PerformanceOverlayView
-                foreach (var child in layout.Children.OfType<PerformanceOverlayView>().ToList())
-                    layout.Children.Remove(child);
+            // Adaugă overlay-ul deasupra
+            AbsoluteLayout.SetLayoutFlags(_overlay!, AbsoluteLayoutFlags.PositionProportional);
+            AbsoluteLayout.SetLayoutBounds(_overlay!, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
 
-                //Adauga overlay
-                layout.Children.Add(_overlay);
-                _overlay.Start();
-            }
-            else if (!layout.Children.Contains(_overlay))
-            { 
-                layout.Children.Add(_overlay);
-                _overlay.Start();
-            }
-
-
-
-            //if (!_overlay!.IsVisibleInLayout(layout))
-            //{
-            //    // Scoate dacă există deja și adaugă la final → on top
-            //    if (layout.Children.Contains(_overlay))
-            //        layout.Children.Remove(_overlay);
-
-            //    layout.Children.Add(_overlay);
-            //    _overlay.Start();
-            //}
+            layout.Children.Add(_overlay!);
+            _overlay!.Start();
         }
     }
 }
-
-
-

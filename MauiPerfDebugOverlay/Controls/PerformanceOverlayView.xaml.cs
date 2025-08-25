@@ -276,17 +276,18 @@ namespace MauiPerfDebugOverlay.Controls
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
             if (sender is not View overlay) return;
-            if (overlay.Parent.Parent is not Grid parent) return;
+            if (overlay.Parent.Parent is not AbsoluteLayout parent) return; // schimbat aici
 
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    _currentXPosition = TranslationX;
+                    _currentXPosition = AbsoluteLayout.GetLayoutBounds(overlay).X;
+                    _currentYPosition = AbsoluteLayout.GetLayoutBounds(overlay).Y;
+
                     _totalXHistory.Clear();
                     _totalXHistory.Enqueue(e.TotalX);
                     _lastAverageX = e.TotalX;
 
-                    _currentYPosition = TranslationY;
                     _totalYHistory.Clear();
                     _totalYHistory.Enqueue(e.TotalY);
                     _lastAverageY = e.TotalY;
@@ -311,7 +312,9 @@ namespace MauiPerfDebugOverlay.Controls
 
                         _currentXPosition = newX;
 
-                        TranslationX = newX;
+                        var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
+                        bounds.X = newX;
+                        AbsoluteLayout.SetLayoutBounds(overlay, bounds);
 
                         _lastAverageX = currentAverageX;
                     }
@@ -329,13 +332,15 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         double newY = _currentYPosition + deltaY;
 
-                        // Limitează între 0% și 100% din înălțimea ecranului
-                        newY = Math.Max(parent.Height * 0.00, newY);
-                        newY = Math.Min(parent.Height * 1 - overlay.Height, newY);
+                        newY = Math.Max(0, newY);
+                        newY = Math.Min(parent.Height - overlay.Height, newY);
 
                         _currentYPosition = newY;
 
-                        TranslationY = newY;
+                        var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
+                        bounds.Y = newY;
+                        AbsoluteLayout.SetLayoutBounds(overlay, bounds);
+
                         _lastAverageY = currentAverageY;
                     }
                     #endregion
@@ -346,6 +351,7 @@ namespace MauiPerfDebugOverlay.Controls
                     break;
             }
         }
+
         #endregion
 
 
