@@ -25,28 +25,65 @@ namespace MauiPerfDebugOverlay.Services
 
         private void OnPageAppearing(object? sender, Page page)
         {
-            if (page is ContentPage contentPage && contentPage.Content != null)
+            if (page is not ContentPage contentPage || contentPage.Content == null)
+                return;
+
+            // Dacă contentul nu e AbsoluteLayout, împachetează-l
+            AbsoluteLayout abs;
+            if (contentPage.Content is AbsoluteLayout existingLayout)
             {
-                EnsureOverlayCreated();
+                abs = existingLayout;
+            }
+            else
+            {
+                abs = new AbsoluteLayout();
 
-                // Dacă contentul paginii nu e deja AbsoluteLayout
-                if (contentPage.Content is not AbsoluteLayout abs)
-                {
-                    abs = new AbsoluteLayout();
+                var originalContent = contentPage.Content;
+                contentPage.Content = null; // eliminăm temporar
+                AbsoluteLayout.SetLayoutFlags(originalContent, AbsoluteLayoutFlags.All);
+                AbsoluteLayout.SetLayoutBounds(originalContent, new Rect(0, 0, 1, 1));
+                abs.Children.Add(originalContent);
 
-                    // Adaugă conținutul existent full screen
-                    AbsoluteLayout.SetLayoutFlags(contentPage.Content, AbsoluteLayoutFlags.All);
-                    AbsoluteLayout.SetLayoutBounds(contentPage.Content, new Rect(0, 0, 1, 1));
-                    abs.Children.Add(contentPage.Content);
-                    AddOverlayToLayout(abs);
+                contentPage.Content = abs;
+            }
 
-                    contentPage.Content = abs;
-                }
-                else
-                    AddOverlayToLayout(abs);
-
+            // Verifică dacă overlay-ul există deja pe pagină
+            if (!abs.Children.OfType<PerformanceOverlayView>().Any())
+            {
+                var overlay = new PerformanceOverlayView();
+                AbsoluteLayout.SetLayoutFlags(overlay, AbsoluteLayoutFlags.None);
+                AbsoluteLayout.SetLayoutBounds(overlay, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+                abs.Children.Add(overlay);
+                overlay.Start();
             }
         }
+
+
+        //private void OnPageAppearing(object? sender, Page page)
+        //{
+        //    if (page is ContentPage contentPage && contentPage.Content != null)
+        //    {
+        //        EnsureOverlayCreated();
+
+        //        // Dacă contentul paginii nu e deja AbsoluteLayout
+        //        if (contentPage.Content is not AbsoluteLayout abs)
+        //        {
+        //            abs = new AbsoluteLayout();
+
+        //            // Adaugă conținutul existent full screen
+
+        //            AbsoluteLayout.SetLayoutFlags(contentPage.Content, AbsoluteLayoutFlags.All);
+        //            AbsoluteLayout.SetLayoutBounds(contentPage.Content, new Rect(0, 0, 1, 1));
+        //            abs.Children.Add(contentPage.Content);
+        //            AddOverlayToLayout(abs);
+
+        //            contentPage.Content = abs;
+        //        }
+        //        else
+        //            AddOverlayToLayout(abs);
+
+        //    }
+        //}
 
         private void EnsureOverlayCreated()
         {
@@ -63,7 +100,7 @@ namespace MauiPerfDebugOverlay.Services
                 layout.Children.Remove(child);
 
             // Adaugă overlay-ul deasupra
-            AbsoluteLayout.SetLayoutFlags(_overlay!, AbsoluteLayoutFlags.PositionProportional);
+            AbsoluteLayout.SetLayoutFlags(_overlay!, AbsoluteLayoutFlags.None);
             AbsoluteLayout.SetLayoutBounds(_overlay!, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
 
             layout.Children.Add(_overlay!);

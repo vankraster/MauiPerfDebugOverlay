@@ -10,9 +10,7 @@
            BackgroundColor="#99000000"
            Padding="8"
            CornerRadius="10"
-           HasShadow="True"
-           AbsoluteLayout.LayoutBounds="10,10,AutoSize,AutoSize"
-           AbsoluteLayout.LayoutFlags="None">
+           HasShadow="True">
 
         <Frame.GestureRecognizers>
             <PanGestureRecognizer PanUpdated="OnPanUpdated" />

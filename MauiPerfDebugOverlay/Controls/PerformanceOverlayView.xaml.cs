@@ -245,7 +245,7 @@ namespace MauiPerfDebugOverlay.Controls
         private const double _emaOverallAlpha = 0.6; // 0–1, mai mare = mai reactiv
 
         private void UpdateOverallScore(double rawScore)
-        { 
+        {
 
             if (_emaOverallScore == 0)
                 _emaOverallScore = rawScore;
@@ -272,16 +272,17 @@ namespace MauiPerfDebugOverlay.Controls
         private double _lastAverageY;
         private double _currentXPosition;
         private double _currentYPosition;
-
+         
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
             if (sender is not Frame frame) return;
-            if (frame.Parent is not AbsoluteLayout parent) return;
+            if (frame.Parent is not PerformanceOverlayView overlay) return;
+            if (overlay.Parent is not AbsoluteLayout parent) return;
 
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    var bounds = AbsoluteLayout.GetLayoutBounds(frame);
+                    var bounds = AbsoluteLayout.GetLayoutBounds(overlay);
                     _currentXPosition = bounds.X;
                     _currentYPosition = bounds.Y;
 
@@ -306,12 +307,12 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         double newX = _currentXPosition + deltaX;
                         newX = Math.Max(0, newX);
-                        newX = Math.Min(parent.Width - frame.Width, newX);
+                        newX = Math.Min(parent.Width - overlay.Width, newX);
                         _currentXPosition = newX;
 
-                        var boundsX = AbsoluteLayout.GetLayoutBounds(frame);
+                        var boundsX = AbsoluteLayout.GetLayoutBounds(overlay);
                         boundsX.X = newX;
-                        AbsoluteLayout.SetLayoutBounds(frame, boundsX);
+                        AbsoluteLayout.SetLayoutBounds(overlay, boundsX);
 
                         _lastAverageX = currentAverageX;
                     }
@@ -328,12 +329,12 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         double newY = _currentYPosition + deltaY;
                         newY = Math.Max(0, newY);
-                        newY = Math.Min(parent.Height - frame.Height, newY);
+                        newY = Math.Min(parent.Height - overlay.Height, newY);
                         _currentYPosition = newY;
 
-                        var boundsY = AbsoluteLayout.GetLayoutBounds(frame);
+                        var boundsY = AbsoluteLayout.GetLayoutBounds(overlay);
                         boundsY.Y = newY;
-                        AbsoluteLayout.SetLayoutBounds(frame, boundsY);
+                        AbsoluteLayout.SetLayoutBounds(overlay, boundsY);
 
                         _lastAverageY = currentAverageY;
                     }
@@ -345,7 +346,6 @@ namespace MauiPerfDebugOverlay.Controls
                     break;
             }
         }
-
         #endregion
 
 
