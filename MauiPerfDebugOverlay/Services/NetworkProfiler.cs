@@ -64,8 +64,15 @@ namespace MauiPerfDebugOverlay.Services
             Interlocked.Add(ref _bytesReceived, bytesReceived);
             Interlocked.Add(ref _totalRequestTimeMs, (long)elapsed.TotalMilliseconds);
             Interlocked.Increment(ref _requestCount);
-        } 
+        }
 
+        internal void Record(long bytesSent, long bytesReceived, TimeSpan elapsed)
+        {
+            Interlocked.Add(ref _bytesSent, bytesSent);
+            Interlocked.Add(ref _bytesReceived, bytesReceived);
+            Interlocked.Add(ref _totalRequestTimeMs, (long)elapsed.TotalMilliseconds);
+            Interlocked.Increment(ref _requestCount);
+        }
 
         private class ProfilingHandler : DelegatingHandler
         {
