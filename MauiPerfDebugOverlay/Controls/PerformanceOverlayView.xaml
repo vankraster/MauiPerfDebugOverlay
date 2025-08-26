@@ -4,10 +4,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="Root"
              IsVisible="True"
-             Opacity="0.95" >
+             Opacity="1" >
 
     <Frame x:Name="OverlayFrame"
-           BackgroundColor="#99000000"
+           BackgroundColor="#CC000000"
            Padding="8"
            CornerRadius="10"
            HasShadow="True">
@@ -74,13 +74,13 @@
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
-                   Text="Hitch: none" />
+                   Text="Last Hitch: none" />
             
             <Label x:Name="HighestHitchLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
-                   Text="Hitch: none" />
+                   Text="Highest Hitch: none" />
 
             <Label x:Name="BatteryLabel"
                    FontAttributes="Bold"
