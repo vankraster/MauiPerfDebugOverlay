@@ -10,7 +10,7 @@ namespace MauiPerfDebugOverlay.Extensions
             if (options.ShowNetworkStats)
             {
                 HttpClientInterceptor.Initialize();
-                WebRequestInterceptor.Initialize();
+                //WebRequestInterceptor.Initialize();
             }
 
             return builder;
