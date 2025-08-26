@@ -11,7 +11,11 @@ namespace MauiPerfDebugOverlay.SampleApp
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UsePerformanceDebugOverlay()
+                .UsePerformanceDebugOverlay(new Models.PerformanceOverlayOptions
+                {
+                    ShowBatteryUsage = true,
+                    ShowNetworkStats = true,
+                })
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -19,9 +23,9 @@ namespace MauiPerfDebugOverlay.SampleApp
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
-            
+
             return builder.Build();
         }
     }

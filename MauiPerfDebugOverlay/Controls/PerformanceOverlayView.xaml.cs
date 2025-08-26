@@ -1,5 +1,4 @@
 ﻿
-using Bumptech.Glide.Util;
 using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Platforms;
@@ -104,11 +103,7 @@ namespace MauiPerfDebugOverlay.Controls
                 if (_emaHitch > _emaHighestHitch)
                     _emaHighestHitch = _emaHitch;
 
-            };
-
-
-            NetworkLabel.IsVisible = _options.ShowNetworkStats;
-            BatteryLabel.IsVisible = _options.ShowBatteryUsage;
+            }; 
         }
 
 
@@ -120,6 +115,10 @@ namespace MauiPerfDebugOverlay.Controls
         public void Start(PerformanceOverlayOptions options)
         {
             _options = options;
+            
+            NetworkLabel.IsVisible = _options.ShowNetworkStats;
+            BatteryLabel.IsVisible = _options.ShowBatteryUsage;
+
             _fpsService?.Start();
             StartMetrics();
         }
