@@ -222,13 +222,13 @@ namespace MauiPerfDebugOverlay.Controls
 
             if (_batteryMilliWAvailable)
             {
-                BatteryLabel.Text = $"Battery: {_batteryMilliW:F1} mW";
+                BatteryLabel.Text = $"Battery consumption: {_batteryMilliW:F1} mW";
                 BatteryLabel.TextColor = _batteryMilliW < 100 ? Colors.LimeGreen :
                                          _batteryMilliW < 500 ? Colors.Goldenrod : Colors.Red;
             }
             else
             {
-                BatteryLabel.Text = "Battery Power: N/A";
+                BatteryLabel.Text = "Battery consumption: N/A";
                 BatteryLabel.TextColor = Colors.Gray;
             }
 
