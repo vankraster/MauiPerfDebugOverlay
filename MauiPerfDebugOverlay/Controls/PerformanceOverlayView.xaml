@@ -76,6 +76,12 @@
                    TextColor="Gray"
                    Text="Hitch: none" />
 
+            <Label x:Name="BatteryLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="Hitch: none" />
+
         </VerticalStackLayout>
 
     </Frame>

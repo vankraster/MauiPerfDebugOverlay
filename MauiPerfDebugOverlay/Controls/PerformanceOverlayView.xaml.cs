@@ -1,4 +1,5 @@
-﻿using MauiPerfDebugOverlay.Interfaces;
+﻿
+using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Platforms;
 using System.Diagnostics;
@@ -42,7 +43,7 @@ namespace MauiPerfDebugOverlay.Controls
         private int _gc1Delta = 0;
         private int _gc2Delta = 0;
 
-         
+
         //Alloc/sec
         private long _lastTotalMemory = 0;
         private double _allocPerSec = 0;
@@ -54,6 +55,9 @@ namespace MauiPerfDebugOverlay.Controls
         //overall score
         private double _emaOverallScore = 0;
         private const double _emaOverallAlpha = 0.6; // 0–1, mai mare = mai reactiv
+
+        private double _batteryMilliW = 0;
+        private bool _batteryMilliWAvailable = true;
 
         public PerformanceOverlayView()
         {
@@ -88,7 +92,7 @@ namespace MauiPerfDebugOverlay.Controls
                     _emaHitch = hitchValue;
                 else
                     _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
-                 
+
             };
 
 
@@ -96,7 +100,7 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
-      
+
 
 
 
@@ -120,14 +124,9 @@ namespace MauiPerfDebugOverlay.Controls
             if (_options.ShowNetworkStats)
                 UpdateNetworkStats();
 
-            if (_options.ShowDiskIO)
-                UpdateDiskIO();
         }
 
-        private void UpdateDiskIO()
-        {
-            throw new NotImplementedException();
-        }
+
 
         private void UpdateNetworkStats()
         {
@@ -136,8 +135,24 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void UpdateBatteryUsage()
         {
-            throw new NotImplementedException();
+#if ANDROID
+            try
+            {
+                _batteryMilliW = BatteryService.GetBatteryMilliW();
+                _batteryMilliWAvailable = true;
+            }
+            catch
+            {
+                _batteryMilliW = 0;
+                _batteryMilliWAvailable = false;
+            }
+#else
+            _batteryMilliW = 0;
+            _batteryMilliWAvailable = false;
+#endif
         }
+
+
 
         private void UpdateGcAndAllocMetrics()
         {
@@ -162,10 +177,10 @@ namespace MauiPerfDebugOverlay.Controls
             _gc0Prev = gen0;
             _gc1Prev = gen1;
             _gc2Prev = gen2;
-             
+
         }
         private void UpdateUi()
-        { 
+        {
             FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
             FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
                                        _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
@@ -203,6 +218,20 @@ namespace MauiPerfDebugOverlay.Controls
             ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
             ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
                                    _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
+
+
+            if (_batteryMilliWAvailable)
+            {
+                BatteryLabel.Text = $"Battery: {_batteryMilliW:F1} mW";
+                BatteryLabel.TextColor = _batteryMilliW < 100 ? Colors.LimeGreen :
+                                         _batteryMilliW < 500 ? Colors.Goldenrod : Colors.Red;
+            }
+            else
+            {
+                BatteryLabel.Text = "Battery Power: N/A";
+                BatteryLabel.TextColor = Colors.Gray;
+            }
+
         }
 
 
@@ -264,14 +293,14 @@ namespace MauiPerfDebugOverlay.Controls
 
             return score; // max 10
         }
-         
+
         private void UpdateOverallScore(double rawScore)
         {
 
             if (_emaOverallScore == 0)
                 _emaOverallScore = rawScore;
             else
-                _emaOverallScore = (_emaOverallAlpha * _emaOverallScore) + ((1 - _emaOverallAlpha) * rawScore); 
+                _emaOverallScore = (_emaOverallAlpha * _emaOverallScore) + ((1 - _emaOverallAlpha) * rawScore);
         }
 
 
@@ -286,7 +315,7 @@ namespace MauiPerfDebugOverlay.Controls
         private double _lastAverageY;
         private double _currentXPosition;
         private double _currentYPosition;
-         
+
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
             if (sender is not Frame frame) return;
