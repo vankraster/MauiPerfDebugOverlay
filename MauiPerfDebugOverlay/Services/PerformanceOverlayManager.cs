@@ -1,4 +1,5 @@
 ﻿using MauiPerfDebugOverlay.Controls;
+using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Utils;
 using Microsoft.Maui.Layouts;
 
@@ -9,6 +10,8 @@ namespace MauiPerfDebugOverlay.Services
         private static PerformanceOverlayManager? _instance;
         private PerformanceOverlayView? _overlay;
 
+        private PerformanceOverlayOptions _options;
+
         public static PerformanceOverlayManager Instance =>
             _instance ??= new PerformanceOverlayManager();
 
@@ -18,8 +21,9 @@ namespace MauiPerfDebugOverlay.Services
         /// Activează overlay-ul global.
         /// Trebuie apelat o singură dată în MauiProgram.cs
         /// </summary>
-        public void Enable()
+        public void Enable(PerformanceOverlayOptions options)
         {
+            _options = options;
             Application.Current.PageAppearing += OnPageAppearing;
         }
 
@@ -54,57 +58,8 @@ namespace MauiPerfDebugOverlay.Services
                 AbsoluteLayout.SetLayoutFlags(overlay, AbsoluteLayoutFlags.None);
                 AbsoluteLayout.SetLayoutBounds(overlay, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
                 abs.Children.Add(overlay);
-                overlay.Start();
+                overlay.Start(_options);
             }
-        }
-
-
-        //private void OnPageAppearing(object? sender, Page page)
-        //{
-        //    if (page is ContentPage contentPage && contentPage.Content != null)
-        //    {
-        //        EnsureOverlayCreated();
-
-        //        // Dacă contentul paginii nu e deja AbsoluteLayout
-        //        if (contentPage.Content is not AbsoluteLayout abs)
-        //        {
-        //            abs = new AbsoluteLayout();
-
-        //            // Adaugă conținutul existent full screen
-
-        //            AbsoluteLayout.SetLayoutFlags(contentPage.Content, AbsoluteLayoutFlags.All);
-        //            AbsoluteLayout.SetLayoutBounds(contentPage.Content, new Rect(0, 0, 1, 1));
-        //            abs.Children.Add(contentPage.Content);
-        //            AddOverlayToLayout(abs);
-
-        //            contentPage.Content = abs;
-        //        }
-        //        else
-        //            AddOverlayToLayout(abs);
-
-        //    }
-        //}
-
-        private void EnsureOverlayCreated()
-        {
-            if (_overlay == null || _overlay?.Parent == null)
-            {
-                _overlay = new PerformanceOverlayView();
-            }
-        }
-
-        private void AddOverlayToLayout(AbsoluteLayout layout)
-        {
-            // Elimină instanțele vechi ale overlay-ului
-            foreach (var child in layout.Children.OfType<PerformanceOverlayView>().ToList())
-                layout.Children.Remove(child);
-
-            // Adaugă overlay-ul deasupra
-            AbsoluteLayout.SetLayoutFlags(_overlay!, AbsoluteLayoutFlags.None);
-            AbsoluteLayout.SetLayoutBounds(_overlay!, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
-
-            layout.Children.Add(_overlay!);
-            _overlay!.Start();
-        }
+        } 
     }
 }

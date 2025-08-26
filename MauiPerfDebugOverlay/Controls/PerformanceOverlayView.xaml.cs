@@ -1,9 +1,12 @@
 ﻿using MauiPerfDebugOverlay.Interfaces;
+using MauiPerfDebugOverlay.Models;
+using MauiPerfDebugOverlay.Platforms;
 using System.Diagnostics;
 namespace MauiPerfDebugOverlay.Controls
 {
     public partial class PerformanceOverlayView : ContentView
     {
+        private PerformanceOverlayOptions _options;
         private readonly IFpsService _fpsService;
 
         private double _overallScore;
@@ -39,8 +42,7 @@ namespace MauiPerfDebugOverlay.Controls
         private int _gc1Delta = 0;
         private int _gc2Delta = 0;
 
-
-
+         
         //Alloc/sec
         private long _lastTotalMemory = 0;
         private double _allocPerSec = 0;
@@ -48,6 +50,10 @@ namespace MauiPerfDebugOverlay.Controls
         private readonly Process _currentProcess = Process.GetCurrentProcess();
         private long _lastAllocatedBytes = GC.GetTotalAllocatedBytes(false);
 
+
+        //overall score
+        private double _emaOverallScore = 0;
+        private const double _emaOverallAlpha = 0.6; // 0–1, mai mare = mai reactiv
 
         public PerformanceOverlayView()
         {
@@ -94,8 +100,9 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
-        public void Start()
+        public void Start(PerformanceOverlayOptions options)
         {
+            _options = options;
             _fpsService?.Start();
             StartMetrics();
         }
@@ -105,6 +112,32 @@ namespace MauiPerfDebugOverlay.Controls
             _stopRequested = true;
         }
 
+        private void UpdateExtraMetrics()
+        {
+            if (_options.ShowBatteryUsage)
+                UpdateBatteryUsage();
+
+            if (_options.ShowNetworkStats)
+                UpdateNetworkStats();
+
+            if (_options.ShowDiskIO)
+                UpdateDiskIO();
+        }
+
+        private void UpdateDiskIO()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void UpdateNetworkStats()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void UpdateBatteryUsage()
+        {
+            throw new NotImplementedException();
+        }
 
         private void UpdateGcAndAllocMetrics()
         {
@@ -182,6 +215,8 @@ namespace MauiPerfDebugOverlay.Controls
             {
                 UpdateGcAndAllocMetrics();
 
+                UpdateExtraMetrics();
+
                 _memoryUsage = _currentProcess.WorkingSet64 / (1024 * 1024);
                 _threadCount = _currentProcess.Threads.Count;
 
@@ -229,10 +264,7 @@ namespace MauiPerfDebugOverlay.Controls
 
             return score; // max 10
         }
-
-        private double _emaOverallScore = 0;
-        private const double _emaOverallAlpha = 0.6; // 0–1, mai mare = mai reactiv
-
+         
         private void UpdateOverallScore(double rawScore)
         {
 

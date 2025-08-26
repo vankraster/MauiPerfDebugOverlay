@@ -2,7 +2,7 @@
 using Foundation;
 using MauiPerfDebugOverlay.Interfaces;
 
-namespace MauiPerfDebugOverlay
+namespace MauiPerfDebugOverlay.Platforms
 { 
     public class FpsService : IFpsService
     {

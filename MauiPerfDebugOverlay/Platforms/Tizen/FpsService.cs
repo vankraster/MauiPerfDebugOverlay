@@ -2,7 +2,7 @@
 using Tizen.Applications;
 using Tizen.NUI;
 
-namespace MauiPerfDebugOverlay
+namespace MauiPerfDebugOverlay.Platforms
 {
     public class FpsService : IFpsService
     {

@@ -1,7 +1,7 @@
 ﻿using Android.Views;
 using MauiPerfDebugOverlay.Interfaces;
 
-namespace MauiPerfDebugOverlay
+namespace MauiPerfDebugOverlay.Platforms
 { 
     public class FpsService : Java.Lang.Object, IFpsService, Choreographer.IFrameCallback
     {

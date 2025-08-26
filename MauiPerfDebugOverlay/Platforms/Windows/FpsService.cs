@@ -1,7 +1,7 @@
 ﻿using MauiPerfDebugOverlay.Interfaces;
 using Microsoft.UI.Xaml.Media;
 
-namespace MauiPerfDebugOverlay
+namespace MauiPerfDebugOverlay.Platforms
 { 
     public class FpsService : IFpsService
     {
