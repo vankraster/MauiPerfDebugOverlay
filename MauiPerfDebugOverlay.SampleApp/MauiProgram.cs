@@ -1,4 +1,5 @@
-﻿using MauiPerfDebugOverlay.Services;
+﻿using MauiPerfDebugOverlay.Extensions;
+using MauiPerfDebugOverlay.Services;
 using Microsoft.Extensions.Logging;
 
 namespace MauiPerfDebugOverlay.SampleApp
@@ -10,6 +11,7 @@ namespace MauiPerfDebugOverlay.SampleApp
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UsePerformanceDebugOverlay()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

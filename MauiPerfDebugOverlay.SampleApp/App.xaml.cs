@@ -12,7 +12,7 @@ namespace MauiPerfDebugOverlay.SampleApp
             PerformanceOverlayManager.Instance.Enable(new Models.PerformanceOverlayOptions
             {
                 ShowBatteryUsage = true,
-                ShowNetworkStats = false
+                ShowNetworkStats = true
             });
 
             MainPage = new AppShell();

@@ -1,7 +1,9 @@
 ﻿
+using Bumptech.Glide.Util;
 using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Platforms;
+using MauiPerfDebugOverlay.Services;
 using System.Diagnostics;
 namespace MauiPerfDebugOverlay.Controls
 {
@@ -52,6 +54,11 @@ namespace MauiPerfDebugOverlay.Controls
         private readonly Process _currentProcess = Process.GetCurrentProcess();
         private long _lastAllocatedBytes = GC.GetTotalAllocatedBytes(false);
 
+        //Networking
+        long totalRequests = 0;
+        long totalSent = 0;
+        long totalReceived = 0;
+        double avgRequestTime = 0;
 
         //overall score
         private double _emaOverallScore = 0;
@@ -100,6 +107,8 @@ namespace MauiPerfDebugOverlay.Controls
             };
 
 
+            NetworkLabel.IsVisible = _options.ShowNetworkStats;
+            BatteryLabel.IsVisible = _options.ShowBatteryUsage;
         }
 
 
@@ -134,7 +143,12 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void UpdateNetworkStats()
         {
-            throw new NotImplementedException();
+            var profiler = NetworkProfiler.Instance;
+
+            totalRequests = profiler.TotalRequests;
+            totalSent = profiler.TotalBytesSent;
+            totalReceived = profiler.TotalBytesReceived;
+            avgRequestTime = profiler.AverageRequestTimeMs;
         }
 
         private void UpdateBatteryUsage()
@@ -199,7 +213,7 @@ namespace MauiPerfDebugOverlay.Controls
                 HitchLabel.TextColor = Colors.Red;
 
                 HighestHitchLabel.Text = $"Highest Hitch: {_emaHighestHitch:F0} ms";
-                HighestHitchLabel.TextColor = Colors.Red; 
+                HighestHitchLabel.TextColor = Colors.Red;
             }
 
             AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
@@ -237,6 +251,15 @@ namespace MauiPerfDebugOverlay.Controls
             {
                 BatteryLabel.Text = "Battery consumption: N/A";
                 BatteryLabel.TextColor = Colors.Gray;
+            }
+
+            if (_options.ShowNetworkStats)
+            {
+                NetworkLabel.Text =
+                $"Requests: {totalRequests}\n" +
+                $"Sent: {totalSent / 1024.0:F1} KB\n" +
+                $"Received: {totalReceived / 1024.0:F1} KB\n" +
+                $"Avg Time: {avgRequestTime:F1} ms";
             }
 
         }
