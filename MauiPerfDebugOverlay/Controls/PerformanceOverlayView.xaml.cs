@@ -31,6 +31,7 @@ namespace MauiPerfDebugOverlay.Controls
         //hitch
         private const double HitchThresholdMs = 200;
         private double _emaHitch = 0;
+        private double _emaHighestHitch = 0;
         private const double _emaHitchAlpha = 0.7; // mai reactiv decât FPS/FrameTime
 
 
@@ -92,6 +93,9 @@ namespace MauiPerfDebugOverlay.Controls
                     _emaHitch = hitchValue;
                 else
                     _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
+
+                if (_emaHitch > _emaHighestHitch)
+                    _emaHighestHitch = _emaHitch;
 
             };
 
@@ -191,8 +195,11 @@ namespace MauiPerfDebugOverlay.Controls
 
             if (_emaHitch >= HitchThresholdMs)
             {
-                HitchLabel.Text = $"Last Hitch EMA: {_emaHitch:F0} ms";
+                HitchLabel.Text = $"Last Hitch: {_emaHitch:F0} ms";
                 HitchLabel.TextColor = Colors.Red;
+
+                HighestHitchLabel.Text = $"Highest Hitch: {_emaHighestHitch:F0} ms";
+                HighestHitchLabel.TextColor = Colors.Red; 
             }
 
             AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
