@@ -22,26 +22,37 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>1.0.3</Version>
+		<Version>1.0.5</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
 		<Description>
-			MAUI Performance Overlay lightweight, drag-and-move performance HUD for .NET MAUI apps.
-			It shows real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, and UI thread hitches.
-			Ideal for diagnostics and profiling MAUI applications on Android, iOS, MacCatalyst, Tizen, and Windows.
-			Easily integrates into your app to monitor performance and responsiveness.</Description>
-		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;Diagnostics</PackageTags>
+			MAUI Performance Overlay – lightweight, drag-and-move performance HUD for .NET MAUI apps.
+			Displays real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, Battery consumption (Android only), and Networking stats (total requests, bytes sent/received, average request time).
+			Provides an overall score for app performance. Ideal for diagnostics and profiling MAUI applications on Android, iOS, MacCatalyst, Tizen, and Windows.
+			Easily integrates into your app to monitor performance and responsiveness.
+		</Description>
+
+		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics</PackageTags>
+
+		<PackageReleaseNotes>
+			Added new metrics: Battery consumption (Android only) and Network stats (requests, bytes sent/received, average request time). Improved UI. Existing FPS, FrameTime, CPU, Memory, Threads, GC, Alloc/sec, Hitches, and Overall Score functionality remains.
+		</PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/vankraster/MauiPerfDebugOverlay</RepositoryUrl>
-		<PackageReleaseNotes>Initial release with FPS, FrameTime, CPU, Memory, Threads, GC, Alloc/sec, Hitches, and Overall Score.</PackageReleaseNotes>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+
+		<None Include="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
+
+	
+
 
 	<ItemGroup>
 		<MauiXaml Update="Controls\PerformanceOverlayView.xaml">
@@ -49,4 +60,6 @@
 		</MauiXaml>
 	</ItemGroup>
 
+
+	
 </Project>

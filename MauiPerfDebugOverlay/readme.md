@@ -1,0 +1,226 @@
+\## PerformanceDebugOverlay (v1.0.5)
+
+
+
+A comprehensive performance overlay for .NET MAUI that monitors FPS, CPU, memory, GC, battery, and networking in real time, without requiring major changes to your application code.
+
+
+
+!\[Overlay Screenshot](https://raw.githubusercontent.com/vankraster/MauiPerfDebugOverlay/refs/heads/master/MauiPerfDebugOverlay.SampleApp/overlay/overlay-screenshot-103.png)
+
+
+
+---
+
+
+
+\## Features
+
+
+
+FPS \& FrameTime – calculated using EMA (Exponential Moving Average)
+
+
+
+CPU usage – per-process CPU utilization
+
+
+
+Memory usage – current memory and allocations/sec
+
+
+
+GC activity – collections per generation
+
+
+
+Battery consumption – approximate consumption in mW (Android only)
+
+
+
+Network stats – total requests, bytes sent/received, average request time
+
+
+
+Overall score – 0–10 score based on all metrics
+
+
+
+Compact / Expanded view – show/hide individual metrics
+
+
+
+Live drag \& reposition – move the overlay freely at runtime
+
+
+
+Plug-and-play integration – works globally without modifying existing HTTP code
+
+
+
+---
+
+
+
+\## Installation
+
+
+
+Add the NuGet package to your project:
+
+
+
+dotnet add package PerformanceDebugOverlay --version 1.0.5
+
+
+
+---
+
+
+
+\## Configuration 
+
+
+
+in MauiProgram.cs
+
+
+
+```bash
+
+
+
+using MauiPerfDebugOverlay.Extensions;
+
+using MauiPerfDebugOverlay.Models;
+
+
+
+public static class MauiProgram
+
+{
+
+ public static MauiApp CreateMauiApp()
+
+ {
+
+     var builder = MauiApp.CreateBuilder();
+
+
+
+     builder
+
+         .UseMauiApp<App>()
+
+         .UsePerformanceDebugOverlay(new PerformanceOverlayOptions
+
+         {
+
+             ShowBatteryUsage = true,
+
+             ShowNetworkStats = true,
+
+             ShowAlloc\_GC = true,
+
+             ShowCPU\_Usage = true,
+
+             ShowFrame = true,
+
+             ShowMemory = true
+
+         });
+
+
+
+     return builder.Build();
+
+ }
+
+}
+
+```
+
+
+
+Options are optional and can be enabled or disabled individually.
+
+
+
+Activation in Your App
+
+
+
+In App.xaml.cs:
+
+
+
+```bash
+
+public App()
+
+{
+
+ InitializeComponent();
+
+
+
+ // Enable the PerformanceOverlay globally
+
+ PerformanceOverlayManager.Instance.Enable();
+
+
+
+ MainPage = new AppShell();
+
+}
+
+```
+
+The overlay will appear automatically and is interactive.
+
+
+
+---
+
+
+
+\## Notes
+
+
+
+Battery consumption metrics are only available on Android. Other platforms will display N/A.
+
+
+
+Networking metrics automatically monitor all HttpClient and HttpWebRequest requests without modifying existing code.
+
+
+
+Overlay is fully configurable and extensible.
+
+
+
+---
+
+
+
+\## Simple API
+
+
+
+```bash
+
+PerformanceOverlayManager.Instance.Enable() – show the overlay
+
+
+
+PerformanceOverlayManager.Instance.Disable() – hide the overlay
+
+```
+
+
+
+Configuration is done via PerformanceOverlayOptions to customize which metrics are displayed
+
+
+
