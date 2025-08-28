@@ -22,7 +22,7 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
