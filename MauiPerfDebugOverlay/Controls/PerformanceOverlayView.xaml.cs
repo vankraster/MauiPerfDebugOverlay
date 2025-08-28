@@ -1,12 +1,9 @@
 ﻿
 using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
-using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Platforms;
 using MauiPerfDebugOverlay.Services;
-using Microsoft.Maui.Graphics.Text;
 using System.Diagnostics;
-using static Java.Util.Jar.Attributes;
 using static System.Net.Mime.MediaTypeNames;
 namespace MauiPerfDebugOverlay.Controls
 {
@@ -288,7 +285,7 @@ namespace MauiPerfDebugOverlay.Controls
             _stopwatch.Restart();
             _prevCpuTime = _currentProcess.TotalProcessorTime;
 
-            Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
+            Microsoft.Maui.Controls.Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
                 if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC)
                     UpdateGcAndAllocMetrics();
