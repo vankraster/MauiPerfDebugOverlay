@@ -3,8 +3,7 @@ using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.Platforms;
 using MauiPerfDebugOverlay.Services;
-using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics; 
 namespace MauiPerfDebugOverlay.Controls
 {
     public partial class PerformanceOverlayView : ContentView
@@ -72,12 +71,7 @@ namespace MauiPerfDebugOverlay.Controls
 
             _stopwatch = new Stopwatch();
 
-            NetworkLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats;
-            BatteryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage;
-            FpsLabel.IsVisible = FrameTimeLabel.IsVisible = HitchLabel.IsVisible = HighestHitchLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame;
-            CpuLabel.IsVisible = ThreadsLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage;
-            GcLabel.IsVisible = AllocLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC;
-            MemoryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory;
+            showUiItems();
 
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame)
             {
@@ -114,7 +108,17 @@ namespace MauiPerfDebugOverlay.Controls
             }
         }
 
+        private void showUiItems()
+        {
+            BoxViewNetwork.IsVisible = NetworkLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats;
+            BoxViewBattery.IsVisible = BatteryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage;
+            BoxViewFps.IsVisible = FpsLabel.IsVisible = FrameTimeLabel.IsVisible = HitchLabel.IsVisible = HighestHitchLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame;
+            BoxViewCpu.IsVisible = CpuLabel.IsVisible = ThreadsLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage;
 
+            BoxViewMemory_GC.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC || PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory;
+            GcLabel.IsVisible = AllocLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC;
+            MemoryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory;
+        }
 
 
 
@@ -459,7 +463,8 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         lbl.IsVisible = false;
                     }
-
+                    else if (child is BoxView box)
+                        box.IsVisible = false;
                 }
 
                 //ToggleButton.Text = "▲"; // simbol expand
@@ -467,10 +472,7 @@ namespace MauiPerfDebugOverlay.Controls
             else
             {
                 // afișăm tot
-                foreach (var child in MetricsStack.Children)
-                {
-                    (child as View).IsVisible = true;
-                }
+                showUiItems();
 
                 //ToggleButton.Text = "▼"; // simbol compact
             }

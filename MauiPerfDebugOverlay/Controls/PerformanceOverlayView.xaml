@@ -28,6 +28,11 @@
                    TextColor="Gray"
                    Text="Overall: --/10" />
 
+            <BoxView HeightRequest="1"
+                     x:Name="BoxViewFps"
+                     Color="Gray"
+                     Margin="0,4" />
+
             <Label x:Name="FpsLabel"
                    FontAttributes="Bold"
                    FontSize="14"
@@ -40,23 +45,45 @@
                    TextColor="Gray"
                    Text="FrameTime: -- ms" />
 
+            <Label x:Name="HitchLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="Last Hitch: none" />
+
+            <Label x:Name="HighestHitchLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="Highest Hitch: none" />
+
+            <BoxView HeightRequest="1"
+                     x:Name="BoxViewCpu"
+                     Color="Gray"
+                     Margin="0,4" />
+
             <Label x:Name="CpuLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
                    Text="CPU: --%" />
 
-            <Label x:Name="MemoryLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Memory: -- MB" />
-
             <Label x:Name="ThreadsLabel"
                    FontAttributes="Bold"
                    FontSize="14"
                    TextColor="Gray"
                    Text="Threads: --" />
+
+            <BoxView HeightRequest="1"
+                     x:Name="BoxViewMemory_GC"
+                     Color="Gray"
+                     Margin="0,4" />
+
+            <Label x:Name="MemoryLabel"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   TextColor="Gray"
+                   Text="Memory: -- MB" />
 
             <Label x:Name="GcLabel"
                    FontAttributes="Bold"
@@ -70,17 +97,10 @@
                    TextColor="Gray"
                    Text="Alloc/sec: -- MB" />
 
-            <Label x:Name="HitchLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Last Hitch: none" />
-            
-            <Label x:Name="HighestHitchLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Highest Hitch: none" />
+            <BoxView HeightRequest="1"
+                     x:Name="BoxViewBattery"
+                     Color="Gray"
+                     Margin="0,4" />
 
             <Label x:Name="BatteryLabel"
                    FontAttributes="Bold"
@@ -88,6 +108,11 @@
                    TextColor="Gray"
                    Text="Hitch: none" />
 
+            <BoxView HeightRequest="1"
+                     x:Name="BoxViewNetwork"
+                     Color="Gray"
+                     Margin="0,4" />
+            
             <Label x:Name="NetworkLabel"
                    FontAttributes="Bold"
                    FontSize="14"
