@@ -9,7 +9,7 @@ namespace MauiPerfDebugOverlay.SampleApp
             InitializeComponent();
 
             // Activează PerformanceOverlay global
-            PerformanceOverlayManager.Instance.Enable( );
+            PerformanceOverlayManager.Instance.Enable();
 
             MainPage = new AppShell();
         }

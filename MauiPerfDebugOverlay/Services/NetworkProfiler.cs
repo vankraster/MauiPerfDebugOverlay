@@ -1,12 +1,22 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace MauiPerfDebugOverlay.Services
 {
+    internal class ProfilingHttpClient : HttpClient
+    {
+        public ProfilingHttpClient()
+      : base(CreateProfilingHandler()) 
+        {
+
+        }
+        private static HttpMessageHandler CreateProfilingHandler()
+        {
+            // handler-ul de profilare
+            return new NetworkProfiler.NetworkProfilingHandler(new HttpClientHandler(), NetworkProfiler.Instance);
+        }
+
+    }
+
     internal class NetworkProfiler
     {
         private static NetworkProfiler? _instance;
@@ -24,6 +34,7 @@ namespace MauiPerfDebugOverlay.Services
         public double RequestsPerSecond => _requestsPerSecond;
         public double BytesSentPerSecond => _bytesSentPerSecond;
         public double BytesReceivedPerSecond => _bytesReceivedPerSecond;
+
         public long TotalRequests => _requestCount;
         public long TotalBytesSent => _bytesSent;
         public long TotalBytesReceived => _bytesReceived;
@@ -33,15 +44,11 @@ namespace MauiPerfDebugOverlay.Services
         {
             // timer pentru update per secunda
             Device.StartTimer(TimeSpan.FromSeconds(1), () =>
-            {
-                _requestsPerSecond = _requestCount;
-                _bytesSentPerSecond = _bytesSent;
-                _bytesReceivedPerSecond = _bytesReceived;
-
+            {   
                 // reset pentru urmatoarea secunda
-                _requestCount = 0;
-                _bytesSent = 0;
-                _bytesReceived = 0;
+                _requestsPerSecond = 0;
+                _bytesSentPerSecond = 0;
+                _bytesReceivedPerSecond = 0;
 
                 return true;
             });
@@ -49,36 +56,19 @@ namespace MauiPerfDebugOverlay.Services
 
         public HttpMessageHandler CreateHandler(HttpMessageHandler innerHandler)
         {
-            return new ProfilingHandler(innerHandler, this);
+            return new NetworkProfilingHandler(innerHandler, this);
         }
 
 
 
 
-        public void Record(HttpWebRequest request, WebResponse response, TimeSpan elapsed)
-        {
-            long bytesSent = request.ContentLength > 0 ? request.ContentLength : 0;
-            long bytesReceived = response.ContentLength > 0 ? response.ContentLength : 0;
 
-            Interlocked.Add(ref _bytesSent, bytesSent);
-            Interlocked.Add(ref _bytesReceived, bytesReceived);
-            Interlocked.Add(ref _totalRequestTimeMs, (long)elapsed.TotalMilliseconds);
-            Interlocked.Increment(ref _requestCount);
-        }
 
-        internal void Record(long bytesSent, long bytesReceived, TimeSpan elapsed)
-        {
-            Interlocked.Add(ref _bytesSent, bytesSent);
-            Interlocked.Add(ref _bytesReceived, bytesReceived);
-            Interlocked.Add(ref _totalRequestTimeMs, (long)elapsed.TotalMilliseconds);
-            Interlocked.Increment(ref _requestCount);
-        }
-
-        private class ProfilingHandler : DelegatingHandler
+        internal class NetworkProfilingHandler : DelegatingHandler
         {
             private readonly NetworkProfiler _profiler;
 
-            public ProfilingHandler(HttpMessageHandler inner, NetworkProfiler profiler) : base(inner)
+            public NetworkProfilingHandler(HttpMessageHandler inner, NetworkProfiler profiler) : base(inner)
             {
                 _profiler = profiler;
             }
@@ -96,10 +86,20 @@ namespace MauiPerfDebugOverlay.Services
                 Interlocked.Increment(ref _profiler._requestCount);
                 Interlocked.Add(ref _profiler._bytesSent, requestSize);
                 Interlocked.Add(ref _profiler._bytesReceived, responseSize);
+
+
+                Interlocked.Increment(ref _profiler._requestsPerSecond);
+                Interlocked.Add(ref _profiler._bytesSentPerSecond, requestSize);
+                Interlocked.Add(ref _profiler._bytesReceivedPerSecond, responseSize);
+
+
                 Interlocked.Add(ref _profiler._totalRequestTimeMs, (long)sw.Elapsed.TotalMilliseconds);
 
                 return response;
             }
+
+
         }
+
     }
 }

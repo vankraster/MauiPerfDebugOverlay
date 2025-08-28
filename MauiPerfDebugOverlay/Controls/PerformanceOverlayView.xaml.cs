@@ -3,7 +3,7 @@ using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.Platforms;
 using MauiPerfDebugOverlay.Services;
-using System.Diagnostics; 
+using System.Diagnostics;
 namespace MauiPerfDebugOverlay.Controls
 {
     public partial class PerformanceOverlayView : ContentView
@@ -56,6 +56,11 @@ namespace MauiPerfDebugOverlay.Controls
         long totalRequests = 0;
         long totalSent = 0;
         long totalReceived = 0;
+
+        double totalRequestsPerSecond = 0;
+        double totalSentPerSecond = 0;
+        double totalReceivedPerSecond = 0;
+
         double avgRequestTime = 0;
 
         //overall score
@@ -155,6 +160,10 @@ namespace MauiPerfDebugOverlay.Controls
             totalSent = profiler.TotalBytesSent;
             totalReceived = profiler.TotalBytesReceived;
             avgRequestTime = profiler.AverageRequestTimeMs;
+
+            totalReceivedPerSecond = profiler.BytesReceivedPerSecond;
+            totalSentPerSecond = profiler.BytesSentPerSecond;
+            totalRequestsPerSecond = profiler.RequestsPerSecond;
         }
 
         private void UpdateBatteryUsage()
@@ -275,7 +284,10 @@ namespace MauiPerfDebugOverlay.Controls
                 $"Requests: {totalRequests}\n" +
                 $"Sent: {totalSent / 1024.0:F1} KB\n" +
                 $"Received: {totalReceived / 1024.0:F1} KB\n" +
-                $"Avg Time: {avgRequestTime:F1} ms";
+                $"Avg Req. Time: {avgRequestTime:F1} ms\n" +
+                $"Requests per sec.: {totalRequestsPerSecond}\n" +
+                $"Sent per sec.: {totalSentPerSecond / 1024.0:F1} KB\n" +
+                $"Received per sec.: {totalReceivedPerSecond / 1024.0:F1} KB";
             }
 
             ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";

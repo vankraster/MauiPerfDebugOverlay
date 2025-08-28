@@ -1,8 +1,11 @@
-﻿namespace MauiPerfDebugOverlay.SampleApp
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace MauiPerfDebugOverlay.SampleApp
 {
     public partial class MainPage : ContentPage
     {
         int count = 0;
+        private HttpClient _httpClient => Handler.MauiContext.Services.GetRequiredService<HttpClient>();
 
         public MainPage()
         {
@@ -22,13 +25,13 @@
 
             try
             {
-                using var client = new HttpClient();
+
 
                 // Important: Google cere un User-Agent, altfel poate returna 403
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (MAUI Test App)");
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (MAUI Test App)");
 
                 string url = "https://www.google.ro/search?q=iasi";
-                var response = await client.GetAsync(url);
+                var response = await _httpClient.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
                 {
