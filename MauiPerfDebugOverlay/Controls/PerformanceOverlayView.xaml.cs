@@ -1,14 +1,17 @@
 ﻿
+using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Platforms;
 using MauiPerfDebugOverlay.Services;
+using Microsoft.Maui.Graphics.Text;
 using System.Diagnostics;
+using static Java.Util.Jar.Attributes;
+using static System.Net.Mime.MediaTypeNames;
 namespace MauiPerfDebugOverlay.Controls
 {
     public partial class PerformanceOverlayView : ContentView
     {
-        private PerformanceOverlayOptions _options;
         private readonly IFpsService _fpsService;
 
         private double _overallScore;
@@ -72,38 +75,46 @@ namespace MauiPerfDebugOverlay.Controls
 
             _stopwatch = new Stopwatch();
 
+            NetworkLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats;
+            BatteryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage;
+            FpsLabel.IsVisible = FrameTimeLabel.IsVisible = HitchLabel.IsVisible = HighestHitchLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame;
+            CpuLabel.IsVisible = ThreadsLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage;
+            GcLabel.IsVisible = AllocLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC;
+            MemoryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory;
 
-
-            _fpsService = new FpsService();
-            _fpsService.OnFrameTimeCalculated += frameTimeMs =>
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame)
             {
-                const double MinFrameTime = 0.1; // ms, pentru a evita diviziunea la zero
-                frameTimeMs = Math.Max(frameTimeMs, MinFrameTime);
+                _fpsService = new FpsService();
+                _fpsService.OnFrameTimeCalculated += frameTimeMs =>
+                {
+                    const double MinFrameTime = 0.1; // ms, pentru a evita diviziunea la zero
+                    frameTimeMs = Math.Max(frameTimeMs, MinFrameTime);
 
-                // EMA FrameTime
-                if (_emaFrameTime == 0)
-                    _emaFrameTime = frameTimeMs;
-                else
-                    _emaFrameTime = (_emaAlpha * _emaFrameTime) + ((1 - _emaAlpha) * frameTimeMs);
+                    // EMA FrameTime
+                    if (_emaFrameTime == 0)
+                        _emaFrameTime = frameTimeMs;
+                    else
+                        _emaFrameTime = (_emaAlpha * _emaFrameTime) + ((1 - _emaAlpha) * frameTimeMs);
 
-                // EMA FPS
-                double fps = 1000.0 / frameTimeMs;
-                if (_emaFps == 0)
-                    _emaFps = fps;
-                else
-                    _emaFps = (_emaAlpha * _emaFps) + ((1 - _emaAlpha) * fps);
+                    // EMA FPS
+                    double fps = 1000.0 / frameTimeMs;
+                    if (_emaFps == 0)
+                        _emaFps = fps;
+                    else
+                        _emaFps = (_emaAlpha * _emaFps) + ((1 - _emaAlpha) * fps);
 
-                // Hitch EMA
-                double hitchValue = frameTimeMs >= HitchThresholdMs ? frameTimeMs : 0;
-                if (_emaHitch == 0)
-                    _emaHitch = hitchValue;
-                else
-                    _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
+                    // Hitch EMA
+                    double hitchValue = frameTimeMs >= HitchThresholdMs ? frameTimeMs : 0;
+                    if (_emaHitch == 0)
+                        _emaHitch = hitchValue;
+                    else
+                        _emaHitch = (_emaHitchAlpha * _emaHitch) + ((1 - _emaHitchAlpha) * hitchValue);
 
-                if (_emaHitch > _emaHighestHitch)
-                    _emaHighestHitch = _emaHitch;
+                    if (_emaHitch > _emaHighestHitch)
+                        _emaHighestHitch = _emaHitch;
 
-            }; 
+                };
+            }
         }
 
 
@@ -112,13 +123,8 @@ namespace MauiPerfDebugOverlay.Controls
 
 
 
-        public void Start(PerformanceOverlayOptions options)
+        public void Start()
         {
-            _options = options;
-            
-            NetworkLabel.IsVisible = _options.ShowNetworkStats;
-            BatteryLabel.IsVisible = _options.ShowBatteryUsage;
-
             _fpsService?.Start();
             StartMetrics();
         }
@@ -130,10 +136,10 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void UpdateExtraMetrics()
         {
-            if (_options.ShowBatteryUsage)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage)
                 UpdateBatteryUsage();
 
-            if (_options.ShowNetworkStats)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats)
                 UpdateNetworkStats();
 
         }
@@ -198,61 +204,71 @@ namespace MauiPerfDebugOverlay.Controls
         }
         private void UpdateUi()
         {
-            FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
-            FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
-                                       _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
-
-            FpsLabel.Text = $"FPS: {_emaFps:F1}";
-            FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
-                                 _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
-
-            if (_emaHitch >= HitchThresholdMs)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame)
             {
-                HitchLabel.Text = $"Last Hitch: {_emaHitch:F0} ms";
-                HitchLabel.TextColor = Colors.Red;
+                FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
+                FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
+                                           _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
 
-                HighestHitchLabel.Text = $"Highest Hitch: {_emaHighestHitch:F0} ms";
-                HighestHitchLabel.TextColor = Colors.Red;
+                FpsLabel.Text = $"FPS: {_emaFps:F1}";
+                FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
+                                     _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
+
+                if (_emaHitch >= HitchThresholdMs)
+                {
+                    HitchLabel.Text = $"Last Hitch: {_emaHitch:F0} ms";
+                    HitchLabel.TextColor = Colors.Red;
+
+                    HighestHitchLabel.Text = $"Highest Hitch: {_emaHighestHitch:F0} ms";
+                    HighestHitchLabel.TextColor = Colors.Red;
+                }
             }
 
-            AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
-            AllocLabel.TextColor = _allocPerSec < 5 ? Colors.LimeGreen :
-                                   _allocPerSec < 10 ? Colors.Goldenrod : Colors.Red;
-
-            GcLabel.Text = $"GC: Gen0 {_gc0Delta}, Gen1 {_gc1Delta}, Gen2 {_gc2Delta}";
-            GcLabel.TextColor = (_gc0Delta + _gc1Delta + _gc2Delta) == 0
-                ? Colors.LimeGreen : Colors.Goldenrod;
-
-            MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
-            MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
-                                    _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
-
-            ThreadsLabel.Text = $"Threads: {_threadCount}";
-            ThreadsLabel.TextColor = _threadCount < 50 ? Colors.LimeGreen :
-                                     _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
-
-            CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
-            CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
-                                 _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
-
-            ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
-            ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
-                                   _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
-
-
-            if (_batteryMilliWAvailable)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC)
             {
-                BatteryLabel.Text = $"Battery consumption: {_batteryMilliW:F1} mW";
-                BatteryLabel.TextColor = _batteryMilliW < 100 ? Colors.LimeGreen :
-                                         _batteryMilliW < 500 ? Colors.Goldenrod : Colors.Red;
-            }
-            else
-            {
-                BatteryLabel.Text = "Battery consumption: N/A";
-                BatteryLabel.TextColor = Colors.Gray;
+                AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
+                AllocLabel.TextColor = _allocPerSec < 5 ? Colors.LimeGreen :
+                                       _allocPerSec < 10 ? Colors.Goldenrod : Colors.Red;
+
+                GcLabel.Text = $"GC: Gen0 {_gc0Delta}, Gen1 {_gc1Delta}, Gen2 {_gc2Delta}";
+                GcLabel.TextColor = (_gc0Delta + _gc1Delta + _gc2Delta) == 0
+                    ? Colors.LimeGreen : Colors.Goldenrod;
             }
 
-            if (_options.ShowNetworkStats)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory)
+            {
+                MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
+                MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
+                                        _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
+            }
+
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage)
+            {
+                ThreadsLabel.Text = $"Threads: {_threadCount}";
+                ThreadsLabel.TextColor = _threadCount < 50 ? Colors.LimeGreen :
+                                         _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
+
+                CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
+                CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
+                                     _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
+            }
+
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage)
+            {
+                if (_batteryMilliWAvailable)
+                {
+                    BatteryLabel.Text = $"Battery consumption: {_batteryMilliW:F1} mW";
+                    BatteryLabel.TextColor = _batteryMilliW < 100 ? Colors.LimeGreen :
+                                             _batteryMilliW < 500 ? Colors.Goldenrod : Colors.Red;
+                }
+                else
+                {
+                    BatteryLabel.Text = "Battery consumption: N/A";
+                    BatteryLabel.TextColor = Colors.Gray;
+                }
+            }
+
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats)
             {
                 NetworkLabel.Text =
                 $"Requests: {totalRequests}\n" +
@@ -261,6 +277,9 @@ namespace MauiPerfDebugOverlay.Controls
                 $"Avg Time: {avgRequestTime:F1} ms";
             }
 
+            ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
+            ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
+                                   _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
         }
 
 
@@ -271,20 +290,24 @@ namespace MauiPerfDebugOverlay.Controls
 
             Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
-                UpdateGcAndAllocMetrics();
+                if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC)
+                    UpdateGcAndAllocMetrics();
 
                 UpdateExtraMetrics();
 
-                _memoryUsage = _currentProcess.WorkingSet64 / (1024 * 1024);
-                _threadCount = _currentProcess.Threads.Count;
+                if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage)
+                {
+                    _memoryUsage = _currentProcess.WorkingSet64 / (1024 * 1024);
+                    _threadCount = _currentProcess.Threads.Count;
 
-                var currentCpuTime = _currentProcess.TotalProcessorTime;
-                double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
+                    var currentCpuTime = _currentProcess.TotalProcessorTime;
+                    double cpuDelta = (currentCpuTime - _prevCpuTime).TotalMilliseconds;
 
-                double interval = _stopwatch.Elapsed.TotalMilliseconds; // ⬅️ real interval
-                _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
+                    double interval = _stopwatch.Elapsed.TotalMilliseconds; // ⬅️ real interval
+                    _cpuUsage = (cpuDelta / interval) * 100 / _processorCount;
 
-                _prevCpuTime = currentCpuTime;
+                    _prevCpuTime = currentCpuTime;
+                }
                 _stopwatch.Restart();
 
                 _overallScore = CalculateOverallScore();

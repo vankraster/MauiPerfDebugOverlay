@@ -1,6 +1,4 @@
 ﻿using MauiPerfDebugOverlay.Controls;
-using MauiPerfDebugOverlay.Models;
-using MauiPerfDebugOverlay.Utils;
 using Microsoft.Maui.Layouts;
 
 namespace MauiPerfDebugOverlay.Services
@@ -9,8 +7,6 @@ namespace MauiPerfDebugOverlay.Services
     {
         private static PerformanceOverlayManager? _instance;
         private PerformanceOverlayView? _overlay;
-
-        private PerformanceOverlayOptions _options;
 
         public static PerformanceOverlayManager Instance =>
             _instance ??= new PerformanceOverlayManager();
@@ -21,9 +17,8 @@ namespace MauiPerfDebugOverlay.Services
         /// Activează overlay-ul global.
         /// Trebuie apelat o singură dată în MauiProgram.cs
         /// </summary>
-        public void Enable(PerformanceOverlayOptions options)
+        public void Enable()
         {
-            _options = options;
             Application.Current.PageAppearing += OnPageAppearing;
         }
 
@@ -58,8 +53,8 @@ namespace MauiPerfDebugOverlay.Services
                 AbsoluteLayout.SetLayoutFlags(overlay, AbsoluteLayoutFlags.None);
                 AbsoluteLayout.SetLayoutBounds(overlay, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
                 abs.Children.Add(overlay);
-                overlay.Start(_options);
+                overlay.Start();
             }
-        } 
+        }
     }
 }

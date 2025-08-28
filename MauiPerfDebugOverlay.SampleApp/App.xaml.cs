@@ -9,11 +9,7 @@ namespace MauiPerfDebugOverlay.SampleApp
             InitializeComponent();
 
             // Activează PerformanceOverlay global
-            PerformanceOverlayManager.Instance.Enable(new Models.PerformanceOverlayOptions
-            {
-                ShowBatteryUsage = true,
-                ShowNetworkStats = true
-            });
+            PerformanceOverlayManager.Instance.Enable( );
 
             MainPage = new AppShell();
         }
