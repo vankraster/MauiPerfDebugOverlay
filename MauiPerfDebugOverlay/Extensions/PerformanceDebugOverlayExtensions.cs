@@ -1,6 +1,5 @@
 ﻿using MauiPerfDebugOverlay.Models;
 using MauiPerfDebugOverlay.Services;
-using static MauiPerfDebugOverlay.Services.NetworkProfiler;
 
 namespace MauiPerfDebugOverlay.Extensions
 {
@@ -13,18 +12,9 @@ namespace MauiPerfDebugOverlay.Extensions
             PerformanceOverlayOptions = options;
 
             if (options.ShowNetworkStats)
-            { 
-                //builder.Services.AddSingleton(sp =>
-                //{
-                //    var handler = NetworkProfiler.Instance.CreateHandler(new HttpClientHandler());
-                //    return new HttpClient(handler);
-                //});
-
+            {   
                 builder.Services.AddSingleton<ProfilingHttpClient>();
-                builder.Services.AddSingleton<HttpClient>(sp => sp.GetRequiredService<ProfilingHttpClient>());
-
-
-                //HttpClientInterceptor.Initialize();
+                builder.Services.AddSingleton<HttpClient>(sp => sp.GetRequiredService<ProfilingHttpClient>()); 
             }
 
             return builder;
