@@ -1,4 +1,4 @@
-## MauiPerfDebugOverlay (v1.0.3)
+## PerformanceDebugOverlay (v1.0.3)
 
 A comprehensive performance overlay for .NET MAUI that monitors FPS, CPU, memory, GC, battery, and networking in real time, without requiring major changes to your application code.
 
@@ -34,7 +34,7 @@ Plug-and-play integration – works globally without modifying existing HTTP cod
 
 Add the NuGet package to your project:
 
-dotnet add package MauiPerfDebugOverlay --version 1.0.3
+dotnet add package PerformanceDebugOverlay --version 1.0.3
 
 ---
 
