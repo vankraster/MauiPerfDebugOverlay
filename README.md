@@ -1,4 +1,8 @@
 ## PerformanceDebugOverlay (v1.0.3)
+ 
+[![NuGet Version](https://img.shields.io/nuget/v/PerformanceDebugOverlay.svg)](https://www.nuget.org/packages/PerformanceDebugOverlay/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/PerformanceDebugOverlay.svg)](https://www.nuget.org/packages/PerformanceDebugOverlay/)
+
 
 A comprehensive performance overlay for .NET MAUI that monitors FPS, CPU, memory, GC, battery, and networking in real time, without requiring major changes to your application code.
 
