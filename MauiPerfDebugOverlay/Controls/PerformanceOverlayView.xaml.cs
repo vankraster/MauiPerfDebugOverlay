@@ -1,6 +1,8 @@
 ﻿
 using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
+using MauiPerfDebugOverlay.InternalControls;
+using MauiPerfDebugOverlay.Models.Internal;
 using MauiPerfDebugOverlay.Platforms;
 using MauiPerfDebugOverlay.Services;
 using System.Diagnostics;
@@ -70,6 +72,9 @@ namespace MauiPerfDebugOverlay.Controls
         private double _batteryMilliW = 0;
         private bool _batteryMilliWAvailable = true;
 
+
+        private DumpCurrentPageService _dumpService = new DumpCurrentPageService();
+
         public PerformanceOverlayView()
         {
             InitializeComponent();
@@ -131,6 +136,7 @@ namespace MauiPerfDebugOverlay.Controls
 
         public void Start()
         {
+            _stopRequested = false;
             _fpsService?.Start();
             StartMetrics();
         }
@@ -217,50 +223,50 @@ namespace MauiPerfDebugOverlay.Controls
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame)
             {
                 FrameTimeLabel.Text = $"FrameTime: {_emaFrameTime:F1} ms";
-                FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Colors.LimeGreen :
-                                           _emaFrameTime <= 33 ? Colors.Goldenrod : Colors.Red;
+                FrameTimeLabel.TextColor = _emaFrameTime <= 16 ? Color.FromHex("7CBF8E") :
+                                           _emaFrameTime <= 33 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
 
                 FpsLabel.Text = $"FPS: {_emaFps:F1}";
-                FpsLabel.TextColor = _emaFps >= 50 ? Colors.LimeGreen :
-                                     _emaFps >= 30 ? Colors.Goldenrod : Colors.Red;
+                FpsLabel.TextColor = _emaFps >= 50 ? Color.FromHex("7CBF8E") :
+                                     _emaFps >= 30 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
 
                 if (_emaHitch >= HitchThresholdMs)
                 {
                     HitchLabel.Text = $"Last Hitch: {_emaHitch:F0} ms";
-                    HitchLabel.TextColor = Colors.Red;
+                    HitchLabel.TextColor = Color.FromHex("D98880");
 
                     HighestHitchLabel.Text = $"Highest Hitch: {_emaHighestHitch:F0} ms";
-                    HighestHitchLabel.TextColor = Colors.Red;
+                    HighestHitchLabel.TextColor = Color.FromHex("D98880");
                 }
             }
 
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC)
             {
                 AllocLabel.Text = $"Alloc/sec: {_allocPerSec:F2} MB";
-                AllocLabel.TextColor = _allocPerSec < 5 ? Colors.LimeGreen :
-                                       _allocPerSec < 10 ? Colors.Goldenrod : Colors.Red;
+                AllocLabel.TextColor = _allocPerSec < 5 ? Color.FromHex("7CBF8E") :
+                                       _allocPerSec < 10 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
 
                 GcLabel.Text = $"GC: Gen0 {_gc0Delta}, Gen1 {_gc1Delta}, Gen2 {_gc2Delta}";
                 GcLabel.TextColor = (_gc0Delta + _gc1Delta + _gc2Delta) == 0
-                    ? Colors.LimeGreen : Colors.Goldenrod;
+                    ? Color.FromHex("7CBF8E") : Color.FromHex("FFECB3");
             }
 
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory)
             {
                 MemoryLabel.Text = $"Memory: {_memoryUsage} MB";
-                MemoryLabel.TextColor = _memoryUsage < 260 ? Colors.LimeGreen :
-                                        _memoryUsage < 400 ? Colors.Goldenrod : Colors.Red;
+                MemoryLabel.TextColor = _memoryUsage < 260 ? Color.FromHex("7CBF8E") :
+                                        _memoryUsage < 400 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
             }
 
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage)
             {
                 ThreadsLabel.Text = $"Threads: {_threadCount}";
-                ThreadsLabel.TextColor = _threadCount < 50 ? Colors.LimeGreen :
-                                         _threadCount < 100 ? Colors.Goldenrod : Colors.Red;
+                ThreadsLabel.TextColor = _threadCount < 50 ? Color.FromHex("7CBF8E") :
+                                         _threadCount < 100 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
 
                 CpuLabel.Text = $"CPU: {_cpuUsage:F1}%";
-                CpuLabel.TextColor = _cpuUsage < 30 ? Colors.LimeGreen :
-                                     _cpuUsage < 60 ? Colors.Goldenrod : Colors.Red;
+                CpuLabel.TextColor = _cpuUsage < 30 ? Color.FromHex("7CBF8E") :
+                                     _cpuUsage < 60 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
             }
 
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage)
@@ -268,8 +274,8 @@ namespace MauiPerfDebugOverlay.Controls
                 if (_batteryMilliWAvailable)
                 {
                     BatteryLabel.Text = $"Battery consumption: {_batteryMilliW:F1} mW";
-                    BatteryLabel.TextColor = _batteryMilliW < 100 ? Colors.LimeGreen :
-                                             _batteryMilliW < 500 ? Colors.Goldenrod : Colors.Red;
+                    BatteryLabel.TextColor = _batteryMilliW < 100 ? Color.FromHex("7CBF8E") :
+                                             _batteryMilliW < 500 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
                 }
                 else
                 {
@@ -291,8 +297,8 @@ namespace MauiPerfDebugOverlay.Controls
             }
 
             ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
-            ScoreLabel.TextColor = _emaOverallScore >= 8 ? Colors.LimeGreen :
-                                   _emaOverallScore >= 5 ? Colors.Goldenrod : Colors.Red;
+            ScoreLabel.TextColor = _emaOverallScore >= 8 ? Color.FromHex("7CBF8E") :
+                                   _emaOverallScore >= 5 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
         }
 
 
@@ -456,8 +462,6 @@ namespace MauiPerfDebugOverlay.Controls
         }
         #endregion
 
-
-
         #region Toggle Min/Max
         private bool _isCompact = false;
         private void OnToggleCompactTapped(object sender, EventArgs e)
@@ -489,7 +493,25 @@ namespace MauiPerfDebugOverlay.Controls
                 //ToggleButton.Text = "▼"; // simbol compact
             }
         }
+
+
+        #endregion
+
+
+        #region Component Loading
+
+        private void SwButton_Clicked(object sender, EventArgs e)
+        {
+            TheTreeView.IsVisible = !TheTreeView.IsVisible;
+            MetricsStack.IsVisible = !MetricsStack.IsVisible;
+
+            TreeNode node = _dumpService.DumpCurrentPage();
+
+            TheTreeView.RootNode = node;
+        }
+
+        #endregion
+
     }
-    #endregion
 }
 

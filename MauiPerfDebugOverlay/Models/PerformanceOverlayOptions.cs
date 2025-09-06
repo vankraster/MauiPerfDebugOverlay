@@ -31,5 +31,10 @@
         /// Show Frames per second (FPS) and Frame time (ms)    
         /// </summary>
         public bool ShowFrame { get; set; } = true;
+
+        /// <summary>
+        /// Show load time per ms per component (VisualElement).
+        /// </summary>
+        public bool ShowLoadTime { get; set; } = true;
     }
 }

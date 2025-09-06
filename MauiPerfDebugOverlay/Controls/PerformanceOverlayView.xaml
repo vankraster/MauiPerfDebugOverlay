@@ -2,9 +2,10 @@
 <ContentView x:Class="MauiPerfDebugOverlay.Controls.PerformanceOverlayView"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MauiPerfDebugOverlay.InternalControls"
              x:Name="Root"
              IsVisible="True"
-             Opacity="1" >
+             Opacity="1">
 
     <Frame x:Name="OverlayFrame"
            BackgroundColor="#CC000000"
@@ -17,109 +18,117 @@
             <TapGestureRecognizer Tapped="OnToggleCompactTapped" />
         </Frame.GestureRecognizers>
 
+        <VerticalStackLayout>
 
-        <VerticalStackLayout x:Name="MetricsStack"
-                             Spacing="2"
-                             Margin="0,0,0,0">
+            <Button Text="Switch View"
+                    Clicked="SwButton_Clicked" />
+            <VerticalStackLayout x:Name="MetricsStack"
+                                 Spacing="2"
+                                 Margin="0,0,0,0">
 
-            <Label x:Name="ScoreLabel"
-                   FontAttributes="Bold"
-                   FontSize="16"
-                   TextColor="Gray"
-                   Text="Overall: --/10" />
+                <Label x:Name="ScoreLabel"
+                       FontAttributes="Bold"
+                       FontSize="14"
+                       TextColor="Gray"
+                       Text="Overall: --/10" />
 
-            <BoxView HeightRequest="1"
-                     x:Name="BoxViewFps"
-                     Color="Gray"
-                     Margin="0,4" />
+                <BoxView HeightRequest="1"
+                         x:Name="BoxViewFps"
+                         Color="Gray"
+                         Margin="0,4" />
 
-            <Label x:Name="FpsLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="FPS: --" />
+                <Label x:Name="FpsLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="FPS: --" />
 
-            <Label x:Name="FrameTimeLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="FrameTime: -- ms" />
+                <Label x:Name="FrameTimeLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="FrameTime: -- ms" />
 
-            <Label x:Name="HitchLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Last Hitch: none" />
+                <Label x:Name="HitchLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Last Hitch: none" />
 
-            <Label x:Name="HighestHitchLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Highest Hitch: none" />
+                <Label x:Name="HighestHitchLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Highest Hitch: none" />
 
-            <BoxView HeightRequest="1"
-                     x:Name="BoxViewCpu"
-                     Color="Gray"
-                     Margin="0,4" />
+                <BoxView HeightRequest="1"
+                         x:Name="BoxViewCpu"
+                         Color="Gray"
+                         Margin="0,4" />
 
-            <Label x:Name="CpuLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="CPU: --%" />
+                <Label x:Name="CpuLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="CPU: --%" />
 
-            <Label x:Name="ThreadsLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Threads: --" />
+                <Label x:Name="ThreadsLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Threads: --" />
 
-            <BoxView HeightRequest="1"
-                     x:Name="BoxViewMemory_GC"
-                     Color="Gray"
-                     Margin="0,4" />
+                <BoxView HeightRequest="1"
+                         x:Name="BoxViewMemory_GC"
+                         Color="Gray"
+                         Margin="0,4" />
 
-            <Label x:Name="MemoryLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Memory: -- MB" />
+                <Label x:Name="MemoryLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Memory: -- MB" />
 
-            <Label x:Name="GcLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="GC: --" />
+                <Label x:Name="GcLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="GC: --" />
 
-            <Label x:Name="AllocLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Alloc/sec: -- MB" />
+                <Label x:Name="AllocLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Alloc/sec: -- MB" />
 
-            <BoxView HeightRequest="1"
-                     x:Name="BoxViewBattery"
-                     Color="Gray"
-                     Margin="0,4" />
+                <BoxView HeightRequest="1"
+                         x:Name="BoxViewBattery"
+                         Color="Gray"
+                         Margin="0,4" />
 
-            <Label x:Name="BatteryLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Hitch: none" />
+                <Label x:Name="BatteryLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Hitch: none" />
 
-            <BoxView HeightRequest="1"
-                     x:Name="BoxViewNetwork"
-                     Color="Gray"
-                     Margin="0,4" />
-            
-            <Label x:Name="NetworkLabel"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   TextColor="Gray"
-                   Text="Network:" />
+                <BoxView HeightRequest="1"
+                         x:Name="BoxViewNetwork"
+                         Color="Gray"
+                         Margin="0,4" />
+
+                <Label x:Name="NetworkLabel"
+                       FontAttributes="Bold"
+                       FontSize="12"
+                       TextColor="Gray"
+                       Text="Network:" />
+
+            </VerticalStackLayout>
+
+            <controls:TreeViewControl BackgroundColor="Transparent"
+                                      IsVisible="False"
+                                      x:Name="TheTreeView" />
 
         </VerticalStackLayout>
-
     </Frame>
 </ContentView>
