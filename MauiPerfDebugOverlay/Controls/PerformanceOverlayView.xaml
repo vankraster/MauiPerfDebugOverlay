@@ -127,6 +127,8 @@
 
             <controls:TreeViewControl BackgroundColor="Transparent"
                                       IsVisible="False"
+                                      HeightRequest="300"
+                                      WidthRequest="300"
                                       x:Name="TheTreeView" />
 
         </VerticalStackLayout>

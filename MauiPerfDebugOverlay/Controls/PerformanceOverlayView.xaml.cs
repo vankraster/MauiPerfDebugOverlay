@@ -389,6 +389,8 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
+            if (!MetricsStack.IsVisible)
+                return;
             if (sender is not Frame frame) return;
             if (frame.Parent is not PerformanceOverlayView overlay) return;
             if (overlay.Parent is not AbsoluteLayout parent) return;
