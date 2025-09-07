@@ -1,14 +1,17 @@
 ﻿using MauiPerfDebugOverlay.Models.Internal;
+using Microsoft.Maui.Graphics;
+using System.Collections.Generic;
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
     public class TreeDrawable : IDrawable
     {
         private readonly TreeNode _root;
-        private const float NodeWidth = 100;
-        private const float NodeHeight = 40;
-        private const float VerticalSpacing = 70;
-        private const float HorizontalSpacing = 30;
+        private const float LineHeight = 20;
+        private const float StartX = 10;
+
+        // pentru hit testing
+        private readonly Dictionary<TreeNode, RectF> _nodeRects = new();
 
         public TreeDrawable(TreeNode root)
         {
@@ -18,46 +21,52 @@ namespace MauiPerfDebugOverlay.InternalControls
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
             canvas.FontSize = 14;
-            DrawNode(canvas, _root, dirtyRect.Width / 2, 20);
+            canvas.FontColor = Colors.White;
+            canvas.Font = Microsoft.Maui.Graphics.Font.Default;
+
+            _nodeRects.Clear();
+            float y = 20;
+            DrawAsciiTree(canvas, _root, "", true, ref y);
         }
 
-        private void DrawNode(ICanvas canvas, TreeNode node, float x, float y)
+        private void DrawAsciiTree(ICanvas canvas, TreeNode node, string indent, bool last, ref float y)
         {
-            // Desenăm nodul (un dreptunghi cu text)
-            var rect = new RectF(x - NodeWidth / 2, y, NodeWidth, NodeHeight);
-            canvas.FillColor = Colors.LightGreen;
-            canvas.FillRectangle(rect);
+            // prefix pentru nodul curent
+            string prefix = indent + (last ? "└── " : "├── ");
+            string text = prefix + node.Name;
 
-            canvas.StrokeColor = Colors.DarkGreen;
-            canvas.DrawRectangle(rect);
+            // desenăm textul
+            var rect = new RectF(StartX, y - LineHeight / 2, 500, LineHeight);
+            _nodeRects[node] = rect;
+            canvas.DrawString(text, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
 
-            canvas.FontColor = Colors.Black;
-            canvas.DrawString(
-                node.Name,
-                rect,
-                HorizontalAlignment.Center,
-                VerticalAlignment.Center
-            );
+            y += LineHeight;
 
-            // Desenăm copiii
-            if (node.Children.Any())
+            // dacă nodul e collapsed, nu desenăm copiii
+            if (!node.IsExpanded || node.Children.Count == 0)
+                return;
+
+            // calculăm indentul pentru copii
+            string childIndent = indent + (last ? "    " : "│   ");
+
+            for (int i = 0; i < node.Children.Count; i++)
             {
-                float childX = x - (node.Children.Count - 1) * (NodeWidth + HorizontalSpacing) / 2;
-                float childY = y + NodeHeight + VerticalSpacing;
-
-                foreach (var child in node.Children)
-                {
-                    // Linie către copil
-                    canvas.StrokeColor = Colors.Gray;
-                    canvas.DrawLine(x, y + NodeHeight, childX, childY);
-
-                    // Recursiv copilul
-                    DrawNode(canvas, child, childX, childY);
-
-                    childX += NodeWidth + HorizontalSpacing;
-                }
+                bool isLast = (i == node.Children.Count - 1);
+                DrawAsciiTree(canvas, node.Children[i], childIndent, isLast, ref y);
             }
         }
-    }
 
+        /// <summary>
+        /// Verifică dacă un punct X,Y e peste un nod
+        /// </summary>
+        public TreeNode HitTest(float x, float y)
+        {
+            foreach (var kvp in _nodeRects)
+            {
+                if (kvp.Value.Contains(x, y))
+                    return kvp.Key;
+            }
+            return null;
+        }
+    }
 }

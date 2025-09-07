@@ -466,31 +466,38 @@ namespace MauiPerfDebugOverlay.Controls
         private bool _isCompact = false;
         private void OnToggleCompactTapped(object sender, EventArgs e)
         {
-            _isCompact = !_isCompact;
+            if (MetricsStack.IsVisible)
+            { 
+                _isCompact = !_isCompact;
 
-            if (_isCompact)
-            {
-                // ascundem totul în afară de scor + FPS
-                foreach (var child in MetricsStack.Children)
+                if (_isCompact)
                 {
-                    if (child is Label lbl &&
-                        lbl != ScoreLabel &&
-                        lbl != FpsLabel)
+                    // ascundem totul în afară de scor + FPS
+                    foreach (var child in MetricsStack.Children)
                     {
-                        lbl.IsVisible = false;
+                        if (child is Label lbl &&
+                            lbl != ScoreLabel &&
+                            lbl != FpsLabel)
+                        {
+                            lbl.IsVisible = false;
+                        }
+                        else if (child is BoxView box)
+                            box.IsVisible = false;
                     }
-                    else if (child is BoxView box)
-                        box.IsVisible = false;
-                }
 
-                //ToggleButton.Text = "▲"; // simbol expand
+                    //ToggleButton.Text = "▲"; // simbol expand
+                }
+                else
+                {
+                    // afișăm tot
+                    showUiItems();
+
+                    //ToggleButton.Text = "▼"; // simbol compact
+                }
             }
             else
             {
-                // afișăm tot
-                showUiItems();
-
-                //ToggleButton.Text = "▼"; // simbol compact
+                
             }
         }
 
@@ -510,8 +517,7 @@ namespace MauiPerfDebugOverlay.Controls
             TheTreeView.RootNode = node;
         }
 
-        #endregion
-
+        #endregion 
     }
 }
 

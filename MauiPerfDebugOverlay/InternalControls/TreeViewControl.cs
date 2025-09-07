@@ -1,4 +1,5 @@
 ﻿using MauiPerfDebugOverlay.Models.Internal;
+using Microsoft.Maui.Controls;
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
@@ -27,6 +28,11 @@ namespace MauiPerfDebugOverlay.InternalControls
                 WidthRequest = 800
             };
 
+            _graphicsView.StartInteraction += (s, e) =>
+            {
+                Tapped(e.Touches[0].X, e.Touches[0].Y);
+            };
+
             Content = new ScrollView
             {
                 Content = _graphicsView
@@ -39,6 +45,20 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 control._graphicsView.Drawable = new TreeDrawable(root);
                 control._graphicsView.Invalidate(); // redesenează
+            }
+        }
+
+
+        public void Tapped(float x, float y)
+        {
+            if (_graphicsView.Drawable is TreeDrawable drawable)
+            {
+                var clickedNode = drawable.HitTest(x, y);
+                if (clickedNode != null)
+                {
+                    clickedNode.IsExpanded = !clickedNode.IsExpanded;
+                    _graphicsView.Invalidate();
+                }
             }
         }
     }
