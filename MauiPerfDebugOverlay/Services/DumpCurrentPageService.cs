@@ -74,37 +74,56 @@ namespace MauiPerfDebugOverlay.Services
 
         public TreeNode DumpCurrentPage()
         {
-            TreeNode root = new TreeNode { Name = "Root", Children = new List<TreeNode>() };
-
             var currentPage = GetCurrentActivePage();
-            if (currentPage != null)
-            {
-                root = new TreeNode { Name = currentPage.GetType().Name };
-                DumpElement(currentPage, root);
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("No active page found.");
-            }
+            if (currentPage == null)
+                return new TreeNode { Name = "NoActivePage" };
 
-            return root;
+            return DumpElement(currentPage);
         }
 
 
-        private void DumpElement(Microsoft.Maui.Controls.Element element, TreeNode root)
+        private TreeNode DumpElement(Element element)
         {
-            var currentTreeNode = new TreeNode
+            var node = new TreeNode
             {
                 Name = element.GetType().Name,
                 Children = new List<TreeNode>()
             };
-            root.Children.Add(currentTreeNode);
+
             if (element is Layout layout)
             {
-                foreach (var item in layout.Children)
-                    if (item is Element newElement)
-                        DumpElement(newElement, currentTreeNode);
+                foreach (var child in layout.Children)
+                    if (child is Element newElement)
+                        node.Children.Add(DumpElement(newElement));
             }
+            else if (element is ContentView contentView && contentView.Content is Element cvElement)
+            {
+                node.Children.Add(DumpElement(cvElement));
+            }
+            else if (element is ContentPage contentPage && contentPage.Content is Element cpElement)
+            {
+                node.Children.Add(DumpElement(cpElement));
+            }
+            else if (element is Shell shell)
+            {
+                foreach (var item in shell.Items)
+                    if (item is Element newElement)
+                        node.Children.Add(DumpElement(newElement));
+            }
+            else if (element is ScrollView scrollView && scrollView.Content is Element svElement)
+            {
+                node.Children.Add(DumpElement(svElement));
+            }
+            else if (element is Frame frame && frame.Content is Element fElement)
+            {
+                node.Children.Add(DumpElement(fElement));
+            }
+            else if (element is Border border && border.Content is Element bElement)
+            {
+                node.Children.Add(DumpElement(bElement));
+            }
+
+            return node;
         }
     }
 }
