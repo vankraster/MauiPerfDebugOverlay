@@ -20,6 +20,8 @@ namespace MauiPerfDebugOverlay.SampleApp
                     ShowFrame = true,
                     ShowMemory = true,
                     ShowLoadTime = true,
+                    LoadTimeDanger = 800,
+                    LoadTimeWarning = 1000
                 })
                 .ConfigureFonts(fonts =>
                 {
