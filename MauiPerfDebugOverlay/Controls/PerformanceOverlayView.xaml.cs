@@ -469,7 +469,7 @@ namespace MauiPerfDebugOverlay.Controls
         private void OnToggleCompactTapped(object sender, EventArgs e)
         {
             if (MetricsStack.IsVisible)
-            { 
+            {
                 _isCompact = !_isCompact;
 
                 if (_isCompact)
@@ -499,7 +499,7 @@ namespace MauiPerfDebugOverlay.Controls
             }
             else
             {
-                
+
             }
         }
 
@@ -514,9 +514,25 @@ namespace MauiPerfDebugOverlay.Controls
             TheTreeView.IsVisible = !TheTreeView.IsVisible;
             MetricsStack.IsVisible = !MetricsStack.IsVisible;
 
-            TreeNode node = _dumpService.DumpCurrentPage();
+            var boundsY = AbsoluteLayout.GetLayoutBounds(this);
+            boundsY.Y = 0;
+            boundsY.X = 0;
 
-            TheTreeView.RootNode = node;
+            if (TheTreeView.IsVisible)
+            {
+                TreeNode node = _dumpService.DumpCurrentPage();
+                TheTreeView.RootNode = node;
+
+                TheTreeView.WidthRequest = boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                TheTreeView.HeightRequest = boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+            }
+            else
+            {
+                boundsY.Width = -1;
+                boundsY.Height = -1;
+            }
+            AbsoluteLayout.SetLayoutBounds(this, boundsY);
+            //TheTreeView._graphicsView.Invalidate();
         }
 
         #endregion 

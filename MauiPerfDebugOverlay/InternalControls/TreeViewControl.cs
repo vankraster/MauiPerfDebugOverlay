@@ -1,11 +1,10 @@
 ﻿using MauiPerfDebugOverlay.Models.Internal;
-using Microsoft.Maui.Controls;
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
     public class TreeViewControl : ContentView
     {
-        private readonly GraphicsView _graphicsView;
+        internal readonly GraphicsView _graphicsView;
 
         public static readonly BindableProperty RootNodeProperty =
             BindableProperty.Create(
@@ -24,8 +23,9 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             _graphicsView = new GraphicsView
             {
-                HeightRequest = 1600,
-                WidthRequest = 800
+                HeightRequest = 160,
+                WidthRequest = 800,
+                VerticalOptions = LayoutOptions.Start
             };
 
             _graphicsView.StartInteraction += (s, e) =>
@@ -43,7 +43,10 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             if (bindable is TreeViewControl control && newValue is TreeNode root)
             {
-                control._graphicsView.Drawable = new TreeDrawable(root);
+                var treeDrawable = new TreeDrawable(root);
+                control._graphicsView.Drawable = treeDrawable;
+                control._graphicsView.HeightRequest = (5 + control.CountVisibleRows(root)) * TreeDrawable.LineHeight;
+
                 control._graphicsView.Invalidate(); // redesenează
             }
         }
@@ -57,9 +60,27 @@ namespace MauiPerfDebugOverlay.InternalControls
                 if (clickedNode != null)
                 {
                     clickedNode.IsExpanded = !clickedNode.IsExpanded;
+
+                    _graphicsView.HeightRequest = (5 + CountVisibleRows(RootNode)) * TreeDrawable.LineHeight;
+
                     _graphicsView.Invalidate();
                 }
             }
+        }
+
+        public int CountVisibleRows(TreeNode node)
+        {
+            int count = 1; // nodul curent
+
+            if (node.IsExpanded)
+            {
+                foreach (var child in node.Children)
+                {
+                    count += CountVisibleRows(child);
+                }
+            }
+
+            return count;
         }
     }
 

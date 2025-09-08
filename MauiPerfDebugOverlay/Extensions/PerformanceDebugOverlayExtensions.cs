@@ -22,7 +22,7 @@ namespace MauiPerfDebugOverlay.Extensions
 
             if (options.ShowLoadTime)
             {
-                LoadTimeMetricsStore loadTimeMetricsStore = new LoadTimeMetricsStore();
+                LoadTimeMetricsStore loadTimeMetricsStore = LoadTimeMetricsStore.Instance;
                 PageHandler.Mapper.AppendToMapping("ClearLoadTimeMetrics", (handler, view) =>
                 {
                     // Clear metrics as soon as the page is created

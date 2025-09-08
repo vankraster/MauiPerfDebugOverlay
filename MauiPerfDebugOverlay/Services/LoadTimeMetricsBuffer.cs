@@ -6,6 +6,9 @@
     /// </summary>
     internal class LoadTimeMetricsStore
     {
+        private static readonly Lazy<LoadTimeMetricsStore> _instance = new(() => new LoadTimeMetricsStore());
+        public static LoadTimeMetricsStore Instance => _instance.Value;
+
         private readonly Dictionary<Guid, double> _metrics = new();
         private readonly object _lock = new();
 
@@ -37,6 +40,13 @@
             CollectionChanged?.Invoke("Clear", null, null);
         }
 
+        public double? GetValue(Guid id)
+        {
+            lock (_lock)
+            {
+                return _metrics.TryGetValue(id, out var value) ? value : (double?)null;
+            }
+        }
         public IReadOnlyDictionary<Guid, double> GetAll()
         {
             lock (_lock)

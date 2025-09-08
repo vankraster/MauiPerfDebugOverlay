@@ -1,4 +1,6 @@
-﻿using MauiPerfDebugOverlay.Models.Internal;
+﻿using MauiPerfDebugOverlay.Extensions;
+using MauiPerfDebugOverlay.Models.Internal;
+using MauiPerfDebugOverlay.Services;
 using Microsoft.Maui.Graphics;
 using System.Collections.Generic;
 
@@ -7,7 +9,7 @@ namespace MauiPerfDebugOverlay.InternalControls
     public class TreeDrawable : IDrawable
     {
         private readonly TreeNode _root;
-        private const float LineHeight = 20;
+        internal const float LineHeight = 20;
         private const float StartX = 10;
 
         // pentru hit testing
@@ -31,9 +33,30 @@ namespace MauiPerfDebugOverlay.InternalControls
 
         private void DrawAsciiTree(ICanvas canvas, TreeNode node, string indent, bool last, ref float y)
         {
+            string slowNodeIndicator = " -> ";
+            var loadTimeInMs = LoadTimeMetricsStore.Instance.GetValue(node.Id);
+            if (loadTimeInMs.HasValue)
+            {
+
+                if (loadTimeInMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
+                    slowNodeIndicator = "⛔ ";
+                else if (loadTimeInMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
+                    slowNodeIndicator = "⚠ ";
+                 
+
+                slowNodeIndicator += loadTimeInMs >= 1100
+                                         ? $"{loadTimeInMs / 1000:F2} s" // convert to seconds
+                                         : $"{loadTimeInMs:F0} ms";      // keep in milliseconds
+            }
+
+            string expandSymbol = "";
+            if (node.Children.Count > 0)
+                expandSymbol = node.IsExpanded ? " [-] " : " [+] ";
+
+
             // prefix pentru nodul curent
             string prefix = indent + (last ? "└── " : "├── ");
-            string text = prefix + node.Name;
+            string text = prefix + node.Name + expandSymbol + slowNodeIndicator;
 
             // desenăm textul
             var rect = new RectF(StartX, y - LineHeight / 2, 500, LineHeight);

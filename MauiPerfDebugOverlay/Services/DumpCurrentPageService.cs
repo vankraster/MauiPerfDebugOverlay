@@ -86,6 +86,7 @@ namespace MauiPerfDebugOverlay.Services
         {
             var node = new TreeNode
             {
+                Id = element.Id,
                 Name = element.GetType().Name,
                 Children = new List<TreeNode>()
             };

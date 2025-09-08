@@ -20,7 +20,8 @@
 
         <VerticalStackLayout>
 
-            <Button Text="Switch View"
+            <Button Text="Show Load Time"
+                    x:Name="BtnSwitch"
                     Clicked="SwButton_Clicked" />
             <VerticalStackLayout x:Name="MetricsStack"
                                  Spacing="2"

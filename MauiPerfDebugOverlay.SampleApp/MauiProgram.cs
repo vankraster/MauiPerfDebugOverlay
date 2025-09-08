@@ -18,7 +18,8 @@ namespace MauiPerfDebugOverlay.SampleApp
                     ShowAlloc_GC = true,
                     ShowCPU_Usage = true,
                     ShowFrame = true,
-                    ShowMemory = true
+                    ShowMemory = true,
+                    ShowLoadTime = true,
                 })
                 .ConfigureFonts(fonts =>
                 {
