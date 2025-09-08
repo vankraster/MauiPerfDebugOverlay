@@ -22,7 +22,7 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>1.0.5</Version>
+		<Version>1.0.6</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
@@ -33,10 +33,10 @@
 			Easily integrates into your app to monitor performance and responsiveness.
 		</Description>
 
-		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics</PackageTags>
+		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;Load time;</PackageTags>
 
 		<PackageReleaseNotes>
-			Added new metrics: Battery consumption (Android only) and Network stats (requests, bytes sent/received, average request time). Improved UI. Existing FPS, FrameTime, CPU, Memory, Threads, GC, Alloc/sec, Hitches, and Overall Score functionality remains.
+			Added Load time per page and components. Fixed some minor bugs.
 		</PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/vankraster/MauiPerfDebugOverlay</RepositoryUrl>

@@ -91,6 +91,9 @@ namespace MauiPerfDebugOverlay.Services
                 Children = new List<TreeNode>()
             };
 
+            if (element.GetType() == typeof(Controls.PerformanceOverlayView))
+                return node;
+
             if (element is Layout layout)
             {
                 foreach (var child in layout.Children)
