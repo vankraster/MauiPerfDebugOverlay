@@ -9,7 +9,7 @@ namespace MauiPerfDebugOverlay.InternalControls
     public class TreeDrawable : IDrawable
     {
         private readonly TreeNode _root;
-        internal const float LineHeight = 20;
+        internal const float LineHeight = 22;
         private const float StartX = 10;
 
         // pentru hit testing
@@ -33,20 +33,25 @@ namespace MauiPerfDebugOverlay.InternalControls
 
         private void DrawAsciiTree(ICanvas canvas, TreeNode node, string indent, bool last, ref float y)
         {
+            canvas.FontColor = Colors.White;
             string slowNodeIndicator = " -> ";
             var loadTimeInMs = LoadTimeMetricsStore.Instance.GetValue(node.Id);
             if (loadTimeInMs.HasValue)
             {
-
                 if (loadTimeInMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
+                {
                     slowNodeIndicator = "⛔ ";
+                    canvas.FontColor = Color.FromHex("D98880");
+                }
                 else if (loadTimeInMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
+                {
                     slowNodeIndicator = "⚠ ";
+                    canvas.FontColor = Color.FromHex("FFECB3");
+                }
                  
-
                 slowNodeIndicator += loadTimeInMs >= 1100
-                                         ? $"{loadTimeInMs / 1000:F2} s" // convert to seconds
-                                         : $"{loadTimeInMs:F0} ms";      // keep in milliseconds
+                     ? $"{loadTimeInMs / 1000:F2} s" // convert to seconds
+                     : $"{loadTimeInMs:F0} ms";      // keep in milliseconds
             }
 
             string expandSymbol = "";
@@ -59,7 +64,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             string text = prefix + node.Name + expandSymbol + slowNodeIndicator;
 
             // desenăm textul
-            var rect = new RectF(StartX, y - LineHeight / 2, 500, LineHeight);
+            var rect = new RectF(StartX, y - LineHeight / 2, 800, LineHeight);
             _nodeRects[node] = rect;
             canvas.DrawString(text, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
 

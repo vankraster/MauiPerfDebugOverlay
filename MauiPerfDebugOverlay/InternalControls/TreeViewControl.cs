@@ -25,7 +25,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 HeightRequest = 160,
                 WidthRequest = 800,
-                VerticalOptions = LayoutOptions.Start
+                VerticalOptions = LayoutOptions.Start, 
             };
 
             _graphicsView.StartInteraction += (s, e) =>
@@ -45,7 +45,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 var treeDrawable = new TreeDrawable(root);
                 control._graphicsView.Drawable = treeDrawable;
-                control._graphicsView.HeightRequest = (5 + control.CountVisibleRows(root)) * TreeDrawable.LineHeight;
+                control._graphicsView.HeightRequest = (1 + control.CountVisibleRows(root)) * TreeDrawable.LineHeight;
 
                 control._graphicsView.Invalidate(); // redesenează
             }
@@ -61,7 +61,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                 {
                     clickedNode.IsExpanded = !clickedNode.IsExpanded;
 
-                    _graphicsView.HeightRequest = (5 + CountVisibleRows(RootNode)) * TreeDrawable.LineHeight;
+                    _graphicsView.HeightRequest = (1 + CountVisibleRows(RootNode)) * TreeDrawable.LineHeight;
 
                     _graphicsView.Invalidate();
                 }

@@ -520,14 +520,20 @@ namespace MauiPerfDebugOverlay.Controls
 
             if (TheTreeView.IsVisible)
             {
+                BtnSwitch.Text = "Show Metrics";
+
                 TreeNode node = _dumpService.DumpCurrentPage();
                 TheTreeView.RootNode = node;
 
-                TheTreeView.WidthRequest = boundsY.Width = (this.Parent as AbsoluteLayout).Width;
-                TheTreeView.HeightRequest = boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+                boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+
+                TheTreeView.WidthRequest = boundsY.Width - 10;
+                TheTreeView.HeightRequest = boundsY.Height - 10 - BtnSwitch.Height;
             }
             else
             {
+                BtnSwitch.Text = "Show Load Time";
                 boundsY.Width = -1;
                 boundsY.Height = -1;
             }
