@@ -1,6 +1,8 @@
 \## PerformanceDebugOverlay (v1.0.6)
 ---
 
+[![NuGet Version](https://img.shields.io/nuget/v/PerformanceDebugOverlay.svg)](https://www.nuget.org/packages/PerformanceDebugOverlay/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/PerformanceDebugOverlay.svg)](https://www.nuget.org/packages/PerformanceDebugOverlay/)
 
 A real-time performance overlay for .NET MAUI that tracks FPS, CPU, memory, GC, battery, and network usage, while providing a load-time component tree—all without major changes to your app code.
 
@@ -84,8 +86,8 @@ public static class MauiProgram
          {
              ShowBatteryUsage = true,
              ShowNetworkStats = true,
-             ShowAlloc\_GC = true,
-             ShowCPU\_Usage = true,
+             ShowAlloc_GC = true,
+             ShowCPU_Usage = true,
              ShowFrame = true,
              ShowMemory = true,
              ShowLoadTime = true,
