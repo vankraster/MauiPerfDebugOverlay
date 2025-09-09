@@ -22,7 +22,7 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>1.0.6</Version>
+		<Version>2.0.0</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
@@ -36,7 +36,7 @@
 		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;Load time;</PackageTags>
 
 		<PackageReleaseNotes>
-			Added Load time per page and components. Fixed some minor bugs.
+			Added support for .Net 9
 		</PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/vankraster/MauiPerfDebugOverlay</RepositoryUrl>
