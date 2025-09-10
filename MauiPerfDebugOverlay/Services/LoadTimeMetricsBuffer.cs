@@ -1,4 +1,6 @@
-﻿namespace MauiPerfDebugOverlay.Services
+﻿using MauiPerfDebugOverlay.Models.Internal;
+
+namespace MauiPerfDebugOverlay.Services
 {
     /// <summary>
     /// Thread-safe storage for load times per element.
@@ -53,6 +55,17 @@
             {
                 return new Dictionary<Guid, double>(_metrics);
             }
+        }
+
+        internal double GetSumOfChildrenInMs(TreeNode treeNode)
+        {
+            double sum = 0;
+            lock (_lock)
+            {
+                foreach (var node in treeNode.Children)
+                    sum += (_metrics.TryGetValue(node.Id, out var value) ? value : 0d);
+            }
+            return sum;
         }
     }
 }

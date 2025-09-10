@@ -1,6 +1,7 @@
 ﻿using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Models.Internal;
 using MauiPerfDebugOverlay.Services;
+using MauiPerfDebugOverlay.Utils;
 using Microsoft.Maui.Graphics;
 using System.Collections.Generic;
 
@@ -34,39 +35,53 @@ namespace MauiPerfDebugOverlay.InternalControls
         private void DrawAsciiTree(ICanvas canvas, TreeNode node, string indent, bool last, ref float y)
         {
             canvas.FontColor = Colors.White;
-            string slowNodeIndicator = " -> ";
-            var loadTimeInMs = LoadTimeMetricsStore.Instance.GetValue(node.Id);
-            if (loadTimeInMs.HasValue)
+            string indicator = "";
+
+            var totalMs = LoadTimeMetricsStore.Instance.GetValue(node.Id);
+            var childrenMs = LoadTimeMetricsStore.Instance.GetSumOfChildrenInMs(node);
+            var selfMs = (totalMs.HasValue && childrenMs > 0)
+                ? totalMs - childrenMs
+                : totalMs;
+
+            if (selfMs.HasValue)
             {
-                if (loadTimeInMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
+                // schimbăm culoarea și indicatorul în funcție de praguri
+                if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
                 {
-                    slowNodeIndicator = "⛔ ";
-                    canvas.FontColor = Color.FromHex("D98880");
+                    indicator = "⛔";
+                    canvas.FontColor = Colors.IndianRed;
                 }
-                else if (loadTimeInMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
+                else if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
                 {
-                    slowNodeIndicator = "⚠ ";
-                    canvas.FontColor = Color.FromHex("FFECB3");
+                    indicator = "⚠";
+                    canvas.FontColor = Colors.Gold;
                 }
-                 
-                slowNodeIndicator += loadTimeInMs >= 1100
-                     ? $"{loadTimeInMs / 1000:F3} s" // convert to seconds
-                     : $"{loadTimeInMs:F4} ms";      // keep in milliseconds
-            } 
-             
-            string expandSymbol = "";
-            if (node.Children.Count > 0)
-                expandSymbol = node.IsExpanded ? " [-] " : " [+] ";
+                else
+                {
+                    indicator = "✔";
+                    //canvas.FontColor = Colors.LightGreen;
+                }
+            }
 
+            string expandSymbol = node.Children.Count > 0
+                ? (node.IsExpanded ? " [-] " : " [+] ")
+                : " ";
 
-            // prefix pentru nodul curent
-            string prefix = indent + (last ? "└── " : "├── ");
-            string text = prefix + node.Name + expandSymbol + slowNodeIndicator;
+            // compunem linia: nume + timp propriu + total
+            string line = $"{indent}{(last ? "└── " : "├── ")}{node.Name}{expandSymbol}{indicator}";
+
+            if (selfMs.HasValue)
+            {
+                line += $" {selfMs.FormatTime()}";
+
+                if (childrenMs > 0)
+                    line += $" (Total {totalMs.FormatTime()})";
+            }
 
             // desenăm textul
             var rect = new RectF(StartX, y - LineHeight / 2, 800, LineHeight);
             _nodeRects[node] = rect;
-            canvas.DrawString(text, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
+            canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
 
             y += LineHeight;
 
@@ -74,7 +89,6 @@ namespace MauiPerfDebugOverlay.InternalControls
             if (!node.IsExpanded || node.Children.Count == 0)
                 return;
 
-            // calculăm indentul pentru copii
             string childIndent = indent + (last ? "    " : "│   ");
 
             for (int i = 0; i < node.Children.Count; i++)
