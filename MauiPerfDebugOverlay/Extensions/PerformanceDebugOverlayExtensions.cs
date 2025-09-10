@@ -23,26 +23,34 @@ namespace MauiPerfDebugOverlay.Extensions
             if (options.ShowLoadTime)
             {
                 LoadTimeMetricsStore loadTimeMetricsStore = LoadTimeMetricsStore.Instance;
-                PageHandler.Mapper.AppendToMapping("ClearLoadTimeMetrics", (handler, view) =>
-                {
-                    // Clear metrics as soon as the page is created
-                    loadTimeMetricsStore.Clear();
-                });
+                //PageHandler.Mapper.AppendToMapping("ClearLoadTimeMetrics", (handler, view) =>
+                //{
+                //    // Clear metrics as soon as the page is created
+                //    loadTimeMetricsStore.Clear();
+                //});
 
                 // Add metrics for load VisualElement (including layouts, controls)
                 ViewHandler.ViewMapper.AppendToMapping("MeasureComponentLoad", (handler, view) =>
                 {
+                    // Reset metrics when a page disappears
+                    PageHandler.Mapper.AppendToMapping("ResetLoadTimeMetricsOnDisappear", (handler, view) =>
+                    {
+                        if (view is Page page)
+                        {
+                            page.Disappearing += (_, __) =>
+                            {
+                                loadTimeMetricsStore.Clear();
+                            };
+                        }
+                    });
+
                     if (view is VisualElement ve)
                     {
                         #region track loading
                         var swHandlerChanged = Stopwatch.StartNew();
-
-                        //Here the difference is subtle but important.
-                        //we want to know when the element is actually loaded and ready, not just when its handler is set ?!
-                        //HandlerChanged can be too early in some cases
-                        //Loaded can be too late in some cases (like if the element is never shown) 
+                          
                         ve.HandlerChanged += (_, __) =>
-                        {  
+                        {
                             if (swHandlerChanged.IsRunning)
                             {
                                 swHandlerChanged.Stop();

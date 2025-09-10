@@ -35,6 +35,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
             Content = new ScrollView
             {
+                Orientation = ScrollOrientation.Both,
                 Content = _graphicsView
             };
         }
