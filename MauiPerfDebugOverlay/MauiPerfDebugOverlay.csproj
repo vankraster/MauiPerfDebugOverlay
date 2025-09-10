@@ -29,7 +29,7 @@
 		<Description>
 			MAUI Performance Overlay – lightweight, drag-and-move performance HUD for .NET MAUI apps.
 			Displays real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, Battery consumption (Android only), and Networking stats (total requests, bytes sent/received, average request time).
-			Provides an overall score for app performance. Ideal for diagnostics and profiling MAUI applications on Android, iOS, MacCatalyst, Tizen, and Windows.
+			Provides an overall score for app performance. Load time per components is also tracked and displayed. Ideal for diagnostics and profiling MAUI applications on Android, iOS, MacCatalyst, Tizen, and Windows.
 			Easily integrates into your app to monitor performance and responsiveness.
 		</Description>
 
