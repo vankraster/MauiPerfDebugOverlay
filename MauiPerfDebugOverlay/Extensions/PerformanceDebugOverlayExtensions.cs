@@ -53,26 +53,30 @@ namespace MauiPerfDebugOverlay.Extensions
                             if (ve is ScrollView scrollView)
                             {
                                 double lastScrollY = 0;
-                                Stopwatch swScroll = new Stopwatch();
+                                DateTime lastTime = DateTime.UtcNow;
 
                                 scrollView.Scrolled += (s, e) =>
                                 {
-                                    if (!swScroll.IsRunning) swScroll.Start();
-
+                                    var now = DateTime.UtcNow;
                                     double deltaY = e.ScrollY - lastScrollY;
                                     lastScrollY = e.ScrollY;
 
-                                    double velocity = deltaY / (swScroll.Elapsed.TotalSeconds + 0.001);
-                                    bool jank = swScroll.Elapsed.TotalMilliseconds > 16;
+                                    double deltaTime = (now - lastTime).TotalSeconds;
+                                    lastTime = now;
+
+                                    // dacă deltaTime e prea mare, ignorăm (user a stat inactiv)
+                                    if (deltaTime > 1.0) deltaTime = 0.001;
+
+                                    double velocity = deltaY / deltaTime;
+                                    bool jank = Math.Abs(velocity) < 1000;
 
                                     ScrollMetricsBuffer.Instance.UpdateMetrics(
-                                        scrollView.Id.ToString(),
-                                        swScroll.Elapsed.TotalMilliseconds,
+                                        scrollView.Id,
+                                        "ScrollView",
+                                        deltaTime * 1000, // milisecunde
                                         velocity,
                                         jank
                                     );
-
-                                    swScroll.Restart();
                                 };
                             }
 
@@ -82,26 +86,30 @@ namespace MauiPerfDebugOverlay.Extensions
                             if (ve is CollectionView collectionView)
                             {
                                 double lastScrollOffset = 0;
-                                Stopwatch swScroll = new Stopwatch();
+                                DateTime lastTime = DateTime.UtcNow;
 
                                 collectionView.Scrolled += (s, e) =>
                                 {
-                                    if (!swScroll.IsRunning) swScroll.Start();
-
+                                    var now = DateTime.UtcNow;
                                     double deltaOffset = e.VerticalOffset - lastScrollOffset;
                                     lastScrollOffset = e.VerticalOffset;
 
-                                    double velocity = deltaOffset / (swScroll.Elapsed.TotalSeconds + 0.001);
-                                    bool jank = swScroll.Elapsed.TotalMilliseconds > 16;
+                                    double deltaTime = (now - lastTime).TotalSeconds;
+                                    lastTime = now;
+
+                                    // ignorăm perioadele mari de inactivitate
+                                    if (deltaTime > 1.0) return;
+
+                                    double velocity = deltaOffset / (deltaTime + 0.001);
+                                    bool jank = Math.Abs(velocity) < 1000;
 
                                     ScrollMetricsBuffer.Instance.UpdateMetrics(
-                                        collectionView.Id.ToString(),
-                                        swScroll.Elapsed.TotalMilliseconds,
+                                        collectionView.Id,
+                                        "CollectionView",
+                                        deltaTime * 1000, // milisecunde
                                         velocity,
                                         jank
                                     );
-
-                                    swScroll.Restart();
                                 };
                             }
                         };

@@ -20,12 +20,13 @@
 
         <VerticalStackLayout>
 
-            <HorizontalStackLayout x:Name="HeaderStack"> 
+            <HorizontalStackLayout x:Name="HeaderStack">
                 <!-- Tab 1: General Metrics -->
                 <Button x:Name="BtnTabGeneral"
                         Text="📊"
                         BackgroundColor="Gray"
-                        Padding="0" Margin="0"
+                        Padding="0"
+                        Margin="0"
                         CommandParameter="TabGeneral"
                         Clicked="OnTabClicked" />
 
@@ -47,7 +48,7 @@
                         CommandParameter="TabTree"
                         Clicked="OnTabClicked" />
             </HorizontalStackLayout>
-            
+
             <VerticalStackLayout x:Name="MetricsStack"
                                  Spacing="2"
                                  Margin="0,0,0,0">
@@ -144,6 +145,11 @@
                        Text="Network:" />
 
             </VerticalStackLayout>
+
+            <controls:ScrollMetricsView BackgroundColor="Transparent"
+                                        IsVisible="False"
+                                        HeightRequest="100"
+                                        x:Name="ScrollMetrics" />
 
             <controls:TreeViewControl BackgroundColor="Transparent"
                                       IsVisible="False"

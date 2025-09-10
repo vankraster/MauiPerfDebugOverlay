@@ -49,12 +49,12 @@ namespace MauiPerfDebugOverlay.InternalControls
                 if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
                 {
                     indicator = "⛔";
-                    canvas.FontColor = Colors.IndianRed;
+                    canvas.FontColor = Color.FromHex("D98880");
                 }
                 else if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
                 {
                     indicator = "⚠";
-                    canvas.FontColor = Colors.Gold;
+                    canvas.FontColor = Color.FromHex("FFECB3");
                 }
                 else
                 {

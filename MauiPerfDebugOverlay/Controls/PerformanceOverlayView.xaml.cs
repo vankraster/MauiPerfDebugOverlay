@@ -530,7 +530,7 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         case TState.TabGeneral:
                             MetricsStack.IsVisible = true;
-                            //TabScrollMetrics.IsVisible = false;
+                            ScrollMetrics.IsVisible = false;
                             TheTreeView.IsVisible = false;
 
                             boundsY.Width = -1;
@@ -539,17 +539,20 @@ namespace MauiPerfDebugOverlay.Controls
 
                         case TState.TabScroll:
                             MetricsStack.IsVisible = false;
-                            //TabScrollMetrics.IsVisible = true;
+                            ScrollMetrics.IsVisible = true;
                             TheTreeView.IsVisible = false;
+
+                            ScrollMetrics.Refresh();
+
+                            boundsY.Width = -1;
+                            boundsY.Height = -1;
                             break;
 
                         case TState.TabTree:
                             MetricsStack.IsVisible = false;
-                            //TabScrollMetrics.IsVisible = false;
+                            ScrollMetrics.IsVisible = false;
                             TheTreeView.IsVisible = true;
-
-
-
+                             
                             TreeNode node = _dumpService.DumpCurrentPage();
                             TheTreeView.RootNode = node;
 
@@ -564,10 +567,7 @@ namespace MauiPerfDebugOverlay.Controls
 
                     AbsoluteLayout.SetLayoutBounds(this, boundsY);
                 }
-            }
-
-
-            //TheTreeView._graphicsView.Invalidate();
+            } 
         }
 
         #endregion 

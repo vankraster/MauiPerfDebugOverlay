@@ -23,7 +23,7 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             _graphicsView = new GraphicsView
             {
-                HeightRequest = 160,
+                HeightRequest = 180,
                 WidthRequest = 800,
                 VerticalOptions = LayoutOptions.Start, 
             };
