@@ -33,7 +33,8 @@
         public bool ShowFrame { get; set; } = true;
 
         /// <summary>
-        /// Show load time per ms per component (VisualElement).
+        /// Show init time per ms per component (VisualElement).
+        /// Event that occurs from creation till HandlerChanged
         /// </summary>
         public bool ShowLoadTime { get; set; } = true;
 

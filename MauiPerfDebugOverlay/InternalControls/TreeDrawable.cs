@@ -58,7 +58,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                 }
                 else
                 {
-                    indicator = "✔";
+                    //indicator = "✔";
                     //canvas.FontColor = Colors.LightGreen;
                 }
             }
