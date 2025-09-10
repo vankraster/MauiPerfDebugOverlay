@@ -50,10 +50,10 @@ namespace MauiPerfDebugOverlay.InternalControls
                 }
                  
                 slowNodeIndicator += loadTimeInMs >= 1100
-                     ? $"{loadTimeInMs / 1000:F2} s" // convert to seconds
-                     : $"{loadTimeInMs:F0} ms";      // keep in milliseconds
-            }
-
+                     ? $"{loadTimeInMs / 1000:F3} s" // convert to seconds
+                     : $"{loadTimeInMs:F4} ms";      // keep in milliseconds
+            } 
+             
             string expandSymbol = "";
             if (node.Children.Count > 0)
                 expandSymbol = node.IsExpanded ? " [-] " : " [+] ";

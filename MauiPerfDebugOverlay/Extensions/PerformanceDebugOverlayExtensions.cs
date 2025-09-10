@@ -35,31 +35,18 @@ namespace MauiPerfDebugOverlay.Extensions
                     if (view is VisualElement ve)
                     {
                         #region track loading
-                        var swLoaded = Stopwatch.StartNew();
-                        //var swHandlerChanged = Stopwatch.StartNew();
-
+                        var swHandlerChanged = Stopwatch.StartNew();
 
                         //Here the difference is subtle but important.
                         //we want to know when the element is actually loaded and ready, not just when its handler is set ?!
                         //HandlerChanged can be too early in some cases
-                        //Loaded can be too late in some cases (like if the element is never shown)
-
-                        //ve.HandlerChanged += (_, __) =>
-                        //{
-                        //    if (swHandlerChanged.IsRunning)
-                        //    {
-                        //        swHandlerChanged.Stop();
-                        //        overlay?.AddMetricElementLoad(ve.Id, ve.GetType().Name, swHandlerChanged.Elapsed.TotalMilliseconds);
-                        //    }
-                        //};
-
-                        //here we only track the element when it is actually loaded (which means it is part of the visual tree and has a size)
-                        ve.Loaded += (_, __) =>
-                        {
-                            if (swLoaded.IsRunning)
+                        //Loaded can be too late in some cases (like if the element is never shown) 
+                        ve.HandlerChanged += (_, __) =>
+                        {  
+                            if (swHandlerChanged.IsRunning)
                             {
-                                swLoaded.Stop();
-                                loadTimeMetricsStore.Add(ve.Id, swLoaded.Elapsed.TotalMilliseconds);
+                                swHandlerChanged.Stop();
+                                loadTimeMetricsStore.Add(ve.Id, swHandlerChanged.Elapsed.TotalMilliseconds);
                             }
                         };
                         #endregion
