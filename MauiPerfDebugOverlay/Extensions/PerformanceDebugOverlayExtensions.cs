@@ -122,38 +122,25 @@ namespace MauiPerfDebugOverlay.Extensions
 
 
 
-            var listener = new MeterListener();
-            listener.InstrumentPublished += (instrument, l) =>
+
+            var diagListener = new DiagnosticsListener();
+
+            diagListener.OnMeasurement += (name, value, tags) =>
             {
-                // ascultăm DOAR metricile de scrolling
-                if (instrument.Meter.Name.Contains("Microsoft.Maui") &&
-                    instrument.Name.StartsWith("maui.scrolling"))
+                Console.WriteLine($"Metric: {name} = {value}");
+                foreach (var tag in tags)
                 {
-                    l.EnableMeasurementEvents(instrument);
+                    Console.WriteLine($"   {tag.Key} = {tag.Value}");
+                }
+
+                // Exemplu: dacă e scroll, poți să trimiți în ScrollMetricsStore
+                if (name.StartsWith("maui.scrolling"))
+                {
+                   
                 }
             };
 
-            // pentru metrici de tip int (count, duration, jank)
-            listener.SetMeasurementEventCallback<int>((instrument, measurement, tags, state) =>
-            {
-                Console.WriteLine($"[INT] {instrument.Name} = {measurement}");
-                foreach (var tag in tags)
-                {
-                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
-                }
-            });
 
-            // pentru metrici de tip double (velocity)
-            listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, state) =>
-            {
-                Console.WriteLine($"[DOUBLE] {instrument.Name} = {measurement}");
-                foreach (var tag in tags)
-                {
-                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
-                }
-            });
-
-            listener.Start();
             return builder;
         }
     }
