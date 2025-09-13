@@ -122,73 +122,24 @@ namespace MauiPerfDebugOverlay.Extensions
 
 
 
-            var listener = new MeterListener();
-            listener.InstrumentPublished += (instrument, l) =>
+
+            var diagListener = new DiagnosticsListener();
+
+            diagListener.OnMeasurement += (name, value, tags) =>
             {
-                // ascultăm DOAR metricile de scrolling
-                if (instrument.Meter.Name.Contains("Microsoft.Maui") )
+                Debug.WriteLine($"Metric: {name} = {value}");
+                foreach (var tag in tags)
                 {
-                    l.EnableMeasurementEvents(instrument);
+                    Debug.WriteLine($"   {tag.Key} = {tag.Value}");
+                }
+
+                // Exemplu: dacă e scroll, poți să trimiți în ScrollMetricsStore
+                if (name.StartsWith("maui.scrolling"))
+                {
+                   
                 }
             };
 
-            // pentru metrici de tip int (count, duration, jank)
-            listener.SetMeasurementEventCallback<int>((instrument, measurement, tags, state) =>
-            {
-                Console.WriteLine($"[INT] {instrument.Name} = {measurement}");
-                foreach (var tag in tags)
-                {
-                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
-                }
-            });
-
-            // pentru metrici de tip double (velocity)
-            listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, state) =>
-            {
-                Console.WriteLine($"[DOUBLE] {instrument.Name} = {measurement}");
-                foreach (var tag in tags)
-                {
-                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
-                }
-            });
-
-
-            // pentru metrici de tip float (velocity)
-            listener.SetMeasurementEventCallback<float>((instrument, measurement, tags, state) =>
-            {
-                Console.WriteLine($"[FLOAT] {instrument.Name} = {measurement}");
-                foreach (var tag in tags)
-                {
-                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
-                }
-            });
-
-
-
-            listener.RecordObservableInstruments();
-
-             
-            listener.Start();
-
-
-            var timer = new System.Timers.Timer(500); // la fiecare 500ms
-            timer.Elapsed += (s, e) =>
-            {
-                listener.RecordObservableInstruments();
-            };
-            timer.Start();
-
-            //var timer = Application.Current?.Dispatcher.CreateTimer();
-            //if (timer != null)
-            //{
-            //    timer.Interval = TimeSpan.FromMilliseconds(500); // la 0.5 sec
-            //    timer.Tick += (s, e) =>
-            //    {
-            //        // 👇 trage valorile din toate ObservableGauge active (ex: velocity)
-            //        listener.RecordObservableInstruments();
-            //    };
-            //    timer.Start();
-            //}
 
             return builder;
         }
