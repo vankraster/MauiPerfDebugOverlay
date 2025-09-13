@@ -126,8 +126,7 @@ namespace MauiPerfDebugOverlay.Extensions
             listener.InstrumentPublished += (instrument, l) =>
             {
                 // ascultăm DOAR metricile de scrolling
-                if (instrument.Meter.Name.Contains("Microsoft.Maui") &&
-                    instrument.Name.StartsWith("maui.scrolling"))
+                if (instrument.Meter.Name.Contains("Microsoft.Maui") )
                 {
                     l.EnableMeasurementEvents(instrument);
                 }
@@ -153,7 +152,44 @@ namespace MauiPerfDebugOverlay.Extensions
                 }
             });
 
+
+            // pentru metrici de tip float (velocity)
+            listener.SetMeasurementEventCallback<float>((instrument, measurement, tags, state) =>
+            {
+                Console.WriteLine($"[FLOAT] {instrument.Name} = {measurement}");
+                foreach (var tag in tags)
+                {
+                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
+                }
+            });
+
+
+
+            listener.RecordObservableInstruments();
+
+             
             listener.Start();
+
+
+            var timer = new System.Timers.Timer(500); // la fiecare 500ms
+            timer.Elapsed += (s, e) =>
+            {
+                listener.RecordObservableInstruments();
+            };
+            timer.Start();
+
+            //var timer = Application.Current?.Dispatcher.CreateTimer();
+            //if (timer != null)
+            //{
+            //    timer.Interval = TimeSpan.FromMilliseconds(500); // la 0.5 sec
+            //    timer.Tick += (s, e) =>
+            //    {
+            //        // 👇 trage valorile din toate ObservableGauge active (ex: velocity)
+            //        listener.RecordObservableInstruments();
+            //    };
+            //    timer.Start();
+            //}
+
             return builder;
         }
     }
