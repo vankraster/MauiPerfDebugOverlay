@@ -2,6 +2,7 @@
 using MauiPerfDebugOverlay.Services;
 using Microsoft.Maui.Handlers;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 
 namespace MauiPerfDebugOverlay.Extensions
 {
@@ -12,7 +13,7 @@ namespace MauiPerfDebugOverlay.Extensions
         public static MauiAppBuilder UsePerformanceDebugOverlay(this MauiAppBuilder builder, PerformanceOverlayOptions options)
         {
             PerformanceOverlayOptions = options;
-
+           
             if (options.ShowNetworkStats)
             {
                 builder.Services.AddSingleton<ProfilingHttpClient>();
@@ -23,51 +24,136 @@ namespace MauiPerfDebugOverlay.Extensions
             if (options.ShowLoadTime)
             {
                 LoadTimeMetricsStore loadTimeMetricsStore = LoadTimeMetricsStore.Instance;
-                PageHandler.Mapper.AppendToMapping("ClearLoadTimeMetrics", (handler, view) =>
-                {
-                    // Clear metrics as soon as the page is created
-                    loadTimeMetricsStore.Clear();
-                });
+                //PageHandler.Mapper.AppendToMapping("ClearLoadTimeMetrics", (handler, view) =>
+                //{
+                //    // Clear metrics as soon as the page is created
+                //    loadTimeMetricsStore.Clear();
+                //});
 
                 // Add metrics for load VisualElement (including layouts, controls)
                 ViewHandler.ViewMapper.AppendToMapping("MeasureComponentLoad", (handler, view) =>
                 {
                     if (view is VisualElement ve)
                     {
-                        #region track loading
-                        var swLoaded = Stopwatch.StartNew();
-                        //var swHandlerChanged = Stopwatch.StartNew();
+                        // -------------------------
+                        // 1️⃣ Track load time
+                        // -------------------------
+                        var swHandlerChanged = Stopwatch.StartNew();
 
-
-                        //Here the difference is subtle but important.
-                        //we want to know when the element is actually loaded and ready, not just when its handler is set ?!
-                        //HandlerChanged can be too early in some cases
-                        //Loaded can be too late in some cases (like if the element is never shown)
-
-                        //ve.HandlerChanged += (_, __) =>
-                        //{
-                        //    if (swHandlerChanged.IsRunning)
-                        //    {
-                        //        swHandlerChanged.Stop();
-                        //        overlay?.AddMetricElementLoad(ve.Id, ve.GetType().Name, swHandlerChanged.Elapsed.TotalMilliseconds);
-                        //    }
-                        //};
-
-                        //here we only track the element when it is actually loaded (which means it is part of the visual tree and has a size)
-                        ve.Loaded += (_, __) =>
+                        ve.HandlerChanged += (_, __) =>
                         {
-                            if (swLoaded.IsRunning)
+                            if (swHandlerChanged.IsRunning)
                             {
-                                swLoaded.Stop();
-                                loadTimeMetricsStore.Add(ve.Id, swLoaded.Elapsed.TotalMilliseconds);
+                                swHandlerChanged.Stop();
+                                loadTimeMetricsStore.Add(ve.Id, swHandlerChanged.Elapsed.TotalMilliseconds);
                             }
+
+                            //// -------------------------
+                            //// 2️⃣ Track ScrollView metrics
+                            //// -------------------------
+                            //if (ve is ScrollView scrollView)
+                            //{
+                            //    double lastScrollY = 0;
+                            //    DateTime lastTime = DateTime.UtcNow;
+
+                            //    scrollView.Scrolled += (s, e) =>
+                            //    {
+                            //        var now = DateTime.UtcNow;
+                            //        double deltaY = e.ScrollY - lastScrollY;
+                            //        lastScrollY = e.ScrollY;
+
+                            //        double deltaTime = (now - lastTime).TotalSeconds;
+                            //        lastTime = now;
+
+                            //        // dacă deltaTime e prea mare, ignorăm (user a stat inactiv)
+                            //        if (deltaTime > 1.0) deltaTime = 0.001;
+
+                            //        double velocity = deltaY / deltaTime;
+                            //        bool jank = Math.Abs(velocity) < 1000;
+
+                            //        ScrollMetricsBuffer.Instance.UpdateMetrics(
+                            //            scrollView.Id,
+                            //            "ScrollView",
+                            //            deltaTime * 1000, // milisecunde
+                            //            velocity,
+                            //            jank
+                            //        );
+                            //    };
+                            //}
+
+                            //// -------------------------
+                            //// 3️⃣ Track CollectionView metrics
+                            //// -------------------------
+                            //if (ve is CollectionView collectionView)
+                            //{
+                            //    double lastScrollOffset = 0;
+                            //    DateTime lastTime = DateTime.UtcNow;
+
+                            //    collectionView.Scrolled += (s, e) =>
+                            //    {
+                            //        var now = DateTime.UtcNow;
+                            //        double deltaOffset = e.VerticalOffset - lastScrollOffset;
+                            //        lastScrollOffset = e.VerticalOffset;
+
+                            //        double deltaTime = (now - lastTime).TotalSeconds;
+                            //        lastTime = now;
+
+                            //        // ignorăm perioadele mari de inactivitate
+                            //        if (deltaTime > 1.0) return;
+
+                            //        double velocity = deltaOffset / (deltaTime + 0.001);
+                            //        bool jank = Math.Abs(velocity) < 1000;
+
+                            //        ScrollMetricsBuffer.Instance.UpdateMetrics(
+                            //            collectionView.Id,
+                            //            "CollectionView",
+                            //            deltaTime * 1000, // milisecunde
+                            //            velocity,
+                            //            jank
+                            //        );
+                            //    };
+                            //}
                         };
-                        #endregion
                     }
                 });
+
             }
 
 
+
+
+            var listener = new MeterListener();
+            listener.InstrumentPublished += (instrument, l) =>
+            {
+                // ascultăm DOAR metricile de scrolling
+                if (instrument.Meter.Name.Contains("Microsoft.Maui") &&
+                    instrument.Name.StartsWith("maui.scrolling"))
+                {
+                    l.EnableMeasurementEvents(instrument);
+                }
+            };
+
+            // pentru metrici de tip int (count, duration, jank)
+            listener.SetMeasurementEventCallback<int>((instrument, measurement, tags, state) =>
+            {
+                Console.WriteLine($"[INT] {instrument.Name} = {measurement}");
+                foreach (var tag in tags)
+                {
+                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
+                }
+            });
+
+            // pentru metrici de tip double (velocity)
+            listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, state) =>
+            {
+                Console.WriteLine($"[DOUBLE] {instrument.Name} = {measurement}");
+                foreach (var tag in tags)
+                {
+                    Console.WriteLine($"   Tag: {tag.Key} = {tag.Value}");
+                }
+            });
+
+            listener.Start();
             return builder;
         }
     }

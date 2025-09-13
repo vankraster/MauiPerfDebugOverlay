@@ -1,4 +1,5 @@
 ﻿
+using MauiPerfDebugOverlay.Enums;
 using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
 using MauiPerfDebugOverlay.InternalControls;
@@ -11,6 +12,7 @@ namespace MauiPerfDebugOverlay.Controls
     public partial class PerformanceOverlayView : ContentView
     {
         private readonly IFpsService _fpsService;
+        private TState CurrentState = TState.TabGeneral;
 
         private double _overallScore;
         private double _cpuUsage;
@@ -296,9 +298,9 @@ namespace MauiPerfDebugOverlay.Controls
                 //$"Received per sec.: {totalReceivedPerSecond / 1024.0:F1} KB";
             }
 
-            ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
-            ScoreLabel.TextColor = _emaOverallScore >= 8 ? Color.FromHex("7CBF8E") :
-                                   _emaOverallScore >= 5 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
+            //ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
+            //ScoreLabel.TextColor = _emaOverallScore >= 8 ? Color.FromHex("7CBF8E") :
+            //                       _emaOverallScore >= 5 ? Color.FromHex("FFECB3") : Color.FromHex("D98880");
         }
 
 
@@ -329,8 +331,8 @@ namespace MauiPerfDebugOverlay.Controls
                 }
                 _stopwatch.Restart();
 
-                _overallScore = CalculateOverallScore();
-                UpdateOverallScore(_overallScore);
+                //_overallScore = CalculateOverallScore();
+                //UpdateOverallScore(_overallScore);
 
                 MainThread.BeginInvokeOnMainThread(UpdateUi);
 
@@ -389,7 +391,7 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
-            if (!MetricsStack.IsVisible)
+            if (CurrentState != TState.TabGeneral)
                 return;
             if (sender is not Frame frame) return;
             if (frame.Parent is not PerformanceOverlayView overlay) return;
@@ -468,7 +470,7 @@ namespace MauiPerfDebugOverlay.Controls
         private bool _isCompact = false;
         private void OnToggleCompactTapped(object sender, EventArgs e)
         {
-            if (MetricsStack.IsVisible)
+            if (CurrentState == TState.TabGeneral)
             {
                 _isCompact = !_isCompact;
 
@@ -478,7 +480,7 @@ namespace MauiPerfDebugOverlay.Controls
                     foreach (var child in MetricsStack.Children)
                     {
                         if (child is Label lbl &&
-                            lbl != ScoreLabel &&
+                            //lbl != ScoreLabel &&
                             lbl != FpsLabel)
                         {
                             lbl.IsVisible = false;
@@ -509,36 +511,63 @@ namespace MauiPerfDebugOverlay.Controls
 
         #region Component Loading
 
-        private void SwButton_Clicked(object sender, EventArgs e)
+        private void OnTabClicked(object sender, EventArgs e)
         {
-            TheTreeView.IsVisible = !TheTreeView.IsVisible;
-            MetricsStack.IsVisible = !MetricsStack.IsVisible;
+            var clickedTab = (sender as Button).CommandParameter.ToString();
 
-            var boundsY = AbsoluteLayout.GetLayoutBounds(this);
-            boundsY.Y = 0;
-            boundsY.X = 0;
-
-            if (TheTreeView.IsVisible)
+            if (Enum.TryParse<TState>(clickedTab, out var tab))
             {
-                BtnSwitch.Text = "Show Metrics";
+                if (CurrentState == tab)
+                    return;
+                else
+                {
+                    CurrentState = tab;
+                    var boundsY = AbsoluteLayout.GetLayoutBounds(this);
+                    boundsY.Y = 0;
+                    boundsY.X = 0;
 
-                TreeNode node = _dumpService.DumpCurrentPage();
-                TheTreeView.RootNode = node;
+                    switch (tab)
+                    {
+                        case TState.TabGeneral:
+                            MetricsStack.IsVisible = true;
+                            ScrollMetrics.IsVisible = false;
+                            TheTreeView.IsVisible = false;
 
-                boundsY.Width = (this.Parent as AbsoluteLayout).Width;
-                boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+                            boundsY.Width = -1;
+                            boundsY.Height = -1;
+                            break;
 
-                TheTreeView.WidthRequest = boundsY.Width - 10;
-                TheTreeView.HeightRequest = boundsY.Height - 10 - BtnSwitch.Height;
-            }
-            else
-            {
-                BtnSwitch.Text = "Show Load Time";
-                boundsY.Width = -1;
-                boundsY.Height = -1;
-            }
-            AbsoluteLayout.SetLayoutBounds(this, boundsY);
-            //TheTreeView._graphicsView.Invalidate();
+                        case TState.TabScroll:
+                            MetricsStack.IsVisible = false;
+                            ScrollMetrics.IsVisible = true;
+                            TheTreeView.IsVisible = false;
+
+                            ScrollMetrics.Refresh();
+
+                            boundsY.Width = -1;
+                            boundsY.Height = -1;
+                            break;
+
+                        case TState.TabTree:
+                            MetricsStack.IsVisible = false;
+                            ScrollMetrics.IsVisible = false;
+                            TheTreeView.IsVisible = true;
+                             
+                            TreeNode node = _dumpService.DumpCurrentPage();
+                            TheTreeView.RootNode = node;
+
+                            boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                            boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+
+                            TheTreeView.WidthRequest = boundsY.Width - 10;
+                            TheTreeView.HeightRequest = boundsY.Height - 10 - HeaderStack.Height;
+                            break;
+                    }
+
+
+                    AbsoluteLayout.SetLayoutBounds(this, boundsY);
+                }
+            } 
         }
 
         #endregion 

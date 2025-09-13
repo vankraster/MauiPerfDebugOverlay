@@ -33,18 +33,19 @@
         public bool ShowFrame { get; set; } = true;
 
         /// <summary>
-        /// Show load time per ms per component (VisualElement).
+        /// Show init time per ms per component (VisualElement).
+        /// Event that occurs from creation till HandlerChanged
         /// </summary>
         public bool ShowLoadTime { get; set; } = true;
 
         /// <summary>
         /// Threshold for warning load time in ms (default 800ms).
         /// </summary>
-        public int LoadTimeWarning { get; set; } = 800;
+        public int LoadTimeWarning { get; set; } = 600;
 
         /// <summary>
         /// Threshold for danger load time in ms (default 1000ms).
         /// </summary>
-        public int LoadTimeDanger { get; set; } = 1000;
+        public int LoadTimeDanger { get; set; } = 800;
     }
 }
