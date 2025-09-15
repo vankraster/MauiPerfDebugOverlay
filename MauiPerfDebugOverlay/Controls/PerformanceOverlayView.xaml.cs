@@ -502,7 +502,7 @@ namespace MauiPerfDebugOverlay.Controls
             {
                 _isCompact = !_isCompact;
 
-                DiagnosticsMetrics.HeightRequest = _isCompact ? 200 : ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
+                OnTabClicked(BtnTabScroll, null);
             }
         }
 
@@ -545,11 +545,24 @@ namespace MauiPerfDebugOverlay.Controls
 
                             DiagnosticsMetrics.Refresh();
 
-                            boundsY.Width = -1;
-                            boundsY.Height = -1;
 
-                            DiagnosticsMetrics.WidthRequest = 400;
-                            DiagnosticsMetrics.HeightRequest = _isCompact? 200: ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
+                            if (_isCompact)
+                            {
+                                boundsY.Width = -1;
+                                boundsY.Height = -1;
+
+                                DiagnosticsMetrics.WidthRequest = 400;
+                                DiagnosticsMetrics.HeightRequest = 200;
+                            }
+                            else
+                            {
+                                boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                                boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+
+                                DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10);
+                                DiagnosticsMetrics.HeightRequest = ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
+                            }
+
                             break;
 
                         case TState.TabTree:

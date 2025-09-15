@@ -11,13 +11,13 @@ namespace MauiPerfDebugOverlay.InternalControls
             _graphicsView = new GraphicsView
             {
                 HeightRequest = 200,
-                WidthRequest = 500,
+                WidthRequest = 520,
                 VerticalOptions = LayoutOptions.Start
             };
             var metricsDrawable = new DiagnosticsMetricsDrawable();
             _graphicsView.Drawable = metricsDrawable;
 
-            ScrollMetricsBuffer.Instance.CollectionChanged += Instance_CollectionChanged;
+            DiagnosticsListener.Instance.CollectionChanged += Instance_CollectionChanged; 
 
             Content = new ScrollView
             {
@@ -26,11 +26,13 @@ namespace MauiPerfDebugOverlay.InternalControls
             };
         }
 
-        private void Instance_CollectionChanged(string arg1, Guid? arg2, double? arg3, double? arg4, bool? arg5)
+        private void Instance_CollectionChanged(string arg1, string? arg2, object? arg3)
         {
             if (this.IsVisible)
                 Refresh();
         }
+
+
 
         /// <summary>
         /// Reîmprospătează datele și redesenează controlul
