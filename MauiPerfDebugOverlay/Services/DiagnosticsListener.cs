@@ -3,51 +3,94 @@
 namespace MauiPerfDebugOverlay.Services
 {
     public class DiagnosticsListener : IDisposable
-    {
+    {  
+        private static readonly Lazy<DiagnosticsListener> _instance = new(() => new DiagnosticsListener());
+        public static DiagnosticsListener Instance => _instance.Value;
+
+
+
         private readonly MeterListener _listener;
         private readonly System.Timers.Timer _observableTimer;
 
-        // Evenimente generice pentru orice metrică
-        public event Action<string, object, Dictionary<string, string>> OnMeasurement;
+        private readonly Dictionary<string, object> _metrics = new();
+        private readonly object _lock = new();
+
+        /// <summary>
+        /// Raised whenever the metrics collection changes.
+        /// Arguments: action type ("Add" or "Clear"), metric key, metric value (if applicable).
+        /// </summary>
+        public event Action<string, string?, object?>? CollectionChanged;
 
         public DiagnosticsListener(double observableIntervalMs = 500)
         {
             _listener = new MeterListener();
 
-            // Publicarea instrumentelor
             _listener.InstrumentPublished += (instrument, l) =>
             {
-                // Enable pentru toate instrumentele
                 l.EnableMeasurementEvents(instrument);
             };
 
-            // Callback pentru int
+            // int
             _listener.SetMeasurementEventCallback<int>((inst, value, tags, state) =>
-            {
-                var tagDict = tags.ToArray().ToDictionary(t => t.Key, t => t.Value?.ToString() ?? "");
-                OnMeasurement?.Invoke(inst.Name, value, tagDict);
-            });
+                Store(inst.Name, value, tags));
 
-            // Callback pentru double
+            // double
             _listener.SetMeasurementEventCallback<double>((inst, value, tags, state) =>
-            {
-                var tagDict = tags.ToArray().ToDictionary(t => t.Key, t => t.Value?.ToString() ?? "");
-                OnMeasurement?.Invoke(inst.Name, value, tagDict);
-            });
+                Store(inst.Name, value, tags));
 
-            // Optional: suport pentru long / float / decimal în viitor
+            // long
             _listener.SetMeasurementEventCallback<long>((inst, value, tags, state) =>
-            {
-                var tagDict = tags.ToArray().ToDictionary(t => t.Key, t => t.Value?.ToString() ?? "");
-                OnMeasurement?.Invoke(inst.Name, value, tagDict);
-            });
+                Store(inst.Name, value, tags));
+
+            // float
+            _listener.SetMeasurementEventCallback<float>((inst, value, tags, state) =>
+                Store(inst.Name, value, tags));
 
             _listener.Start();
 
-            // Timer pentru gauge-uri observabile
             _observableTimer = new System.Timers.Timer(observableIntervalMs);
             _observableTimer.Elapsed += (s, e) => _listener.RecordObservableInstruments();
             _observableTimer.Start();
+        }
+
+        private void Store(string metricName, object value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
+        {
+            var tagKey = tags.Length > 0
+                ? $"{metricName}:{string.Join(",", tags.ToArray().Select(t => $"{t.Key}={t.Value}"))}"
+                : metricName;
+
+            lock (_lock)
+            {
+                _metrics[tagKey] = value;
+            }
+
+            CollectionChanged?.Invoke("Add", tagKey, value);
+        }
+
+        public object? GetValue(string key)
+        {
+            lock (_lock)
+            {
+                return _metrics.TryGetValue(key, out var value) ? value : null;
+            }
+        }
+
+        public IReadOnlyDictionary<string, object> GetAll()
+        {
+            lock (_lock)
+            {
+                return new Dictionary<string, object>(_metrics);
+            }
+        }
+
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                _metrics.Clear();
+            }
+
+            CollectionChanged?.Invoke("Clear", null, null);
         }
 
         public void Dispose()

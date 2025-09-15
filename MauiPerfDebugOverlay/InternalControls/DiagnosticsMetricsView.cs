@@ -2,29 +2,28 @@
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
-    public class ScrollMetricsView : ContentView
+    public class DiagnosticsMetricsView : ContentView
     {
         internal readonly GraphicsView _graphicsView;
 
-        public ScrollMetricsView()
+        public DiagnosticsMetricsView()
         {
             _graphicsView = new GraphicsView
             {
                 HeightRequest = 200,
-                WidthRequest = 800,
+                WidthRequest = 500,
                 VerticalOptions = LayoutOptions.Start
             };
+            var metricsDrawable = new DiagnosticsMetricsDrawable();
+            _graphicsView.Drawable = metricsDrawable;
+
+            ScrollMetricsBuffer.Instance.CollectionChanged += Instance_CollectionChanged;
 
             Content = new ScrollView
             {
                 Orientation = ScrollOrientation.Both,
                 Content = _graphicsView
             };
-            var metricsDrawable = new ScrollMetricsDrawable();
-            _graphicsView.Drawable = metricsDrawable;
-
-            ScrollMetricsBuffer.Instance.CollectionChanged += Instance_CollectionChanged;
-
         }
 
         private void Instance_CollectionChanged(string arg1, Guid? arg2, double? arg3, double? arg4, bool? arg5)
@@ -37,10 +36,10 @@ namespace MauiPerfDebugOverlay.InternalControls
         /// Reîmprospătează datele și redesenează controlul
         /// </summary>
         public void Refresh()
-        { 
-            var metricsDrawable = (_graphicsView.Drawable as ScrollMetricsDrawable);
+        {
+            var metricsDrawable = (_graphicsView.Drawable as DiagnosticsMetricsDrawable);
             // Înălțimea ajustată dinamic
-            _graphicsView.HeightRequest = (metricsDrawable.CountMetrics() + 1) * ScrollMetricsDrawable.LineHeight;
+            _graphicsView.HeightRequest = (metricsDrawable.CountMetrics() + 1) * DiagnosticsMetricsDrawable.LineHeight;
             _graphicsView.Invalidate();
         }
     }

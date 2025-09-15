@@ -2,7 +2,6 @@
 using MauiPerfDebugOverlay.Enums;
 using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Interfaces;
-using MauiPerfDebugOverlay.InternalControls;
 using MauiPerfDebugOverlay.Models.Internal;
 using MauiPerfDebugOverlay.Platforms;
 using MauiPerfDebugOverlay.Services;
@@ -124,7 +123,7 @@ namespace MauiPerfDebugOverlay.Controls
         {
             BoxViewNetwork.IsVisible = NetworkLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats;
             BoxViewBattery.IsVisible = BatteryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage;
-            BoxViewFps.IsVisible = FpsLabel.IsVisible = FrameTimeLabel.IsVisible = HitchLabel.IsVisible = HighestHitchLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame;
+            FpsLabel.IsVisible = FrameTimeLabel.IsVisible = HitchLabel.IsVisible = HighestHitchLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame;
             BoxViewCpu.IsVisible = CpuLabel.IsVisible = ThreadsLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage;
 
             BoxViewMemory_GC.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowAlloc_GC || PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowMemory;
@@ -391,7 +390,7 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void OnPanUpdated(object? sender, PanUpdatedEventArgs e)
         {
-            if (CurrentState != TState.TabGeneral)
+            if (CurrentState == TState.TabTree)
                 return;
             if (sender is not Frame frame) return;
             if (frame.Parent is not PerformanceOverlayView overlay) return;
@@ -499,9 +498,11 @@ namespace MauiPerfDebugOverlay.Controls
                     //ToggleButton.Text = "▼"; // simbol compact
                 }
             }
-            else
+            else if (CurrentState == TState.TabDiagnostics)
             {
+                _isCompact = !_isCompact;
 
+                DiagnosticsMetrics.HeightRequest = _isCompact ? 200 : ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
             }
         }
 
@@ -530,29 +531,32 @@ namespace MauiPerfDebugOverlay.Controls
                     {
                         case TState.TabGeneral:
                             MetricsStack.IsVisible = true;
-                            ScrollMetrics.IsVisible = false;
+                            DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = false;
 
                             boundsY.Width = -1;
                             boundsY.Height = -1;
                             break;
 
-                        case TState.TabScroll:
+                        case TState.TabDiagnostics:
                             MetricsStack.IsVisible = false;
-                            ScrollMetrics.IsVisible = true;
+                            DiagnosticsMetrics.IsVisible = true;
                             TheTreeView.IsVisible = false;
 
-                            ScrollMetrics.Refresh();
+                            DiagnosticsMetrics.Refresh();
 
                             boundsY.Width = -1;
                             boundsY.Height = -1;
+
+                            DiagnosticsMetrics.WidthRequest = 400;
+                            DiagnosticsMetrics.HeightRequest = _isCompact? 200: ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
                             break;
 
                         case TState.TabTree:
                             MetricsStack.IsVisible = false;
-                            ScrollMetrics.IsVisible = false;
+                            DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = true;
-                             
+
                             TreeNode node = _dumpService.DumpCurrentPage();
                             TheTreeView.RootNode = node;
 
@@ -567,7 +571,7 @@ namespace MauiPerfDebugOverlay.Controls
 
                     AbsoluteLayout.SetLayoutBounds(this, boundsY);
                 }
-            } 
+            }
         }
 
         #endregion 

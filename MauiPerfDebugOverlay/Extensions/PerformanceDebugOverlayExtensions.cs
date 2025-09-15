@@ -13,14 +13,18 @@ namespace MauiPerfDebugOverlay.Extensions
         public static MauiAppBuilder UsePerformanceDebugOverlay(this MauiAppBuilder builder, PerformanceOverlayOptions options)
         {
             PerformanceOverlayOptions = options;
-           
+
+            DiagnosticsListener.Instance.CollectionChanged += (name, value, tags) =>
+            {
+
+            };
+
             if (options.ShowNetworkStats)
             {
                 builder.Services.AddSingleton<ProfilingHttpClient>();
                 builder.Services.AddSingleton<HttpClient>(sp => sp.GetRequiredService<ProfilingHttpClient>());
             }
-
-
+             
             if (options.ShowLoadTime)
             {
                 LoadTimeMetricsStore loadTimeMetricsStore = LoadTimeMetricsStore.Instance;
@@ -117,29 +121,7 @@ namespace MauiPerfDebugOverlay.Extensions
                     }
                 });
 
-            }
-
-
-
-
-
-            var diagListener = new DiagnosticsListener();
-
-            diagListener.OnMeasurement += (name, value, tags) =>
-            {
-                Debug.WriteLine($"Metric: {name} = {value}");
-                foreach (var tag in tags)
-                {
-                    Debug.WriteLine($"   {tag.Key} = {tag.Value}");
-                }
-
-                // Exemplu: dacă e scroll, poți să trimiți în ScrollMetricsStore
-                if (name.StartsWith("maui.scrolling"))
-                {
-                   
-                }
-            };
-
+            } 
 
             return builder;
         }
