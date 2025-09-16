@@ -8,11 +8,14 @@ namespace MauiPerfDebugOverlay.Services
         private static readonly Lazy<DiagnosticsListener> _instance = new(() => new DiagnosticsListener());
         public static DiagnosticsListener Instance => _instance.Value;
 
-        private readonly List<NetworkMetric> _networkMetrics = new();
-
-
         private readonly MeterListener _listener;
         private readonly System.Timers.Timer _observableTimer;
+
+        private readonly List<NetworkMetric> _networkMetrics = new();
+        private readonly object _lockNetwork = new();
+
+        private readonly Dictionary<string, object> _metricsExceptions = new();
+        private readonly object _lockExceptions = new();
 
         private readonly Dictionary<string, object> _metrics = new();
         private readonly object _lock = new();
@@ -79,10 +82,32 @@ namespace MauiPerfDebugOverlay.Services
 
         private void Store(string metricName, object value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
         {
-            if (metricName.StartsWith("http.client"))
+            if (metricName.StartsWith("dotnet.exceptions"))
+            {
+                if (tags.Length == 0)
+                {
+                    lock (_lockExceptions)
+                        _metricsExceptions[metricName] = value;
+
+                    CollectionChanged?.Invoke("Add", metricName, value);
+                    return;
+                }
+
+                foreach (var tag in tags)
+                {
+                    //var tagKey = $"{metricName}:{tag.Key}={tag.Value}";
+
+                    lock (_lockExceptions)
+                        _metricsExceptions[tag.Value?.ToString() ?? "NO TAG VALUE"] = value;
+
+                    CollectionChanged?.Invoke("Add", tag.Key, value);
+                }
+
+            }
+            else if (metricName.StartsWith("http.client") || metricName.StartsWith("dns"))
             {
                 // Stochează și în lista de rețea pentru analiză ulterioară
-                lock (_networkMetrics)
+                lock (_lockNetwork)
                 {
                     _networkMetrics.Add(new NetworkMetric
                     {
@@ -91,6 +116,7 @@ namespace MauiPerfDebugOverlay.Services
                         Tags = tags.ToArray(),
                         Timestamp = DateTime.UtcNow
                     });
+
                     // Păstrează doar ultimele 100 de intrări
                     if (_networkMetrics.Count > 100)
                     {
@@ -98,25 +124,26 @@ namespace MauiPerfDebugOverlay.Services
                     }
                 }
             }
-
-
-            if (tags.Length == 0)
+            else
             {
-                lock (_lock)
-                    _metrics[metricName] = value;
+                if (tags.Length == 0)
+                {
+                    lock (_lock)
+                        _metrics[metricName] = value;
 
-                CollectionChanged?.Invoke("Add", metricName, value);
-                return;
-            }
+                    CollectionChanged?.Invoke("Add", metricName, value);
+                    return;
+                }
 
-            foreach (var tag in tags)
-            {
-                var tagKey = $"{metricName}:{tag.Key}={tag.Value}";
+                foreach (var tag in tags)
+                {
+                    var tagKey = $"{metricName}:{tag.Key}={tag.Value}";
 
-                lock (_lock)
-                    _metrics[tagKey] = value;
+                    lock (_lock)
+                        _metrics[tagKey] = value;
 
-                CollectionChanged?.Invoke("Add", tagKey, value);
+                    CollectionChanged?.Invoke("Add", tagKey, value);
+                }
             }
         }
 
@@ -133,6 +160,14 @@ namespace MauiPerfDebugOverlay.Services
             lock (_lock)
             {
                 return new Dictionary<string, object>(_metrics);
+            }
+        }
+
+        public IReadOnlyDictionary<string, object> GetAllExceptions()
+        {
+            lock (_lockExceptions)
+            {
+                return new Dictionary<string, object>(_metricsExceptions);
             }
         }
 
@@ -155,12 +190,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public int Count()
         {
-            return _metrics.Count();
-        }
-
-        public bool HasHttp()
-        {
-            return _metrics.Keys.Any(k => k.StartsWith("http.client"));
+            return _metrics.Count() + _metricsExceptions.Count() +2;
         }
     }
 }

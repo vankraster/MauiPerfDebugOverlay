@@ -6,7 +6,8 @@ namespace MauiPerfDebugOverlay.SampleApp
     public partial class MainPage : ContentPage
     {
         int count = 0;
-        private HttpClient _httpClient => Handler.MauiContext.Services.GetRequiredService<HttpClient>();
+        //private HttpClient _httpClient => Handler.MauiContext.Services.GetRequiredService<HttpClient>();
+        private HttpClient _httpClient => new();
 
         public MainPage()
         {

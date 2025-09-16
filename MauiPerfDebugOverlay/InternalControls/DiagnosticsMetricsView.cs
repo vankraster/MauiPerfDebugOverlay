@@ -44,11 +44,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             // Înălțimea ajustată dinamic
             var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 1) * DiagnosticsMetricsDrawable.LineHeight;
             if (newHeight != _graphicsView.HeightRequest)
-                _graphicsView.HeightRequest = newHeight;
-
-            var newWidth = metricsDrawable.HasHttp() ? 700 : 520;
-            if (newWidth != _graphicsView.WidthRequest)
-                _graphicsView.WidthRequest = newWidth;
+                _graphicsView.HeightRequest = newHeight; 
 
             _graphicsView.Invalidate();
         }

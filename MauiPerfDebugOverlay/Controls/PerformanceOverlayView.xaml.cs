@@ -162,12 +162,12 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void UpdateNetworkStats()
         {
-            var profiler = NetworkProfiler.Instance;
+            //var profiler = NetworkProfiler.Instance;
 
-            totalRequests = profiler.TotalRequests;
-            totalSent = profiler.TotalBytesSent;
-            totalReceived = profiler.TotalBytesReceived;
-            avgRequestTime = profiler.AverageRequestTimeMs;
+            //totalRequests = profiler.TotalRequests;
+            //totalSent = profiler.TotalBytesSent;
+            //totalReceived = profiler.TotalBytesReceived;
+            //avgRequestTime = profiler.AverageRequestTimeMs;
 
             //totalReceivedPerSecond = profiler.BytesReceivedPerSecond;
             //totalSentPerSecond = profiler.BytesSentPerSecond;

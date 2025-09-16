@@ -8,5 +8,9 @@ namespace MauiPerfDebugOverlay.Models.Internal
 {
     internal class NetworkMetric
     {
+        public string Name { get; internal set; }
+        public object Value { get; internal set; }
+        public KeyValuePair<string, object?>[] Tags { get; internal set; }
+        public DateTime Timestamp { get; internal set; }
     }
 }
