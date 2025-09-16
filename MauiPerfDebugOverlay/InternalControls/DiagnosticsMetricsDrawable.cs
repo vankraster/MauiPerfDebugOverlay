@@ -72,9 +72,8 @@ namespace MauiPerfDebugOverlay.InternalControls
             }
         }
 
-        public int CountMetrics()
-        {
-            return DiagnosticsListener.Instance.Count();
-        }
+        public int CountMetrics() => DiagnosticsListener.Instance.Count();
+
+        internal bool HasHttp() => DiagnosticsListener.Instance.HasHttp();
     }
 }

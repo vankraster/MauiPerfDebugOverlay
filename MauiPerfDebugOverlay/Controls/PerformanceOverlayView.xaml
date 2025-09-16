@@ -149,8 +149,7 @@
             <controls:DiagnosticsMetricsView BackgroundColor="Transparent"
                                              IsVisible="False"
                                              HeightRequest="100"
-                                             x:Name="DiagnosticsMetrics" 
-                                             StartInteraction="DiagnosticsMetrics_StartInteraction"/>
+                                             x:Name="DiagnosticsMetrics"  />
 
             <controls:TreeViewControl BackgroundColor="Transparent"
                                       IsVisible="False"

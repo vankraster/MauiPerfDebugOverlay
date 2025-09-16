@@ -3,7 +3,7 @@
 namespace MauiPerfDebugOverlay.Services
 {
     public class DiagnosticsListener : IDisposable
-    {  
+    {
         private static readonly Lazy<DiagnosticsListener> _instance = new(() => new DiagnosticsListener());
         public static DiagnosticsListener Instance => _instance.Value;
 
@@ -67,7 +67,7 @@ namespace MauiPerfDebugOverlay.Services
             // long
             _listener.SetMeasurementEventCallback<long>((inst, value, tags, state) =>
                 Store(inst.Name, value, tags));
-             
+
             _listener.Start();
 
             _observableTimer = new System.Timers.Timer(observableIntervalMs);
@@ -125,6 +125,11 @@ namespace MauiPerfDebugOverlay.Services
         public int Count()
         {
             return _metrics.Count();
+        }
+
+        public bool HasHttp()
+        {
+            return _metrics.Keys.Any(k => k.StartsWith("dotnet.net.http"));
         }
     }
 }

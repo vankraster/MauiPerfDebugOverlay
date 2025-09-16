@@ -5,7 +5,6 @@ namespace MauiPerfDebugOverlay.InternalControls
     public class DiagnosticsMetricsView : ContentView
     {
         internal readonly GraphicsView _graphicsView;
-        public event EventHandler StartInteraction;
 
         public DiagnosticsMetricsView()
         {
@@ -18,11 +17,6 @@ namespace MauiPerfDebugOverlay.InternalControls
             var metricsDrawable = new DiagnosticsMetricsDrawable();
             _graphicsView.Drawable = metricsDrawable;
 
-            _graphicsView.StartInteraction += (s, e) =>
-            {
-                //Tapped(e.Touches[0].X, e.Touches[0].Y);
-                this.StartInteraction?.Invoke(null, null);
-            };
             DiagnosticsListener.Instance.CollectionChanged += Instance_CollectionChanged;
 
             Content = new ScrollView
@@ -50,10 +44,12 @@ namespace MauiPerfDebugOverlay.InternalControls
             // Înălțimea ajustată dinamic
             var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 1) * DiagnosticsMetricsDrawable.LineHeight;
             if (newHeight != _graphicsView.HeightRequest)
-            {
                 _graphicsView.HeightRequest = newHeight;
-                _graphicsView.HeightRequest = newHeight;
-            }
+
+            var newWidth = metricsDrawable.HasHttp() ? 800 : 520;
+            if (newWidth != _graphicsView.WidthRequest)
+                _graphicsView.WidthRequest = newWidth;
+
             _graphicsView.Invalidate();
         }
     }

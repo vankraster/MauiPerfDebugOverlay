@@ -518,7 +518,7 @@ namespace MauiPerfDebugOverlay.Controls
 
             if (Enum.TryParse<TState>(clickedTab, out var tab))
             {
-                if (CurrentState == tab  && tab != TState.TabDiagnostics)
+                if (CurrentState == tab && tab != TState.TabDiagnostics)
                     return;
                 else
                 {
@@ -551,7 +551,7 @@ namespace MauiPerfDebugOverlay.Controls
                                 boundsY.Width = -1;
                                 boundsY.Height = -1;
 
-                                DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10)/2;
+                                DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10) / 2;
                                 DiagnosticsMetrics.HeightRequest = 200;
                             }
                             else
@@ -589,12 +589,6 @@ namespace MauiPerfDebugOverlay.Controls
 
         #endregion
 
-        private void DiagnosticsMetrics_StartInteraction(object sender, EventArgs e)
-        {
-            _isCompact = !_isCompact;
-
-            OnTabClicked(BtnTabScroll, null);
-        }
     }
 }
 

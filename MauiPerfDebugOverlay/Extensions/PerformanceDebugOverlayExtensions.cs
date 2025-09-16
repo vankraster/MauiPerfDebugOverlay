@@ -12,6 +12,8 @@ namespace MauiPerfDebugOverlay.Extensions
 
         public static MauiAppBuilder UsePerformanceDebugOverlay(this MauiAppBuilder builder, PerformanceOverlayOptions options)
         {
+            AppContext.SetSwitch("System.Diagnostics.Metrics.Meter.IsSupported", true);
+
             PerformanceOverlayOptions = options;
 
             DiagnosticsListener.Instance.CollectionChanged += (name, value, tags) =>
