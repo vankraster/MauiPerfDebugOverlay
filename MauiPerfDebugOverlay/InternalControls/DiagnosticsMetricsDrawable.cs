@@ -4,7 +4,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 {
     public class DiagnosticsMetricsDrawable : IDrawable
     {
-        internal const float LineHeight = 30;
+        internal const float LineHeight = 36;
         private const float StartX = 10;
         private const float StartY = 20;
         private readonly Dictionary<string, RectF> _rects = new();
@@ -59,7 +59,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
                     canvas.FontColor = Colors.White;
                     canvas.FontSize = 14;
-                    canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
+                    canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Center);
                     y += LineHeight;
                 }
             }

@@ -46,7 +46,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             if (newHeight != _graphicsView.HeightRequest)
                 _graphicsView.HeightRequest = newHeight;
 
-            var newWidth = metricsDrawable.HasHttp() ? 800 : 520;
+            var newWidth = metricsDrawable.HasHttp() ? 700 : 520;
             if (newWidth != _graphicsView.WidthRequest)
                 _graphicsView.WidthRequest = newWidth;
 

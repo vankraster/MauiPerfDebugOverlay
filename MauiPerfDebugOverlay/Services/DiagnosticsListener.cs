@@ -77,16 +77,24 @@ namespace MauiPerfDebugOverlay.Services
 
         private void Store(string metricName, object value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
         {
-            var tagKey = tags.Length > 0
-                ? $"{metricName}:{string.Join(",", tags.ToArray().Select(t => $"{t.Key}={t.Value}"))}"
-                : metricName;
-
-            lock (_lock)
+            if (tags.Length == 0)
             {
-                _metrics[tagKey] = value;
+                lock (_lock)
+                    _metrics[metricName] = value;
+
+                CollectionChanged?.Invoke("Add", metricName, value);
+                return;
             }
 
-            CollectionChanged?.Invoke("Add", tagKey, value);
+            foreach (var tag in tags)
+            {
+                var tagKey = $"{metricName}:{tag.Key}={tag.Value}";
+
+                lock (_lock)
+                    _metrics[tagKey] = value;
+
+                CollectionChanged?.Invoke("Add", tagKey, value);
+            }
         }
 
         public object? GetValue(string key)
@@ -129,7 +137,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public bool HasHttp()
         {
-            return _metrics.Keys.Any(k => k.StartsWith("dotnet.net.http"));
+            return _metrics.Keys.Any(k => k.StartsWith("http.client"));
         }
     }
 }
