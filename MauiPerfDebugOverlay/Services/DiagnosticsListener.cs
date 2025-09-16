@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Metrics;
+﻿using MauiPerfDebugOverlay.Models.Internal;
+using System.Diagnostics.Metrics;
 
 namespace MauiPerfDebugOverlay.Services
 {
@@ -7,6 +8,7 @@ namespace MauiPerfDebugOverlay.Services
         private static readonly Lazy<DiagnosticsListener> _instance = new(() => new DiagnosticsListener());
         public static DiagnosticsListener Instance => _instance.Value;
 
+        private readonly List<NetworkMetric> _networkMetrics = new();
 
 
         private readonly MeterListener _listener;
@@ -77,6 +79,27 @@ namespace MauiPerfDebugOverlay.Services
 
         private void Store(string metricName, object value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
         {
+            if (metricName.StartsWith("http.client"))
+            {
+                // Stochează și în lista de rețea pentru analiză ulterioară
+                lock (_networkMetrics)
+                {
+                    _networkMetrics.Add(new NetworkMetric
+                    {
+                        Name = metricName,
+                        Value = value,
+                        Tags = tags.ToArray(),
+                        Timestamp = DateTime.UtcNow
+                    });
+                    // Păstrează doar ultimele 100 de intrări
+                    if (_networkMetrics.Count > 100)
+                    {
+                        _networkMetrics.RemoveAt(0);
+                    }
+                }
+            }
+
+
             if (tags.Length == 0)
             {
                 lock (_lock)

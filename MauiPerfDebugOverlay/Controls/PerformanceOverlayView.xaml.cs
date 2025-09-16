@@ -121,7 +121,8 @@ namespace MauiPerfDebugOverlay.Controls
 
         private void showUiItems()
         {
-            BoxViewNetwork.IsVisible = NetworkLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats;
+            //BoxViewNetwork.IsVisible = NetworkLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats;
+            BoxViewNetwork.IsVisible = NetworkLabel.IsVisible = false;
             BoxViewBattery.IsVisible = BatteryLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage;
             FpsLabel.IsVisible = FrameTimeLabel.IsVisible = HitchLabel.IsVisible = HighestHitchLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowFrame;
             BoxViewCpu.IsVisible = CpuLabel.IsVisible = ThreadsLabel.IsVisible = PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage;
@@ -152,8 +153,8 @@ namespace MauiPerfDebugOverlay.Controls
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowBatteryUsage)
                 UpdateBatteryUsage();
 
-            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats)
-                UpdateNetworkStats();
+            //if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats)
+            //    UpdateNetworkStats();
 
         }
 
@@ -285,17 +286,17 @@ namespace MauiPerfDebugOverlay.Controls
                 }
             }
 
-            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats)
-            {
-                NetworkLabel.Text =
-                $"Requests: {totalRequests}\n" +
-                $"Sent: {totalSent / 1024.0:F1} KB\n" +
-                $"Received: {totalReceived / 1024.0:F1} KB\n" +
-                $"Avg Req. Time: {avgRequestTime:F1} ms\n";
-                //$"Requests per sec.: {totalRequestsPerSecond}\n" +
-                //$"Sent per sec.: {totalSentPerSecond / 1024.0:F1} KB\n" +
-                //$"Received per sec.: {totalReceivedPerSecond / 1024.0:F1} KB";
-            }
+            //if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowNetworkStats)
+            //{
+            //    NetworkLabel.Text =
+            //    $"Requests: {totalRequests}\n" +
+            //    $"Sent: {totalSent / 1024.0:F1} KB\n" +
+            //    $"Received: {totalReceived / 1024.0:F1} KB\n" +
+            //    $"Avg Req. Time: {avgRequestTime:F1} ms\n";
+            //    //$"Requests per sec.: {totalRequestsPerSecond}\n" +
+            //    //$"Sent per sec.: {totalSentPerSecond / 1024.0:F1} KB\n" +
+            //    //$"Received per sec.: {totalReceivedPerSecond / 1024.0:F1} KB";
+            //}
 
             //ScoreLabel.Text = $"Overall: {_emaOverallScore:F1}/10";
             //ScoreLabel.TextColor = _emaOverallScore >= 8 ? Color.FromHex("7CBF8E") :

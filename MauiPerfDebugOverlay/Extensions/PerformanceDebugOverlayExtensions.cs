@@ -21,11 +21,11 @@ namespace MauiPerfDebugOverlay.Extensions
 
             };
 
-            if (options.ShowNetworkStats)
-            {
-                builder.Services.AddSingleton<ProfilingHttpClient>();
-                builder.Services.AddSingleton<HttpClient>(sp => sp.GetRequiredService<ProfilingHttpClient>());
-            }
+            //if (options.ShowNetworkStats)
+            //{
+            //    builder.Services.AddSingleton<ProfilingHttpClient>();
+            //    builder.Services.AddSingleton<HttpClient>(sp => sp.GetRequiredService<ProfilingHttpClient>());
+            //}
              
             if (options.ShowLoadTime)
             {

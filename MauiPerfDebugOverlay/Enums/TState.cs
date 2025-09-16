@@ -4,6 +4,7 @@
     {
         TabGeneral,
         TabDiagnostics,
-        TabTree
+        TabTree,
+        TabNetwork
     }
 }
