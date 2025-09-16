@@ -25,27 +25,49 @@ namespace MauiPerfDebugOverlay.Services
         {
             _listener = new MeterListener();
 
+            // Activează pentru toate instrumentele deja existente
+            //foreach (var meter in Meter.GetAllMeters())
+            //{
+            //    foreach (var instrument in meter.Instruments)
+            //    {
+            //        _listener.EnableMeasurementEvents(instrument);
+            //    }
+            //}
+
+
             _listener.InstrumentPublished += (instrument, l) =>
             {
                 l.EnableMeasurementEvents(instrument);
             };
 
+            //byte
+            _listener.SetMeasurementEventCallback<byte>((inst, value, tags, state) =>
+               Store(inst.Name, value, tags));
+
             // int
             _listener.SetMeasurementEventCallback<int>((inst, value, tags, state) =>
-                Store(inst.Name, value, tags));
-
-            // double
-            _listener.SetMeasurementEventCallback<double>((inst, value, tags, state) =>
-                Store(inst.Name, value, tags));
-
-            // long
-            _listener.SetMeasurementEventCallback<long>((inst, value, tags, state) =>
                 Store(inst.Name, value, tags));
 
             // float
             _listener.SetMeasurementEventCallback<float>((inst, value, tags, state) =>
                 Store(inst.Name, value, tags));
 
+            // double
+            _listener.SetMeasurementEventCallback<double>((inst, value, tags, state) =>
+                Store(inst.Name, value, tags));
+
+            // decimal
+            _listener.SetMeasurementEventCallback<decimal>((inst, value, tags, state) =>
+                Store(inst.Name, value, tags));
+
+            //short
+            _listener.SetMeasurementEventCallback<short>((inst, value, tags, state) =>
+               Store(inst.Name, value, tags));
+
+            // long
+            _listener.SetMeasurementEventCallback<long>((inst, value, tags, state) =>
+                Store(inst.Name, value, tags));
+             
             _listener.Start();
 
             _observableTimer = new System.Timers.Timer(observableIntervalMs);
@@ -98,6 +120,11 @@ namespace MauiPerfDebugOverlay.Services
             _observableTimer?.Stop();
             _observableTimer?.Dispose();
             _listener?.Dispose();
+        }
+
+        public int Count()
+        {
+            return _metrics.Count();
         }
     }
 }

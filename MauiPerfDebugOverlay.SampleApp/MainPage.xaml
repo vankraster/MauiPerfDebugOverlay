@@ -34,70 +34,11 @@
                 HorizontalOptions="Fill" />
 
 
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Label Text="Welcome to &#10;.NET Multi-platform App UI"
-                   Style="{StaticResource SubHeadline}"
-                   SemanticProperties.HeadingLevel="Level2"
-                   SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
+            <Button x:Name="CustomMetrics"
+                    Text="Click me"
+                    SemanticProperties.Hint="Add custom metrics"
+                    Clicked="CustomMetrics_Clicked"
+                    HorizontalOptions="Fill" />
 
 
         </VerticalStackLayout>

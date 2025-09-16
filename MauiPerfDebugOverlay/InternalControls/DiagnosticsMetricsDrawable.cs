@@ -74,7 +74,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
         public int CountMetrics()
         {
-            return DiagnosticsListener.Instance.GetAll().Count;
+            return DiagnosticsListener.Instance.Count();
         }
     }
 }
