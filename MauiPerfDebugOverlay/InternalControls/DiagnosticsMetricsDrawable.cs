@@ -143,7 +143,8 @@ namespace MauiPerfDebugOverlay.InternalControls
             // titlu
             var rect = new RectF(2, y - LineHeight / 2, dirtyRect.Width - 4, LineHeight);
             canvas.StrokeColor = Color.FromHex("D98880");
-            canvas.DrawRectangle(rect);
+       canvas.FillColor=Color.FromHex("D98880");
+            canvas.FillRectangle(rect);
 
             canvas.FontColor = Colors.White;
             canvas.FontSize = 16;
