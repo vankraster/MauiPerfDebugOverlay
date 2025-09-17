@@ -109,18 +109,18 @@ namespace MauiPerfDebugOverlay.Services
                 // Stochează și în lista de rețea pentru analiză ulterioară
                 lock (_lockNetwork)
                 {
-                    _networkMetrics.Add(new NetworkMetric
+                    _networkMetrics.Insert(0, new NetworkMetric
                     {
                         Name = metricName,
                         Value = value,
                         Tags = tags.ToArray(),
-                        Timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.Now
                     });
 
                     // Păstrează doar ultimele 100 de intrări
                     if (_networkMetrics.Count > 100)
                     {
-                        _networkMetrics.RemoveAt(0);
+                        _networkMetrics.RemoveAt(_networkMetrics.Count - 1);
                     }
                 }
             }
@@ -190,7 +190,8 @@ namespace MauiPerfDebugOverlay.Services
 
         public int Count()
         {
-            return _metrics.Count() + _metricsExceptions.Count() +2;
+            return (_metrics.Count() > 0 ? _metrics.Count() + 1 : 0) +
+                   (_metricsExceptions.Count() > 0 ? _metricsExceptions.Count() + 1 : 0);
         }
     }
 }
