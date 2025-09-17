@@ -68,7 +68,8 @@
                    FontAttributes="Bold"
                    FontSize="12"
                    TextColor="Red"
-                   Text="A newer version is available on NuGet. Please update to get the latest features!" />
+                   IsVisible="False"
+                   Text="" />
 
             <VerticalStackLayout x:Name="MetricsStack"
                                  Spacing="2"

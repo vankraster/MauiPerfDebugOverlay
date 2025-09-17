@@ -601,6 +601,18 @@ namespace MauiPerfDebugOverlay.Controls
 
         #endregion
 
+
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height);
+
+            if (!string.IsNullOrEmpty(VersionChecker.NewVersionLabelText))
+            {
+                NewVersionLabel.Text = VersionChecker.NewVersionLabelText;
+                NewVersionLabel.IsVisible = true;
+            }
+        }
+
     }
 }
 

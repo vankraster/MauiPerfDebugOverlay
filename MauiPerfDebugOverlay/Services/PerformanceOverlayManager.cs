@@ -1,5 +1,6 @@
 ﻿using MauiPerfDebugOverlay.Controls;
 using Microsoft.Maui.Layouts;
+using System.Reflection;
 
 namespace MauiPerfDebugOverlay.Services
 {
@@ -20,11 +21,22 @@ namespace MauiPerfDebugOverlay.Services
         public void Enable()
         {
             Application.Current.PageAppearing += OnPageAppearing;
-
-
+             
             #region CheckLatestVersion
             //https://api.nuget.org/v3-flatcontainer/PerformanceDebugOverlay/index.json
 
+
+            Task.Run(async () =>
+            {
+                int majorLine = 2; // sau 2, depinde de linia ta de .NET 
+                string currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
+
+                var latestVersion = VersionChecker.GetLatestNugetVersionForMajor(majorLine);
+
+                if (VersionChecker.IsNewerVersionAvailable(currentVersion, latestVersion))
+                    VersionChecker.NewVersionLabelText = $"New version {latestVersion} available on NuGet!";
+
+            });
             #endregion
         }
 
