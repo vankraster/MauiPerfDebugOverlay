@@ -216,7 +216,7 @@ namespace MauiPerfDebugOverlay.Services
             lock (_lockNetwork)
             {
                 if (_networkMetrics.Count == 0)
-                    return 0;
+                    return 36;
 
                 int count = _networkMetrics.Count + 1; // +1 pentru titlu/section header
 

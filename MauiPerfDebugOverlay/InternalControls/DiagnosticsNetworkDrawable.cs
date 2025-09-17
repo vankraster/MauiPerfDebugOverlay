@@ -26,7 +26,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             }
             else
             {
-                string line = "No metrics collected from System.Diagnostics.Metrics yet on Network.";
+                string line = "No metrics collected on Network from System.Diagnostics.Metrics yet.";
                 var rect = new RectF(StartX, y - LineHeight / 2, dirtyRect.Width - 20, LineHeight);
                 canvas.FontColor = Colors.White;
                 canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
