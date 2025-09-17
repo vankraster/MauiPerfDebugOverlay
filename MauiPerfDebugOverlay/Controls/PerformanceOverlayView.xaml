@@ -64,15 +64,15 @@
                      Color="Gray"
                      Margin="0,4" />
 
-            <VerticalStackLayout x:Name="MetricsStack"
-                                 Spacing="2"
-                                 Margin="0,0,0,0">
-                
                 <Label x:Name="NewVersionLabel"
                        FontAttributes="Bold"
                        FontSize="12"
                        TextColor="Red"
                        Text="New Version on Nuget" />
+            <VerticalStackLayout x:Name="MetricsStack"
+                                 Spacing="2"
+                                 Margin="0,0,0,0">
+
 
                 <Label x:Name="FpsLabel"
                        FontAttributes="Bold"
@@ -166,6 +166,11 @@
                                              IsVisible="False"
                                              HeightRequest="100"
                                              x:Name="DiagnosticsMetrics" />
+
+            <controls:DiagnosticsNetworkView BackgroundColor="Transparent"
+                                             IsVisible="False"
+                                             HeightRequest="100"
+                                             x:Name="DiagnosticsNetwork" />
 
             <controls:TreeViewControl BackgroundColor="Transparent"
                                       IsVisible="False"

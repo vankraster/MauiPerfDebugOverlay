@@ -26,6 +26,8 @@ namespace MauiPerfDebugOverlay.Services
         /// </summary>
         public event Action<string, string?, object?>? CollectionChanged;
 
+        public event Action<string, string?, object?>? CollectionNetworkChanged;
+
         public DiagnosticsListener(double observableIntervalMs = 500)
         {
             _listener = new MeterListener();
@@ -101,8 +103,7 @@ namespace MauiPerfDebugOverlay.Services
                         _metricsExceptions[tag.Value?.ToString() ?? "NO TAG VALUE"] = value;
 
                     CollectionChanged?.Invoke("Add", tag.Key, value);
-                }
-
+                } 
             }
             else if (metricName.StartsWith("http.client") || metricName.StartsWith("dns"))
             {
@@ -123,6 +124,8 @@ namespace MauiPerfDebugOverlay.Services
                         _networkMetrics.RemoveAt(_networkMetrics.Count - 1);
                     }
                 }
+
+                CollectionNetworkChanged?.Invoke("Add", metricName, value);
             }
             else
             {
@@ -171,15 +174,7 @@ namespace MauiPerfDebugOverlay.Services
             }
         }
 
-        public void Clear()
-        {
-            lock (_lock)
-            {
-                _metrics.Clear();
-            }
-
-            CollectionChanged?.Invoke("Clear", null, null);
-        }
+         
 
         public void Dispose()
         {

@@ -534,19 +534,18 @@ namespace MauiPerfDebugOverlay.Controls
                             MetricsStack.IsVisible = true;
                             DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = false;
+                            DiagnosticsNetwork.IsVisible = false;
 
                             boundsY.Width = -1;
                             boundsY.Height = -1;
                             break;
-
                         case TState.TabDiagnostics:
                             MetricsStack.IsVisible = false;
                             DiagnosticsMetrics.IsVisible = true;
                             TheTreeView.IsVisible = false;
+                            DiagnosticsNetwork.IsVisible = false;
 
-                            DiagnosticsMetrics.Refresh();
-
-
+                            DiagnosticsMetrics.Refresh(); 
                             if (_isCompact)
                             {
                                 boundsY.Width = -1;
@@ -563,13 +562,24 @@ namespace MauiPerfDebugOverlay.Controls
                                 DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10);
                                 DiagnosticsMetrics.HeightRequest = ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
                             }
-
                             break;
+                        case TState.TabNetwork:
+                            MetricsStack.IsVisible = false;
+                            DiagnosticsMetrics.IsVisible = false;
+                            TheTreeView.IsVisible = false;
+                            DiagnosticsNetwork.IsVisible = true;
 
+                            boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                            boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+
+                            DiagnosticsNetwork.WidthRequest = boundsY.Width - 10;
+                            DiagnosticsNetwork.HeightRequest = boundsY.Height - 10 - HeaderStack.Height;
+                            break;
                         case TState.TabTree:
                             MetricsStack.IsVisible = false;
                             DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = true;
+                            DiagnosticsNetwork.IsVisible = false;
 
                             TreeNode node = _dumpService.DumpCurrentPage();
                             TheTreeView.RootNode = node;

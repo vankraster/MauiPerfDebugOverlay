@@ -2,11 +2,11 @@
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
-    public class DiagnosticsMetricsView : ContentView
+    public class DiagnosticsNetworkView : ContentView
     {
         internal readonly GraphicsView _graphicsView;
 
-        public DiagnosticsMetricsView()
+        public DiagnosticsNetworkView()
         {
             _graphicsView = new GraphicsView
             {
@@ -14,10 +14,10 @@ namespace MauiPerfDebugOverlay.InternalControls
                 WidthRequest = 520,
                 VerticalOptions = LayoutOptions.Start
             };
-            var metricsDrawable = new DiagnosticsMetricsDrawable();
+            var metricsDrawable = new DiagnosticsNetworkDrawable();
             _graphicsView.Drawable = metricsDrawable;
 
-            DiagnosticsListener.Instance.CollectionChanged += Instance_CollectionChanged;
+            DiagnosticsListener.Instance.CollectionNetworkChanged += Instance_CollectionChanged;
 
             Content = new ScrollView
             {
@@ -32,19 +32,17 @@ namespace MauiPerfDebugOverlay.InternalControls
             if (this.IsVisible)
                 Refresh();// Application.Current.Dispatcher.Dispatch(Refresh);
         }
-
-
-
+         
         /// <summary>
         /// Reîmprospătează datele și redesenează controlul
         /// </summary>
         public void Refresh()
         {
-            var metricsDrawable = (_graphicsView.Drawable as DiagnosticsMetricsDrawable);
+            var metricsDrawable = (_graphicsView.Drawable as DiagnosticsNetworkDrawable);
             // Înălțimea ajustată dinamic
-            var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 1) * DiagnosticsMetricsDrawable.LineHeight;
+            var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 1) * DiagnosticsNetworkDrawable.LineHeight;
             if (newHeight != _graphicsView.HeightRequest)
-                _graphicsView.HeightRequest = newHeight; 
+                _graphicsView.HeightRequest = newHeight;
 
             _graphicsView.Invalidate();
         }
