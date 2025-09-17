@@ -1,4 +1,4 @@
-\## PerformanceDebugOverlay (v2.0.1)
+\## PerformanceDebugOverlay (v1.0.7)
 ---
   
 A real-time performance overlay for .NET MAUI that tracks FPS, CPU, memory, GC, battery, and network usage, while providing a load-time component tree—all without major changes to your app code.
@@ -88,8 +88,8 @@ public static class MauiProgram
              ShowFrame = true,
              ShowMemory = true,
              ShowLoadTime = true,
-             LoadTimeDanger = 800,
-             LoadTimeWarning = 1000
+             LoadTimeDanger = 200,
+             LoadTimeWarning = 450
 
          });
      return builder.Build();
