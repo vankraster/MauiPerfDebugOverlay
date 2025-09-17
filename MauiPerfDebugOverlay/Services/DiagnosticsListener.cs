@@ -103,7 +103,7 @@ namespace MauiPerfDebugOverlay.Services
                         _metricsExceptions[tag.Value?.ToString() ?? "NO TAG VALUE"] = value;
 
                     CollectionChanged?.Invoke("Add", tag.Key, value);
-                } 
+                }
             }
             else if (metricName.StartsWith("http.client") || metricName.StartsWith("dns"))
             {
@@ -174,7 +174,13 @@ namespace MauiPerfDebugOverlay.Services
             }
         }
 
-         
+        public IReadOnlyList<NetworkMetric> GetAllNetwork()
+        {
+            lock (_lockNetwork)
+            {
+                return new List<NetworkMetric>(_networkMetrics);
+            }
+        }
 
         public void Dispose()
         {

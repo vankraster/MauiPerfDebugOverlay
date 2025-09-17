@@ -30,7 +30,7 @@ namespace MauiPerfDebugOverlay.InternalControls
         private void Instance_CollectionChanged(string arg1, string? arg2, object? arg3)
         {
             if (this.IsVisible)
-                Refresh();// Application.Current.Dispatcher.Dispatch(Refresh);
+                 Application.Current.Dispatcher.Dispatch(Refresh);
         }
          
         /// <summary>

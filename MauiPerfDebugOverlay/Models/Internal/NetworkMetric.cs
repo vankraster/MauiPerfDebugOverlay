@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MauiPerfDebugOverlay.Models.Internal
 {
-    internal class NetworkMetric
+    public class NetworkMetric
     {
         public string Name { get; internal set; }
         public object Value { get; internal set; }

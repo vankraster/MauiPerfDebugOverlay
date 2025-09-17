@@ -1,4 +1,5 @@
-﻿using MauiPerfDebugOverlay.Services;
+﻿using MauiPerfDebugOverlay.Models.Internal;
+using MauiPerfDebugOverlay.Services;
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
@@ -17,24 +18,22 @@ namespace MauiPerfDebugOverlay.InternalControls
             _rects.Clear();
             float y = StartY;
 
-            var items = DiagnosticsListener.Instance.GetAll();
-            var itemsExceptions = DiagnosticsListener.Instance.GetAllExceptions();
+            var items = DiagnosticsListener.Instance.GetAllNetwork(); 
 
-            if (items.Count > 0 || itemsExceptions.Count > 0)
+            if (items.Count > 0 )
             {
-                y = DrawMetricsSection(canvas, "Exception metrics", itemsExceptions, y, dirtyRect);
-                y = DrawMetricsSection(canvas, "Generic metrics", items, y, dirtyRect);
+                y = DrawMetricsSection(canvas, "Exception metrics", items, y, dirtyRect); 
             }
             else
             {
-                string line = "No metrics collected from System.Diagnostics.Metrics yet.";
+                string line = "No metrics collected from System.Diagnostics.Metrics yet on Network.";
                 var rect = new RectF(StartX, y - LineHeight / 2, dirtyRect.Width - 20, LineHeight);
                 canvas.FontColor = Colors.White;
                 canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
             }
         }
 
-        private float DrawMetricsSection(ICanvas canvas, string title, IReadOnlyDictionary<string, object> items, float y, RectF dirtyRect)
+        private float DrawMetricsSection(ICanvas canvas, string title, IReadOnlyList<NetworkMetric> items, float y, RectF dirtyRect)
         {
             if (items.Count == 0)
                 return y;
@@ -54,10 +53,10 @@ namespace MauiPerfDebugOverlay.InternalControls
             foreach (var kvp in items)
             {
                 index++;
-                string line = $"{kvp.Key.Replace("dotnet.", "")} = {kvp.Value}";
+                string line = $"{kvp.Name.Replace("dotnet.", "")} = {kvp.Value}";
 
                 rect = new RectF(StartX, y - LineHeight / 2, dirtyRect.Width - 20, LineHeight);
-                _rects[kvp.Key] = rect;
+                _rects[kvp.Name] = rect;
 
                 // fundal alternativ
                 if (index % 2 == 0)
