@@ -182,6 +182,19 @@ namespace MauiPerfDebugOverlay.Services
             }
         }
 
+        public void CollapseExpandNetwork(int key)
+        {
+            lock (_lockNetwork)
+            {
+                var metric = _networkMetrics.FirstOrDefault(m => m.Id == key);
+                if (metric != null)
+                {
+                    metric.IsExpanded = !metric.IsExpanded;
+                }
+            }
+        }
+
+
         public void Dispose()
         {
             _observableTimer?.Stop();
@@ -195,9 +208,30 @@ namespace MauiPerfDebugOverlay.Services
                    (_metricsExceptions.Count() > 0 ? _metricsExceptions.Count() + 1 : 0);
         }
 
-        public int CountNetwork()
+
+
+        internal double NewHeight()
         {
-            return (_networkMetrics.Count() > 0 ? _networkMetrics.Count() + 1 : 0);
+            double height = 0;
+            lock (_lockNetwork)
+            {
+                if (_networkMetrics.Count == 0)
+                    return 0;
+
+                int count = _networkMetrics.Count + 1; // +1 pentru titlu/section header
+
+                height = count * 36;
+
+                // adaugă numărul de tag-uri pentru fiecare metrică expandată
+                int countTags = _networkMetrics
+                      .Where(m => m.IsExpanded && m.Tags != null)
+                      .Sum(m => m.Tags.Length);
+
+
+                height += 36   * countTags;
+            }
+
+            return height;
         }
     }
 }

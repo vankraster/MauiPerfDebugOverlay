@@ -17,6 +17,11 @@ namespace MauiPerfDebugOverlay.InternalControls
             var metricsDrawable = new DiagnosticsNetworkDrawable();
             _graphicsView.Drawable = metricsDrawable;
 
+            _graphicsView.StartInteraction += (s, e) =>
+            {
+                Tapped(e.Touches[0].X, e.Touches[0].Y);
+            };
+
             DiagnosticsListener.Instance.CollectionNetworkChanged += Instance_CollectionChanged;
 
             Content = new ScrollView
@@ -27,12 +32,26 @@ namespace MauiPerfDebugOverlay.InternalControls
 
         }
 
+
+        public void Tapped(float x, float y)
+        {
+            if (_graphicsView.Drawable is DiagnosticsNetworkDrawable drawable)
+            {
+                var clickedNode = drawable.HitTest(x, y);
+                if (clickedNode > 0)
+                {
+                    DiagnosticsListener.Instance.CollapseExpandNetwork(clickedNode);
+                    Refresh();
+                }
+            }
+        }
+
         private void Instance_CollectionChanged(string arg1, string? arg2, object? arg3)
         {
             if (this.IsVisible)
-                 Application.Current.Dispatcher.Dispatch(Refresh);
+                Application.Current.Dispatcher.Dispatch(Refresh);
         }
-         
+
         /// <summary>
         /// Reîmprospătează datele și redesenează controlul
         /// </summary>
@@ -40,7 +59,7 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             var metricsDrawable = (_graphicsView.Drawable as DiagnosticsNetworkDrawable);
             // Înălțimea ajustată dinamic
-            var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 1) * DiagnosticsNetworkDrawable.LineHeight;
+            var newHeight = metricsDrawable.NewHeight();
             if (newHeight != _graphicsView.HeightRequest)
                 _graphicsView.HeightRequest = newHeight;
 

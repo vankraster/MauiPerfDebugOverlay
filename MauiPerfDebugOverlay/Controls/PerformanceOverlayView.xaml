@@ -64,11 +64,12 @@
                      Color="Gray"
                      Margin="0,4" />
 
-                <Label x:Name="NewVersionLabel"
-                       FontAttributes="Bold"
-                       FontSize="12"
-                       TextColor="Red"
-                       Text="New Version on Nuget" />
+            <Label x:Name="NewVersionLabel"
+                   FontAttributes="Bold"
+                   FontSize="12"
+                   TextColor="Red"
+                   Text="A newer version is available on NuGet. Please update to get the latest features!" />
+
             <VerticalStackLayout x:Name="MetricsStack"
                                  Spacing="2"
                                  Margin="0,0,0,0">
