@@ -11,7 +11,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             _graphicsView = new GraphicsView
             {
                 HeightRequest = 200,
-                WidthRequest = 520,
+                WidthRequest = 800,
                 VerticalOptions = LayoutOptions.Start
             };
             var metricsDrawable = new DiagnosticsMetricsDrawable();

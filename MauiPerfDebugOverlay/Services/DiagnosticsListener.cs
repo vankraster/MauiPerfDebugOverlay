@@ -194,5 +194,10 @@ namespace MauiPerfDebugOverlay.Services
             return (_metrics.Count() > 0 ? _metrics.Count() + 1 : 0) +
                    (_metricsExceptions.Count() > 0 ? _metricsExceptions.Count() + 1 : 0);
         }
+
+        public int CountNetwork()
+        {
+            return (_networkMetrics.Count() > 0 ? _networkMetrics.Count() + 1 : 0);
+        }
     }
 }

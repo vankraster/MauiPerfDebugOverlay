@@ -574,6 +574,7 @@ namespace MauiPerfDebugOverlay.Controls
 
                             DiagnosticsNetwork.WidthRequest = boundsY.Width - 10;
                             DiagnosticsNetwork.HeightRequest = boundsY.Height - 10 - HeaderStack.Height;
+                            DiagnosticsNetwork.Refresh();
                             break;
                         case TState.TabTree:
                             MetricsStack.IsVisible = false;

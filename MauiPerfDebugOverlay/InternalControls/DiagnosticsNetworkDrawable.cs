@@ -22,7 +22,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
             if (items.Count > 0 )
             {
-                y = DrawMetricsSection(canvas, "Exception metrics", items, y, dirtyRect); 
+                y = DrawMetricsSection(canvas, "Network metrics", items, y, dirtyRect); 
             }
             else
             {
@@ -74,6 +74,6 @@ namespace MauiPerfDebugOverlay.InternalControls
             return y;
         }
          
-        public int CountMetrics() => DiagnosticsListener.Instance.Count();
+        public int CountMetrics() => DiagnosticsListener.Instance.CountNetwork();
     }
 }
