@@ -39,13 +39,13 @@
         public bool ShowLoadTime { get; set; } = true;
 
         /// <summary>
-        /// Threshold for warning load time in ms (default 800ms).
+        /// Threshold for warning load time in ms (default 200ms).
         /// </summary>
-        public int LoadTimeWarning { get; set; } = 600;
+        public int LoadTimeWarning { get; set; } = 200;
 
         /// <summary>
-        /// Threshold for danger load time in ms (default 1000ms).
+        /// Threshold for danger load time in ms (default 450ms).
         /// </summary>
-        public int LoadTimeDanger { get; set; } = 800;
+        public int LoadTimeDanger { get; set; } = 450;
     }
 }

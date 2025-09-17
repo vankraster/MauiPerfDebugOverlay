@@ -22,22 +22,25 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>2.0.0</Version>
+		<Version>2.0.1</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
 		<Description>
 			MAUI Performance Overlay – lightweight, drag-and-move performance HUD for .NET MAUI apps.
 			Displays real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, Battery consumption (Android only), and Networking stats (total requests, bytes sent/received, average request time).
-			Provides an overall score for app performance. Load time per components is also tracked and displayed. Ideal for diagnostics and profiling MAUI applications on Android, iOS, MacCatalyst, Tizen, and Windows.
-			Easily integrates into your app to monitor performance and responsiveness.
+			Tracks load time per component and provides overall performance score.
+			Supports .NET 9, Android, iOS, MacCatalyst, Tizen, and Windows.
+			Easily integrates into your app for real-time diagnostics and profiling.
 		</Description>
-
-		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;Load time;</PackageTags>
-
+		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;.NET9</PackageTags>
 		<PackageReleaseNotes>
-			Added support for .Net 9
+			- Added support for .NET 9.
+			- Updated Network metrics visualization.
+			- Improved Tree load-time rendering with expandable nodes.
+			- Minor bug fixes and performance improvements.
 		</PackageReleaseNotes>
+
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/vankraster/MauiPerfDebugOverlay</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>

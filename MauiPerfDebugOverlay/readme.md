@@ -1,11 +1,11 @@
-\## PerformanceDebugOverlay (v2.0.0)
+\## PerformanceDebugOverlay (v2.0.1)
 ---
   
 A real-time performance overlay for .NET MAUI that tracks FPS, CPU, memory, GC, battery, and network usage, while providing a load-time component tree—all without major changes to your app code.
 
 
 
-![Overlay Screenshot](https://raw.githubusercontent.com/vankraster/MauiPerfDebugOverlay/refs/heads/master/MauiPerfDebugOverlay.SampleApp/overlay/overlay-screenshot-106.png)
+![Overlay Screenshot](https://raw.githubusercontent.com/vankraster/MauiPerfDebugOverlay/refs/heads/master/MauiPerfDebugOverlay.SampleApp/overlay/overlay-screenshot-201.png)
 
 
 \## Features
