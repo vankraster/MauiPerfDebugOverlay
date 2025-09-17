@@ -88,8 +88,8 @@ public static class MauiProgram
              ShowFrame = true,
              ShowMemory = true,
              ShowLoadTime = true,
-             LoadTimeDanger = 800,
-             LoadTimeWarning = 1000
+             LoadTimeDanger = 200,
+             LoadTimeWarning = 450
 
          });
      return builder.Build();
