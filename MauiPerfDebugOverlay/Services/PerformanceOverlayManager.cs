@@ -20,6 +20,12 @@ namespace MauiPerfDebugOverlay.Services
         public void Enable()
         {
             Application.Current.PageAppearing += OnPageAppearing;
+
+
+            #region CheckLatestVersion
+            //https://api.nuget.org/v3-flatcontainer/PerformanceDebugOverlay/index.json
+
+            #endregion
         }
 
         private void OnPageAppearing(object? sender, Page page)
