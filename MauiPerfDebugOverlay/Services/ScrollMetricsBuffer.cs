@@ -10,7 +10,7 @@
 
         // Cheia este Id-ul controlului
         private readonly Dictionary<Guid, ScrollMetrics> _metrics = new();
-
+        private readonly Lock _lock = new();
         /// <summary>
         /// Raised whenever the metrics collection changes.
         /// Arguments: action type ("Add" or "Clear"), element Id, load time (if applicable).
@@ -29,7 +29,7 @@
         /// <param name="jank">Dacă frame-ul a depășit 16ms</param>
         public void UpdateMetrics(Guid controlId, string type, double durationMs, double velocity, bool jank)
         {
-            lock (_metrics)
+            using (_lock.EnterScope())
             {
                 if (!_metrics.TryGetValue(controlId, out var metric))
                 {
@@ -54,7 +54,7 @@
         /// <returns>ScrollMetrics sau null dacă nu există</returns>
         public ScrollMetrics? GetMetrics(Guid controlId)
         {
-            lock (_metrics)
+            using (_lock.EnterScope())
             {
                 return _metrics.TryGetValue(controlId, out var metric) ? metric : null;
             }
@@ -65,7 +65,7 @@
         /// </summary>
         public void ClearMetrics(Guid controlId)
         {
-            lock (_metrics)
+            using (_lock.EnterScope())
             {
                 _metrics.Remove(controlId);
             }
@@ -78,7 +78,7 @@
         /// </summary>
         public void ClearAllMetrics()
         {
-            lock (_metrics)
+            using (_lock.EnterScope())
             {
                 _metrics.Clear();
             }
@@ -88,7 +88,7 @@
 
         public List<Guid> GetAllControlIds()
         {
-            lock (_metrics)
+            using (_lock.EnterScope())
             {
                 return _metrics.Keys.ToList();
             }

@@ -12,7 +12,7 @@ namespace MauiPerfDebugOverlay.Services
         public static LoadTimeMetricsStore Instance => _instance.Value;
 
         private readonly Dictionary<Guid, double> _metrics = new();
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         /// <summary>
         /// Raised whenever the metrics collection changes.
@@ -22,7 +22,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public void Add(Guid id, double ms)
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 _metrics[id] = ms;
             }
@@ -33,7 +33,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public void Clear()
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 _metrics.Clear();
             }
@@ -44,14 +44,14 @@ namespace MauiPerfDebugOverlay.Services
 
         public double? GetValue(Guid id)
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 return _metrics.TryGetValue(id, out var value) ? value : (double?)null;
             }
         }
         public IReadOnlyDictionary<Guid, double> GetAll()
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 return new Dictionary<Guid, double>(_metrics);
             }
@@ -60,7 +60,7 @@ namespace MauiPerfDebugOverlay.Services
         internal double GetSumOfChildrenInMs(TreeNode treeNode)
         {
             double sum = 0;
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 foreach (var node in treeNode.Children)
                     sum += (_metrics.TryGetValue(node.Id, out var value) ? value : 0d);

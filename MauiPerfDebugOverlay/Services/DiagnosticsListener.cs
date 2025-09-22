@@ -12,13 +12,14 @@ namespace MauiPerfDebugOverlay.Services
         private readonly System.Timers.Timer _observableTimer;
 
         private readonly List<NetworkMetric> _networkMetrics = new();
-        private readonly object _lockNetwork = new();
+        private readonly Lock _lockNetwork = new();
 
         private readonly Dictionary<string, object> _metricsExceptions = new();
-        private readonly object _lockExceptions = new();
+        private readonly Lock _lockExceptions = new();
 
         private readonly Dictionary<string, object> _metrics = new();
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
+
 
         /// <summary>
         /// Raised whenever the metrics collection changes.
@@ -88,7 +89,7 @@ namespace MauiPerfDebugOverlay.Services
             {
                 if (tags.Length == 0)
                 {
-                    lock (_lockExceptions)
+                    using (_lockExceptions.EnterScope())
                         _metricsExceptions[metricName] = value;
 
                     CollectionChanged?.Invoke("Add", metricName, value);
@@ -99,7 +100,7 @@ namespace MauiPerfDebugOverlay.Services
                 {
                     //var tagKey = $"{metricName}:{tag.Key}={tag.Value}";
 
-                    lock (_lockExceptions)
+                    using (_lockExceptions.EnterScope())
                         _metricsExceptions[tag.Value?.ToString() ?? "NO TAG VALUE"] = value;
 
                     CollectionChanged?.Invoke("Add", tag.Key, value);
@@ -108,7 +109,7 @@ namespace MauiPerfDebugOverlay.Services
             else if (metricName.StartsWith("http.client") || metricName.StartsWith("dns"))
             {
                 // Stochează și în lista de rețea pentru analiză ulterioară
-                lock (_lockNetwork)
+                using (_lockNetwork.EnterScope())
                 {
                     _networkMetrics.Insert(0, new NetworkMetric
                     {
@@ -131,7 +132,7 @@ namespace MauiPerfDebugOverlay.Services
             {
                 if (tags.Length == 0)
                 {
-                    lock (_lock)
+                    using (_lock.EnterScope())
                         _metrics[metricName] = value;
 
                     CollectionChanged?.Invoke("Add", metricName, value);
@@ -142,7 +143,7 @@ namespace MauiPerfDebugOverlay.Services
                 {
                     var tagKey = $"{metricName}:{tag.Key}={tag.Value}";
 
-                    lock (_lock)
+                    using (_lock.EnterScope())
                         _metrics[tagKey] = value;
 
                     CollectionChanged?.Invoke("Add", tagKey, value);
@@ -152,7 +153,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public object? GetValue(string key)
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 return _metrics.TryGetValue(key, out var value) ? value : null;
             }
@@ -160,7 +161,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public IReadOnlyDictionary<string, object> GetAll()
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 return new Dictionary<string, object>(_metrics);
             }
@@ -168,7 +169,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public IReadOnlyDictionary<string, object> GetAllExceptions()
         {
-            lock (_lockExceptions)
+            using (_lockExceptions.EnterScope())
             {
                 return new Dictionary<string, object>(_metricsExceptions);
             }
@@ -176,7 +177,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public IReadOnlyList<NetworkMetric> GetAllNetwork()
         {
-            lock (_lockNetwork)
+            using (_lockNetwork.EnterScope())
             {
                 return new List<NetworkMetric>(_networkMetrics);
             }
@@ -184,7 +185,7 @@ namespace MauiPerfDebugOverlay.Services
 
         public void CollapseExpandNetwork(int key)
         {
-            lock (_lockNetwork)
+            using (_lockNetwork.EnterScope())
             {
                 var metric = _networkMetrics.FirstOrDefault(m => m.Id == key);
                 if (metric != null)
@@ -213,7 +214,7 @@ namespace MauiPerfDebugOverlay.Services
         internal double NewHeight()
         {
             double height = 0;
-            lock (_lockNetwork)
+            using (_lockNetwork.EnterScope())
             {
                 if (_networkMetrics.Count == 0)
                     return 36;
@@ -228,7 +229,7 @@ namespace MauiPerfDebugOverlay.Services
                       .Sum(m => m.Tags.Length);
 
 
-                height += 36   * countTags;
+                height += 36 * countTags;
             }
 
             return height;
