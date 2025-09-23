@@ -27,9 +27,15 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 HorizontalOptions = LayoutOptions.StartAndExpand,
                 VerticalOptions = LayoutOptions.StartAndExpand,
-                Text = "In order to have AI analyzer you should add Gemini ApiKey in " + Environment.NewLine +
-                       "MauiProgram > .UsePerformanceDebugOverlay property GeminiAPIKey " + Environment.NewLine +
-                       "You can generate key from https://aistudio.google.com/apikey "
+                Text = "⚡ To enable AI Analyzer, please add your Gemini API Key.\n" +
+                        "\n" +
+                        "1. Open MauiProgram.cs and set it in:\n" +
+                        "   .UsePerformanceDebugOverlay(new Models.PerformanceOverlayOptions { GeminiAPIKey: \"your_key_here\" .....)\n" +
+                        "\n" +
+                        "2. You can generate a free API key here:\n" +
+                        "   https://aistudio.google.com/apikey\n" +
+                        "\n" +
+                        "💡 Once set, the [Ask AI] button will become visible in the Tree Tab."
             };
 
             GeminiService.Instance.ResponseChanged += Instance_ResponseChanged;

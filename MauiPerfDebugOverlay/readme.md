@@ -1,4 +1,4 @@
-\## PerformanceDebugOverlay (v1.0.7)
+\## PerformanceDebugOverlay (v1.0.8)
 ---
   
 A real-time performance overlay for .NET MAUI that tracks FPS, CPU, memory, GC, battery, and network usage, while providing a load-time component tree—all without major changes to your app code.
@@ -38,6 +38,7 @@ Collapse/Expand tree view items
 
 Scrollable TreeView
 
+AI assistance for performance improvement suggestions ( use your own Gemini API key )
 
 \## Installation
 ---
@@ -46,7 +47,7 @@ Add the NuGet package to your project:
 
 
 
-dotnet add package PerformanceDebugOverlay --version 2.0.0
+dotnet add package PerformanceDebugOverlay --version 1.0.8
 
 
 
@@ -90,7 +91,7 @@ public static class MauiProgram
              ShowLoadTime = true,
              LoadTimeDanger = 200,
              LoadTimeWarning = 450
-
+             GeminiAPIKey = "YOUR_API_KEY" // optional
          });
      return builder.Build();
   }
