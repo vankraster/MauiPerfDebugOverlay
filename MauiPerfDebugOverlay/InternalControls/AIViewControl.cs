@@ -25,6 +25,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
             _label = new Label
             {
+                TextColor = Colors.White,
                 HorizontalOptions = LayoutOptions.StartAndExpand,
                 VerticalOptions = LayoutOptions.StartAndExpand,
                 Text = "⚡ To enable AI Analyzer, please add your Gemini API Key.\n" +
