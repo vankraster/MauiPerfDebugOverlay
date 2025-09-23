@@ -79,16 +79,18 @@ namespace MauiPerfDebugOverlay.Services
             ResponseChanged?.Invoke(LastAnalyzerResponse);
             string serializedTree = TreeNode.SerializeTree(clickedNode);
 
-            string treePrompt = $@" I have a XAML structure from a .NET MAUI page.
+            string treePrompt = $@" I have a XAML subtree from a .NET MAUI page.
 
-                                Please analyze the following subtree and provide:  
-                                1. Any possible performance issues based on SelfMs timings.
-                                2. Suggestions for optimization.
+                                    Please analyze this subtree for potential issues, but follow these rules:
 
-                                Subtree details:
-                                {serializedTree}
+                                    1. Performance: Identify only CLEAR performance bottlenecks based on SelfMs/HandlerChanged timings.
+                                    2. Structural/Layout: Identify only CLEAR structural/layout problems, e.g., excessive nesting, inappropriate layout usage, or patterns that could degrade performance or maintainability.
+                                    3. If there are no real issues in a category, just say ""No clear issues detected"" for that category.
+                                    4. Avoid inventing problems or giving generic optimization tips. Only mention real, observable concerns.
+                                    5. Give a brief, structured answer.
 
-                                Answer in a clear, structured and brief way.";
+                                    Subtree details:
+                                    {serializedTree} ";
 
             LastAnalyzerResponse = await GetResponseAsync(treePrompt);
             ResponseChanged?.Invoke(LastAnalyzerResponse);
