@@ -5,6 +5,7 @@
         TabGeneral,
         TabDiagnostics,
         TabTree,
-        TabNetwork
+        TabNetwork,
+        TabAI
     }
 }

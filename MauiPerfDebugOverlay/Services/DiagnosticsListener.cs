@@ -228,10 +228,10 @@ namespace MauiPerfDebugOverlay.Services
                       .Sum(m => m.Tags.Length);
 
 
-                height += 36   * countTags;
+                height += 36 * countTags;
             }
 
-            return height;
+            return height + 20;
         }
     }
 }
