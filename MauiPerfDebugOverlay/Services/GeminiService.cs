@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using MauiPerfDebugOverlay.Models.Internal;
+using System.Text.Json;
 
 namespace MauiPerfDebugOverlay.Services
 {
@@ -16,20 +17,8 @@ namespace MauiPerfDebugOverlay.Services
         }
 
 
-        private string treeAnalyzerResponse;
 
 
-        private async Task<string> GetTreeAnalyzerResponseAsync()
-        {
-             
-            if (string.IsNullOrWhiteSpace(treeAnalyzerResponse))
-            {
-                string treePrompt = "";
-                treeAnalyzerResponse = await GetResponseAsync(treePrompt);
-            }
-
-            return treeAnalyzerResponse;
-        }
 
 
         private async Task<string> GetResponseAsync(string prompt)
@@ -86,5 +75,27 @@ namespace MauiPerfDebugOverlay.Services
             }
 
         }
+
+
+
+        private string lastTreeAnalyzerResponse;
+        internal async Task AskForTreeNode(TreeNode clickedNode)
+        {
+            string serializedTree = TreeNode.SerializeTree(clickedNode);
+
+            string treePrompt = $@" I have a XAML structure from a .NET MAUI page.
+
+                                Please analyze the following subtree and provide:  
+                                1. Any possible performance issues based on SelfMs timings.
+                                2. Suggestions for optimization.
+
+                                Subtree details:
+                                {serializedTree}
+
+                                Answer in a clear, structured way.";
+
+            lastTreeAnalyzerResponse = await GetResponseAsync(treePrompt);
+        }
+
     }
 }
