@@ -1,6 +1,5 @@
 ﻿using MauiPerfDebugOverlay.Models.Internal;
-using System.Diagnostics.Metrics;
-
+using System.Diagnostics.Metrics; 
 namespace MauiPerfDebugOverlay.Services
 {
     public class DiagnosticsListener : IDisposable

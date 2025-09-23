@@ -72,8 +72,8 @@ namespace MauiPerfDebugOverlay.Services
         {
             double totalMs = 0;
             double childrenMs = 0;
-             
-            lock (_lock)
+
+            using (_lock.EnterScope())
             {
                 _metrics.TryGetValue(treeNode.Id, out totalMs);
 
