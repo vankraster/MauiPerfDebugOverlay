@@ -5,7 +5,7 @@ A real-time performance overlay for .NET MAUI that tracks FPS, CPU, memory, GC, 
 
 
 
-![Overlay Screenshot](https://raw.githubusercontent.com/vankraster/MauiPerfDebugOverlay/refs/heads/master/MauiPerfDebugOverlay.SampleApp/overlay/overlay-screenshot-201.png)
+![Overlay Screenshot](https://raw.githubusercontent.com/vankraster/MauiPerfDebugOverlay/refs/heads/master/MauiPerfDebugOverlay.SampleApp/overlay/overlay-screenshot-202.png)
 
 
 \## Features
