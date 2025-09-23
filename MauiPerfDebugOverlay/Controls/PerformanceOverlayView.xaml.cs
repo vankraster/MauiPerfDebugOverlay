@@ -513,7 +513,7 @@ namespace MauiPerfDebugOverlay.Controls
 
         #region Component Loading
 
-        private void OnTabClicked(object sender, EventArgs e)
+        private async void OnTabClicked(object sender, EventArgs e)
         {
             var clickedTab = (sender as Button).CommandParameter.ToString();
 
@@ -535,6 +535,7 @@ namespace MauiPerfDebugOverlay.Controls
                             DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = false;
                             DiagnosticsNetwork.IsVisible = false;
+                            AiView.IsVisible = false;
 
                             boundsY.Width = -1;
                             boundsY.Height = -1;
@@ -544,8 +545,9 @@ namespace MauiPerfDebugOverlay.Controls
                             DiagnosticsMetrics.IsVisible = true;
                             TheTreeView.IsVisible = false;
                             DiagnosticsNetwork.IsVisible = false;
+                            AiView.IsVisible = false;
 
-                            DiagnosticsMetrics.Refresh(); 
+                            DiagnosticsMetrics.Refresh();
                             if (_isCompact)
                             {
                                 boundsY.Width = -1;
@@ -568,6 +570,7 @@ namespace MauiPerfDebugOverlay.Controls
                             DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = false;
                             DiagnosticsNetwork.IsVisible = true;
+                            AiView.IsVisible = false;
 
                             boundsY.Width = (this.Parent as AbsoluteLayout).Width;
                             boundsY.Height = (this.Parent as AbsoluteLayout).Height;
@@ -581,6 +584,7 @@ namespace MauiPerfDebugOverlay.Controls
                             DiagnosticsMetrics.IsVisible = false;
                             TheTreeView.IsVisible = true;
                             DiagnosticsNetwork.IsVisible = false;
+                            AiView.IsVisible = false;
 
                             TreeNode node = _dumpService.DumpCurrentPage();
                             TheTreeView.RootNode = node;
@@ -590,6 +594,20 @@ namespace MauiPerfDebugOverlay.Controls
 
                             TheTreeView.WidthRequest = boundsY.Width - 10;
                             TheTreeView.HeightRequest = boundsY.Height - 10 - HeaderStack.Height;
+                            break;
+                        case TState.TabAI:
+                            MetricsStack.IsVisible = false;
+                            DiagnosticsMetrics.IsVisible = false;
+                            TheTreeView.IsVisible = false;
+                            DiagnosticsNetwork.IsVisible = false;
+                            AiView.IsVisible = true;
+
+
+                            boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                            boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+
+                            AiView.WidthRequest = boundsY.Width - 20;
+                            AiView.HeightRequest = boundsY.Height - 10 - HeaderStack.Height;
                             break;
                     }
 

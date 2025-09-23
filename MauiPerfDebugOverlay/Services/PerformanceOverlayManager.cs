@@ -28,7 +28,7 @@ namespace MauiPerfDebugOverlay.Services
 
             Task.Run(async () =>
             {
-                int majorLine = 2; // sau 2, depinde de linia ta de .NET 
+                int majorLine = 1; // sau 2, depinde de linia ta de .NET 
                 string currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
 
                 var latestVersion = VersionChecker.GetLatestNugetVersionForMajor(majorLine);

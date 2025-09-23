@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -22,23 +22,23 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>2.0.1</Version>
+		<Version>1.0.8</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
 		<Description>
-			MAUI Performance Overlay – lightweight, drag-and-move performance HUD for .NET MAUI apps.
-			Displays real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, Battery consumption (Android only), and Networking stats (total requests, bytes sent/received, average request time).
-			Tracks load time per component and provides overall performance score.
-			Supports .NET 9, Android, iOS, MacCatalyst, Tizen, and Windows.
-			Easily integrates into your app for real-time diagnostics and profiling.
+			MAUI Performance Overlay – a lightweight, draggable performance HUD for .NET MAUI apps.
+			Provides real-time metrics: FPS, frame time, CPU and memory usage, active threads, GC collections, allocations per second, battery consumption (Android only), and networking statistics (requests, bytes sent/received, average response time).
+			Tracks load time per component, calculates an overall performance score, and offers AI-powered performance insights and recommendations via Gemini integration.
+			Cross-platform support: Android, iOS, MacCatalyst, Tizen, and Windows.
+			Seamlessly integrates into your app to deliver real-time diagnostics, profiling, and AI-driven optimization tips.
 		</Description>
-		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;.NET9</PackageTags>
+		<PackageTags>
+			MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;Profiling;.NET8
+		</PackageTags>
 		<PackageReleaseNotes>
-			- Added support for .NET 9.
-			- Updated Network metrics visualization.
-			- Improved Tree load-time rendering with expandable nodes.
-			- Minor bug fixes and performance improvements.
+			- Added Gemini AI integration for automated performance analysis and recommendations.
+			- Enhanced Tree view with expandable nodes and improved load-time rendering.
 		</PackageReleaseNotes>
 
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -232,7 +232,7 @@ namespace MauiPerfDebugOverlay.Services
                 height += 36 * countTags;
             }
 
-            return height;
+            return height + 20;
         }
     }
 }

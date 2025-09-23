@@ -67,5 +67,25 @@ namespace MauiPerfDebugOverlay.Services
             }
             return sum;
         }
+
+        internal double GetSelfMsByNode(TreeNode treeNode)
+        {
+            double totalMs = 0;
+            double childrenMs = 0;
+             
+            lock (_lock)
+            {
+                _metrics.TryGetValue(treeNode.Id, out totalMs);
+
+                foreach (var node in treeNode.Children)
+                    childrenMs += (_metrics.TryGetValue(node.Id, out var innerChildrenMs) ? innerChildrenMs : 0d);
+            }
+
+            var selfMs = totalMs;
+            if (childrenMs > 0 && totalMs >= childrenMs)
+                selfMs = totalMs - childrenMs;
+
+            return selfMs;
+        }
     }
 }

@@ -47,5 +47,14 @@
         /// Threshold for danger load time in ms (default 450ms).
         /// </summary>
         public int LoadTimeDanger { get; set; } = 450;
+
+
+        /// <summary>
+        /// Needed if you want to integrate Gemini AI model for analyzing the performance data.
+        /// </summary>
+        public string GeminiAPIKey { get; set; } = "";
+
+
+        internal bool ViewTabAI => !string.IsNullOrWhiteSpace(GeminiAPIKey);
     }
 }

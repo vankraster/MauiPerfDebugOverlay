@@ -13,6 +13,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
         // pentru hit testing
         private readonly Dictionary<TreeNode, RectF> _nodeRects = new();
+        private readonly Dictionary<TreeNode, RectF> _aiButtonRects = new();
 
         public TreeDrawable(TreeNode root)
         {
@@ -27,6 +28,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
             _nodeRects.Clear();
             float y = 20;
+
             DrawAsciiTree(canvas, _root, 0, ref y);
         }
 
@@ -36,10 +38,9 @@ namespace MauiPerfDebugOverlay.InternalControls
             const float indentPerLevel = 22f;
             float startXNode = StartX + level * indentPerLevel;
 
-            var totalMs = LoadTimeMetricsStore.Instance.GetValue(node.Id);
-            var childrenMs = LoadTimeMetricsStore.Instance.GetSumOfChildrenInMs(node);
-            var selfMs = (totalMs.HasValue && childrenMs > 0) ? totalMs - childrenMs : totalMs;
 
+            var selfMs = LoadTimeMetricsStore.Instance.GetSelfMsByNode(node); 
+             
             // 1️⃣ simbol expand/collapse
             string expandSymbol = node.Children.Count > 0 ? (node.IsExpanded ? "[-]" : "[+]") : "   ";
             canvas.FontColor = node.Children.Count > 0 ? Colors.Orange : Colors.White;
@@ -52,47 +53,76 @@ namespace MauiPerfDebugOverlay.InternalControls
             canvas.DrawString(node.Name, new RectF(textX, y, 200, LineHeight),
                               HorizontalAlignment.Left, VerticalAlignment.Top);
 
+            //// 2️⃣➕ buton AI (vizibil doar dacă opțiunea e activă)
+            //if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+            //{
+            //    string aiButton = "[AI]";
+            //    float aiButtonX = textX + 210; // după nume
+            //    canvas.FontColor = Colors.Cyan;
+            //    canvas.DrawString(aiButton, new RectF(aiButtonX, y, 40, LineHeight),
+            //                      HorizontalAlignment.Left, VerticalAlignment.Top);
+
+            //    // salvezi rectul pentru hit-test
+            //    var aiRect = new RectF(aiButtonX, y, 40, LineHeight);
+            //    _aiButtonRects[node] = aiRect;
+            //}
+
             // 3️⃣ indicator de prag
             string indicator = "";
             Color indicatorColor = Colors.White;
-            if (selfMs.HasValue)
+
+            if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
             {
-                if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
-                {
-                    indicator = "⛔";
-                    indicatorColor = Color.FromHex("D98880");
-                }
-                else if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
-                {
-                    indicator = "⚠";
-                    indicatorColor = Color.FromHex("FFECB3");
-                }
+                indicator = "⛔";
+                indicatorColor = Color.FromHex("D98880");
             }
-            canvas.FontColor = indicatorColor;
-            canvas.DrawString(indicator, new RectF(textX + 150, y, 20, LineHeight),
+            else if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
+            {
+                indicator = "⚠";
+                indicatorColor = Color.FromHex("FFECB3");
+            }
+
+            string timeText = $"{selfMs.FormatTime()}";
+            canvas.FontColor = Colors.LightGray;
+            var timeRect = new RectF(textX + 180, y, 80, LineHeight);
+            canvas.DrawString(timeText, timeRect,
                               HorizontalAlignment.Left, VerticalAlignment.Top);
 
-            if (selfMs.HasValue)
+            var timeWidth = canvas.GetStringSize(timeText, Microsoft.Maui.Graphics.Font.Default, 14).Width;
+            var lastX = timeRect.X + timeWidth;
+            // [AI] vine după textul timpului
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
             {
-                // 4️⃣ timp numeric
-                canvas.FontColor = Colors.LightGray;
-                canvas.DrawString($"{selfMs.FormatTime()}", new RectF(textX + 180, y, 80, LineHeight),
+                string aiButton = "[Ask AI]";
+                float aiButtonX = lastX + 10; // spațiu de 20px după timp
+                canvas.FontColor = Colors.Cyan;
+                canvas.DrawString(aiButton, new RectF(aiButtonX, y, 55, LineHeight),
                                   HorizontalAlignment.Left, VerticalAlignment.Top);
 
+                _aiButtonRects[node] = new RectF(aiButtonX, y, 40, LineHeight);
 
-                // 5️⃣ bară de progres
-
-                float maxBarWidth = 150;
-                float barWidth = Math.Min(maxBarWidth, (float)(selfMs.Value / 1000 * maxBarWidth));
-                Color barColor = selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger
-                    ? Colors.Red
-                    : selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning
-                        ? Colors.Yellow
-                        : Colors.Green;
-
-                canvas.FillColor = barColor;
-                canvas.FillRectangle(new RectF(textX + 280, y + 4, barWidth, LineHeight - 8));
+                lastX += 55;
             }
+
+            canvas.FontColor = indicatorColor;
+            canvas.DrawString(indicator, new RectF(lastX + 10, y, 20, LineHeight),
+                              HorizontalAlignment.Left, VerticalAlignment.Top);
+            lastX += 30;
+
+
+            // 5️⃣ bară de progres
+
+            float maxBarWidth = 150;
+            float barWidth = Math.Max(Math.Min(maxBarWidth, (float)(selfMs / 1000 * maxBarWidth)), 1);
+            Color barColor = selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger
+                ? Colors.Red
+                : selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning
+                    ? Colors.Yellow
+                    : Colors.Green;
+
+            canvas.FillColor = barColor;
+            canvas.FillRectangle(new RectF(lastX + 10, y + 4, barWidth, LineHeight - 8));
+
 
             // 6️⃣ salvăm rect pentru hit-testing
             var rect = new RectF(startXNode, y, 500, LineHeight);
@@ -110,70 +140,16 @@ namespace MauiPerfDebugOverlay.InternalControls
             }
         }
 
-        private void _DrawAsciiTree(ICanvas canvas, TreeNode node, string indent, bool last, ref float y)
+
+
+        public TreeNode HitTestAI(float x, float y)
         {
-            canvas.FontColor = Colors.White;
-            string indicator = "";
-
-            var totalMs = LoadTimeMetricsStore.Instance.GetValue(node.Id);
-            var childrenMs = LoadTimeMetricsStore.Instance.GetSumOfChildrenInMs(node);
-            var selfMs = (totalMs.HasValue && childrenMs > 0)
-                ? totalMs - childrenMs
-                : totalMs;
-
-            if (selfMs.HasValue)
+            foreach (var kvp in _aiButtonRects)
             {
-                // schimbăm culoarea și indicatorul în funcție de praguri
-                if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeDanger)
-                {
-                    indicator = "⛔";
-                    canvas.FontColor = Color.FromHex("D98880");
-                }
-                else if (selfMs > PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.LoadTimeWarning)
-                {
-                    indicator = "⚠";
-                    canvas.FontColor = Color.FromHex("FFECB3");
-                }
-                else
-                {
-                    //indicator = "✔";
-                    //canvas.FontColor = Colors.LightGreen;
-                }
+                if (kvp.Value.Contains(x, y))
+                    return kvp.Key;
             }
-
-            string expandSymbol = node.Children.Count > 0
-                ? (node.IsExpanded ? " [-] " : " [+] ")
-                : " ";
-
-            // compunem linia: nume + timp propriu + total
-            string line = $"{indent}{(last ? "└── " : "├── ")}{node.Name}{expandSymbol}{indicator}";
-
-            if (selfMs.HasValue)
-            {
-                line += $" {selfMs.FormatTime()}";
-
-                if (childrenMs > 0)
-                    line += $" (Total {totalMs.FormatTime()})";
-            }
-
-            // desenăm textul
-            var rect = new RectF(StartX, y - LineHeight / 2, 800, LineHeight);
-            _nodeRects[node] = rect;
-            canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
-
-            y += LineHeight;
-
-            // dacă nodul e collapsed, nu desenăm copiii
-            if (!node.IsExpanded || node.Children.Count == 0)
-                return;
-
-            string childIndent = indent + (last ? "    " : "│   ");
-
-            for (int i = 0; i < node.Children.Count; i++)
-            {
-                bool isLast = (i == node.Children.Count - 1);
-                _DrawAsciiTree(canvas, node.Children[i], childIndent, isLast, ref y);
-            }
+            return null;
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using MauiPerfDebugOverlay.Models.Internal;
+﻿using MauiPerfDebugOverlay.Extensions;
+using MauiPerfDebugOverlay.Models.Internal;
+using MauiPerfDebugOverlay.Services;
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
@@ -25,7 +27,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 HeightRequest = 180,
                 WidthRequest = 800,
-                VerticalOptions = LayoutOptions.Start, 
+                VerticalOptions = LayoutOptions.Start,
             };
 
             _graphicsView.StartInteraction += (s, e) =>
@@ -38,6 +40,8 @@ namespace MauiPerfDebugOverlay.InternalControls
                 Orientation = ScrollOrientation.Both,
                 Content = _graphicsView
             };
+
+           
         }
 
         private static void OnRootNodeChanged(BindableObject bindable, object oldValue, object newValue)
@@ -57,7 +61,18 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             if (_graphicsView.Drawable is TreeDrawable drawable)
             {
-                var clickedNode = drawable.HitTest(x, y);
+                TreeNode clickedNode = null;
+                if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+                {
+                    clickedNode = drawable.HitTestAI(x, y);
+                    if (clickedNode != null)
+                    {
+                        GeminiService.Instance.AskForTreeNode(clickedNode);
+                        return;
+                    }
+                }
+
+                clickedNode = drawable.HitTest(x, y);
                 if (clickedNode != null)
                 {
                     clickedNode.IsExpanded = !clickedNode.IsExpanded;
@@ -66,6 +81,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
                     _graphicsView.Invalidate();
                 }
+
             }
         }
 
