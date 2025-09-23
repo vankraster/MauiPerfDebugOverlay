@@ -22,22 +22,23 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>1.0.7</Version>
+		<Version>1.0.8</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
 		<Description>
-			MAUI Performance Overlay – lightweight, drag-and-move performance HUD for .NET MAUI apps.
-			Displays real-time FPS, Frame Time, CPU usage, Memory usage, Threads, GC Collections, Allocations/sec, Battery consumption (Android only), and Networking stats (total requests, bytes sent/received, average request time).
-			Tracks load time per component and provides overall performance score.
-			Supports Android, iOS, MacCatalyst, Tizen, and Windows.
-			Easily integrates into your app for real-time diagnostics and profiling.
+			MAUI Performance Overlay – a lightweight, draggable performance HUD for .NET MAUI apps.
+			Provides real-time metrics: FPS, frame time, CPU and memory usage, active threads, GC collections, allocations per second, battery consumption (Android only), and networking statistics (requests, bytes sent/received, average response time).
+			Tracks load time per component, calculates an overall performance score, and offers AI-powered performance insights and recommendations via Gemini integration.
+			Cross-platform support: Android, iOS, MacCatalyst, Tizen, and Windows.
+			Seamlessly integrates into your app to deliver real-time diagnostics, profiling, and AI-driven optimization tips.
 		</Description>
-		<PackageTags>MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;.net8</PackageTags>
-		<PackageReleaseNotes> 
-			- Updated Network metrics visualization.
-			- Improved Tree load-time rendering with expandable nodes.
-			- Minor bug fixes and performance improvements.
+		<PackageTags>
+			MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;Profiling;.NET8
+		</PackageTags>
+		<PackageReleaseNotes>
+			- Added Gemini AI integration for automated performance analysis and recommendations.
+			- Enhanced Tree view with expandable nodes and improved load-time rendering.
 		</PackageReleaseNotes>
 
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
