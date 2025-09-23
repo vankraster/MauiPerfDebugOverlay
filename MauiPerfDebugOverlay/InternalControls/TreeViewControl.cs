@@ -40,6 +40,8 @@ namespace MauiPerfDebugOverlay.InternalControls
                 Orientation = ScrollOrientation.Both,
                 Content = _graphicsView
             };
+
+           
         }
 
         private static void OnRootNodeChanged(BindableObject bindable, object oldValue, object newValue)
@@ -62,7 +64,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                 TreeNode clickedNode = null;
                 if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
                 {
-                    clickedNode = drawable.HitTest(x, y);
+                    clickedNode = drawable.HitTestAI(x, y);
                     if (clickedNode != null)
                     {
                         GeminiService.Instance.AskForTreeNode(clickedNode);

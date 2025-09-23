@@ -606,7 +606,7 @@ namespace MauiPerfDebugOverlay.Controls
                             boundsY.Width = (this.Parent as AbsoluteLayout).Width;
                             boundsY.Height = (this.Parent as AbsoluteLayout).Height;
 
-                            AiView.WidthRequest = boundsY.Width - 10;
+                            AiView.WidthRequest = boundsY.Width - 20;
                             AiView.HeightRequest = boundsY.Height - 10 - HeaderStack.Height;
                             break;
                     }

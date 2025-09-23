@@ -144,7 +144,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
         public TreeNode HitTestAI(float x, float y)
         {
-            foreach (var kvp in _nodeRects)
+            foreach (var kvp in _aiButtonRects)
             {
                 if (kvp.Value.Contains(x, y))
                     return kvp.Key;

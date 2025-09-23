@@ -1,4 +1,6 @@
-﻿namespace MauiPerfDebugOverlay.InternalControls
+﻿using MauiPerfDebugOverlay.Services;
+
+namespace MauiPerfDebugOverlay.InternalControls
 {
     public class AIViewControl : ContentView
     {
@@ -23,10 +25,14 @@
 
             _label = new Label
             {
-                HorizontalOptions = LayoutOptions.CenterAndExpand,
-                VerticalOptions = LayoutOptions.CenterAndExpand,
+                HorizontalOptions = LayoutOptions.StartAndExpand,
+                VerticalOptions = LayoutOptions.StartAndExpand,
+                Text = "In order to have AI analyzer you should add Gemini ApiKey in " + Environment.NewLine +
+                       "MauiProgram > .UsePerformanceDebugOverlay property GeminiAPIKey " + Environment.NewLine +
+                       "You can generate key from https://aistudio.google.com/apikey "
             };
 
+            GeminiService.Instance.ResponseChanged += Instance_ResponseChanged;
             Content = new ScrollView
             {
                 Orientation = ScrollOrientation.Both,
@@ -34,6 +40,10 @@
             };
         }
 
+        private void Instance_ResponseChanged(string obj)
+        {
+            _label.Text = obj;
+        }
 
         public void Tapped(float x, float y)
         {

@@ -8,18 +8,14 @@ namespace MauiPerfDebugOverlay.Services
         private static GeminiService? _instance;
         public static GeminiService Instance => _instance ??= new GeminiService();
 
+        public event Action<string>? ResponseChanged;
 
         private readonly HttpClient _httpClient;
-
+        public string LastAnalyzerResponse { private set; get; }
         private GeminiService()
         {
             _httpClient = new HttpClient();
         }
-
-
-
-
-
 
         private async Task<string> GetResponseAsync(string prompt)
         {
@@ -77,10 +73,10 @@ namespace MauiPerfDebugOverlay.Services
         }
 
 
-
-        private string lastTreeAnalyzerResponse;
         internal async Task AskForTreeNode(TreeNode clickedNode)
         {
+            LastAnalyzerResponse = "Waiting the response from Gemini while analyzing node: " + clickedNode.Name;
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
             string serializedTree = TreeNode.SerializeTree(clickedNode);
 
             string treePrompt = $@" I have a XAML structure from a .NET MAUI page.
@@ -92,9 +88,10 @@ namespace MauiPerfDebugOverlay.Services
                                 Subtree details:
                                 {serializedTree}
 
-                                Answer in a clear, structured way.";
+                                Answer in a clear, structured and brief way.";
 
-            lastTreeAnalyzerResponse = await GetResponseAsync(treePrompt);
+            LastAnalyzerResponse = await GetResponseAsync(treePrompt);
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
 
     }

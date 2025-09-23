@@ -191,8 +191,8 @@
 
             <controls:AIViewControl BackgroundColor="Transparent"
                                     IsVisible="False"
-                                    HeightRequest="300"
-                                    WidthRequest="300"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
                                     x:Name="AiView" />
         </VerticalStackLayout>
     </Frame>
