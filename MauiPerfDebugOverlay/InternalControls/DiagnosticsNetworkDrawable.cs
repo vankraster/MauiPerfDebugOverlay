@@ -1,4 +1,5 @@
-﻿using MauiPerfDebugOverlay.Models.Internal;
+﻿using MauiPerfDebugOverlay.Extensions;
+using MauiPerfDebugOverlay.Models.Internal;
 using MauiPerfDebugOverlay.Services;
 
 namespace MauiPerfDebugOverlay.InternalControls
@@ -8,7 +9,12 @@ namespace MauiPerfDebugOverlay.InternalControls
         internal const float LineHeight = 36;
         private const float StartX = 10;
         private const float StartY = 20;
-        private readonly Dictionary<int, RectF> _rects = new();
+
+        private readonly Dictionary<int, RectF> _rects = new();           // întreaga linie
+        private readonly Dictionary<int, RectF> _aiButtonRects = new();   // [Ask AI]
+        private readonly Dictionary<int, RectF> _checkboxRects = new();   // checkbox
+        private readonly HashSet<int> _selectedMetrics = new();           // selecții checkbox
+        private readonly HashSet<int> _aiClickedFeedback = new();         // feedback vizual temporar
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
@@ -16,31 +22,30 @@ namespace MauiPerfDebugOverlay.InternalControls
             canvas.Font = Microsoft.Maui.Graphics.Font.Default;
 
             _rects.Clear();
-            float y = StartY;
+            _aiButtonRects.Clear();
+            _checkboxRects.Clear();
 
+            float y = StartY;
             var items = DiagnosticsListener.Instance.GetAllNetwork();
 
-            if (items.Count > 0)
-            {
-                y = DrawMetricsSection(canvas, "Network metrics", items, y, dirtyRect);
-            }
-            else
+            if (items.Count == 0)
             {
                 string line = "No metrics collected on Network from System.Diagnostics.Metrics yet.";
                 var rect = new RectF(StartX, y - LineHeight / 2, dirtyRect.Width - 20, LineHeight);
                 canvas.FontColor = Colors.White;
                 canvas.DrawString(line, rect, HorizontalAlignment.Left, VerticalAlignment.Top);
+                return;
             }
+
+            y = DrawMetricsSection(canvas, "Network metrics", items, y, dirtyRect);
         }
 
         private float DrawMetricsSection(ICanvas canvas, string title, IReadOnlyList<NetworkMetric> items, float y, RectF dirtyRect)
         {
-            if (items.Count == 0)
-                return y;
+            if (items.Count == 0) return y;
 
-            // titlu
+            // Titlu
             var rect = new RectF(2, y - LineHeight / 2, dirtyRect.Width - 4, LineHeight);
-            canvas.StrokeColor = Color.FromHex("D98880");
             canvas.FillColor = Color.FromHex("D98880");
             canvas.FillRectangle(rect);
 
@@ -49,52 +54,73 @@ namespace MauiPerfDebugOverlay.InternalControls
             canvas.DrawString(title, rect, HorizontalAlignment.Center, VerticalAlignment.Center);
             y += LineHeight;
 
-            int index = 0;
             foreach (var kvp in items)
             {
-                index++;
-                string line = $"[{kvp.Timestamp:HH:mm:ss.fff}] {kvp.Name.Replace("dotnet.", "")} = {kvp.Value}";
-
-
-                // rect pentru întreaga linie a metricii
-                //rect = new RectF(StartX, y - LineHeight / 2, dirtyRect.Width - 20, LineHeight);
-
-
+                // background pentru highlight selecție
                 _rects[kvp.Id] = new RectF(0, y - LineHeight / 2, dirtyRect.Width, LineHeight);
-                canvas.FillColor = Color.FromArgb("#BB222222");
+                canvas.FillColor = _selectedMetrics.Contains(kvp.Id)
+                    ? Colors.DarkSlateGray
+                    : Color.FromArgb("#BB222222");
                 canvas.FillRectangle(_rects[kvp.Id]);
 
+                // checkbox doar dacă tab AI este activ
+                if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+                {
+                    float checkboxSize = LineHeight / 2;
+                    var checkboxRect = new RectF(StartX, y - LineHeight / 2 + 10, checkboxSize, checkboxSize);
+                    canvas.StrokeColor = Colors.DarkGray;
+                    canvas.StrokeSize = 1;
+                    canvas.DrawRoundedRectangle(checkboxRect, 6);
 
-                // desenăm simbol expand/collapse
+                    if (_selectedMetrics.Contains(kvp.Id))
+                    {
+                        canvas.FontColor = Colors.Lime;
+                        canvas.FontSize = 18;
+                        canvas.DrawString("✓", new RectF(checkboxRect.X, checkboxRect.Y - 2, checkboxRect.Width, checkboxRect.Height),
+                                          HorizontalAlignment.Center, VerticalAlignment.Center);
+                    }
+
+                    _checkboxRects[kvp.Id] = checkboxRect;
+                }
+
+                // simbol expand/collapse
                 string expandSymbol = (kvp.Tags != null && kvp.Tags.Length > 0)
-                    ? (kvp.IsExpanded ? "[-]" : "[+]")
-                    : "   "; // gol dacă nu are tags
-
-                var symbolRect = new RectF(StartX, y - LineHeight / 2, 30, LineHeight);
+                    ? (kvp.IsExpanded ? "[-]" : "[+]") : "   ";
+                var symbolRect = new RectF(StartX + 30, y - LineHeight / 2, 30, LineHeight);
                 canvas.FontColor = Colors.Orange;
                 canvas.FontSize = 14;
                 canvas.DrawString(expandSymbol, symbolRect, HorizontalAlignment.Left, VerticalAlignment.Center);
 
-                // desenăm textul metricii
-                var textRect = new RectF(StartX + 35, y - LineHeight / 2, dirtyRect.Width - 55, LineHeight);
+                // text metrică
+                string line = $"[{kvp.Timestamp:HH:mm:ss.fff}] {kvp.Name.Replace("dotnet.", "")} = {kvp.Value}";
+                var textRect = new RectF(StartX + 60, y - LineHeight / 2, dirtyRect.Width - 130, LineHeight);
                 canvas.FontColor = Colors.White;
                 canvas.FontSize = 14;
                 canvas.DrawString(line, textRect, HorizontalAlignment.Left, VerticalAlignment.Center);
 
+                // [Ask AI] button
+                if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+                {
+                    string aiButton = "[Ask AI]";
+                    float aiButtonX = dirtyRect.Width - 70;
+                    canvas.FontColor = _aiClickedFeedback.Contains(kvp.Id) ? Colors.Gray : Colors.Cyan;
+                    var aiRect = new RectF(aiButtonX, y - LineHeight / 2, 60, LineHeight);
+                    canvas.DrawString(aiButton, aiRect, HorizontalAlignment.Left, VerticalAlignment.Center);
+                    _aiButtonRects[kvp.Id] = aiRect;
+                }
+
                 y += LineHeight;
 
-                // dacă e expandat => afișăm tag-urile indentate
+                // desenăm tag-urile dacă e expandat
                 if (kvp.IsExpanded && kvp.Tags != null && kvp.Tags.Length > 0)
                 {
                     foreach (var tag in kvp.Tags)
                     {
                         string tagLine = $"• {tag.Key} = {tag.Value}";
                         var tagRect = new RectF(StartX + 50, y - LineHeight / 2, dirtyRect.Width - 70, LineHeight);
-
                         canvas.FontColor = Colors.LightGray;
                         canvas.FontSize = 12;
                         canvas.DrawString(tagLine, tagRect, HorizontalAlignment.Left, VerticalAlignment.Center);
-
                         y += LineHeight * 0.8f;
                     }
                 }
@@ -103,16 +129,61 @@ namespace MauiPerfDebugOverlay.InternalControls
             return y;
         }
 
+        // hit-test checkbox
+        public bool HitTestCheckbox(int id, float x, float y)
+        {
+            return PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI
+                && _checkboxRects.TryGetValue(id, out var rect)
+                && rect.Contains(x, y);
+        }
+
+        // hit-test [Ask AI]
+        public List<int> HitTestAI(float x, float y)
+        {
+            if (!PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+                return new List<int>();
+
+            foreach (var kvp in _aiButtonRects)
+                if (kvp.Value.Contains(x, y))
+                    return new List<int> { kvp.Key };
+            return new List<int>();
+        }
+
+        // hit-test linie
         public int HitTest(float x, float y)
         {
-            foreach (var kvp in _rects )
-            {
+            foreach (var kvp in _rects)
                 if (kvp.Value.Contains(x, y))
                     return kvp.Key;
-            }
             return 0;
         }
-         
+
+        // selecție checkbox
+        public void SelectMetric(int id) => _selectedMetrics.Add(id);
+        public void DeselectMetric(int id) => _selectedMetrics.Remove(id);
+        public bool IsMetricSelected(int id) => _selectedMetrics.Contains(id);
+        public void ClearSelection() => _selectedMetrics.Clear();
+
+        // feedback vizual temporar click AI
+        public void MarkAIClicked(int id, GraphicsView graphicsView)
+        {
+            _aiClickedFeedback.Add(id);
+            graphicsView.Invalidate();
+
+            Task.Delay(300).ContinueWith(_ =>
+            {
+                _aiClickedFeedback.Remove(id);
+                graphicsView.Invalidate();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        public List<NetworkMetric> GetSelectedMetrics()
+        {
+            var items = DiagnosticsListener.Instance.GetAllNetwork();
+            return items.Where(m => _selectedMetrics.Contains(m.Id)).ToList();
+        }
+
+        public IEnumerable<int> GetAllMetricIds() => _rects.Keys;
 
         internal double NewHeight() => DiagnosticsListener.Instance.NewHeight();
     }

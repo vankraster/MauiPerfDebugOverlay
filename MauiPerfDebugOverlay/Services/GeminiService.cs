@@ -96,5 +96,9 @@ namespace MauiPerfDebugOverlay.Services
             ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
 
+        internal void AskForNetworkMetrics(List<NetworkMetric> selectedData)
+        {
+ 
+        }
     }
 }
