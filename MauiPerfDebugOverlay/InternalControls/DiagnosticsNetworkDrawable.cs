@@ -10,11 +10,16 @@ namespace MauiPerfDebugOverlay.InternalControls
         private const float StartX = 10;
         private const float StartY = 20;
 
-        private readonly Dictionary<int, RectF> _rects = new();           // întreaga linie
-        private readonly Dictionary<int, RectF> _aiButtonRects = new();   // [Ask AI]
-        private readonly Dictionary<int, RectF> _checkboxRects = new();   // checkbox
-        private readonly HashSet<int> _selectedMetrics = new();           // selecții checkbox
-        private readonly HashSet<int> _aiClickedFeedback = new();         // feedback vizual temporar
+        private readonly Dictionary<int, RectF> _rects = new();
+        private readonly Dictionary<int, RectF> _aiButtonRects = new();
+        private readonly Dictionary<int, RectF> _checkboxRects = new();
+        private readonly HashSet<int> _selectedMetrics = new();
+        private readonly HashSet<int> _aiClickedFeedback = new();
+
+        private RectF? _globalCheckboxRect;
+        private RectF? _globalAskAIButtonRect;
+        private bool _selectAllState = false;
+        private bool _globalAskClickedFeedback = false;
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
@@ -24,6 +29,8 @@ namespace MauiPerfDebugOverlay.InternalControls
             _rects.Clear();
             _aiButtonRects.Clear();
             _checkboxRects.Clear();
+            _globalCheckboxRect = null;
+            _globalAskAIButtonRect = null;
 
             float y = StartY;
             var items = DiagnosticsListener.Instance.GetAllNetwork();
@@ -44,26 +51,66 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             if (items.Count == 0) return y;
 
-            // Titlu
+            // Header rect
             var rect = new RectF(2, y - LineHeight / 2, dirtyRect.Width - 4, LineHeight);
             canvas.FillColor = Color.FromHex("D98880");
             canvas.FillRectangle(rect);
 
+            // Checkbox global (select/deselect all)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+            {
+                float checkboxSize = LineHeight / 2;
+                var checkboxRect = new RectF(StartX, y - LineHeight / 2 + 10, checkboxSize, checkboxSize);
+                canvas.StrokeColor = Colors.DarkGray;
+                canvas.StrokeSize = 1;
+                canvas.DrawRoundedRectangle(checkboxRect, 6);
+
+                if (_selectAllState)
+                {
+                    canvas.FontColor = Colors.Lime;
+                    canvas.FontSize = 18;
+                    canvas.DrawString("✓", new RectF(checkboxRect.X, checkboxRect.Y - 2, checkboxRect.Width, checkboxRect.Height),
+                                      HorizontalAlignment.Center, VerticalAlignment.Center);
+                }
+
+                _globalCheckboxRect = checkboxRect;
+
+                // Label pentru checkbox
+                canvas.FontColor = Colors.White;
+                canvas.FontSize = 14;
+                canvas.DrawString("Select/Deselect All",
+                                  new RectF(checkboxRect.Right + 5, y - LineHeight / 2, 160, LineHeight),
+                                  HorizontalAlignment.Left, VerticalAlignment.Center);
+            }
+
+            // Titlu (pus după checkbox ca să fie mereu la stânga lui, vizibil și clar)
             canvas.FontColor = Colors.White;
             canvas.FontSize = 16;
             canvas.DrawString(title, rect, HorizontalAlignment.Center, VerticalAlignment.Center);
+
+            // [Ask AI] global (pus la final în dreapta sus)
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
+            {
+                string aiButton = "[Ask AI]";
+                float aiButtonWidth = 70;
+                _globalAskAIButtonRect = new RectF(dirtyRect.Width - aiButtonWidth - 5, y - LineHeight / 2, aiButtonWidth, LineHeight);
+
+                canvas.FontColor = _globalAskClickedFeedback ? Colors.Gray : Colors.Cyan;
+                canvas.DrawString(aiButton, _globalAskAIButtonRect.Value, HorizontalAlignment.Left, VerticalAlignment.Center);
+            }
+
             y += LineHeight;
 
+            // Liniile cu metrice
             foreach (var kvp in items)
             {
-                // background pentru highlight selecție
                 _rects[kvp.Id] = new RectF(0, y - LineHeight / 2, dirtyRect.Width, LineHeight);
                 canvas.FillColor = _selectedMetrics.Contains(kvp.Id)
                     ? Colors.DarkSlateGray
                     : Color.FromArgb("#BB222222");
                 canvas.FillRectangle(_rects[kvp.Id]);
 
-                // checkbox doar dacă tab AI este activ
+                // Checkbox per rând
                 if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
                 {
                     float checkboxSize = LineHeight / 2;
@@ -83,7 +130,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                     _checkboxRects[kvp.Id] = checkboxRect;
                 }
 
-                // simbol expand/collapse
+                // Expand/collapse symbol
                 string expandSymbol = (kvp.Tags != null && kvp.Tags.Length > 0)
                     ? (kvp.IsExpanded ? "[-]" : "[+]") : "   ";
                 var symbolRect = new RectF(StartX + 30, y - LineHeight / 2, 30, LineHeight);
@@ -91,14 +138,14 @@ namespace MauiPerfDebugOverlay.InternalControls
                 canvas.FontSize = 14;
                 canvas.DrawString(expandSymbol, symbolRect, HorizontalAlignment.Left, VerticalAlignment.Center);
 
-                // text metrică
+                // Text metrică
                 string line = $"[{kvp.Timestamp:HH:mm:ss.fff}] {kvp.Name.Replace("dotnet.", "")} = {kvp.Value}";
                 var textRect = new RectF(StartX + 60, y - LineHeight / 2, dirtyRect.Width - 130, LineHeight);
                 canvas.FontColor = Colors.White;
                 canvas.FontSize = 14;
                 canvas.DrawString(line, textRect, HorizontalAlignment.Left, VerticalAlignment.Center);
 
-                // [Ask AI] button
+                // [Ask AI] pe rând
                 if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
                 {
                     string aiButton = "[Ask AI]";
@@ -111,7 +158,7 @@ namespace MauiPerfDebugOverlay.InternalControls
 
                 y += LineHeight;
 
-                // desenăm tag-urile dacă e expandat
+                // Tag-uri expandate
                 if (kvp.IsExpanded && kvp.Tags != null && kvp.Tags.Length > 0)
                 {
                     foreach (var tag in kvp.Tags)
@@ -129,15 +176,12 @@ namespace MauiPerfDebugOverlay.InternalControls
             return y;
         }
 
-        // hit-test checkbox
-        public bool HitTestCheckbox(int id, float x, float y)
-        {
-            return PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI
-                && _checkboxRects.TryGetValue(id, out var rect)
-                && rect.Contains(x, y);
-        }
+        // Hit tests
+        public bool HitTestCheckbox(int id, float x, float y) =>
+            PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI
+            && _checkboxRects.TryGetValue(id, out var rect)
+            && rect.Contains(x, y);
 
-        // hit-test [Ask AI]
         public List<int> HitTestAI(float x, float y)
         {
             if (!PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
@@ -149,7 +193,6 @@ namespace MauiPerfDebugOverlay.InternalControls
             return new List<int>();
         }
 
-        // hit-test linie
         public int HitTest(float x, float y)
         {
             foreach (var kvp in _rects)
@@ -158,13 +201,33 @@ namespace MauiPerfDebugOverlay.InternalControls
             return 0;
         }
 
-        // selecție checkbox
+        public bool HitTestGlobalCheckbox(float x, float y) =>
+            _globalCheckboxRect.HasValue && _globalCheckboxRect.Value.Contains(x, y);
+
+        public bool HitTestGlobalAI(float x, float y) =>
+            _globalAskAIButtonRect.HasValue && _globalAskAIButtonRect.Value.Contains(x, y);
+
+        // Selecții
         public void SelectMetric(int id) => _selectedMetrics.Add(id);
         public void DeselectMetric(int id) => _selectedMetrics.Remove(id);
         public bool IsMetricSelected(int id) => _selectedMetrics.Contains(id);
         public void ClearSelection() => _selectedMetrics.Clear();
 
-        // feedback vizual temporar click AI
+        public void ToggleSelectAll()
+        {
+            _selectAllState = !_selectAllState;
+            if (_selectAllState)
+            {
+                foreach (var id in _rects.Keys)
+                    _selectedMetrics.Add(id);
+            }
+            else
+            {
+                _selectedMetrics.Clear();
+            }
+        }
+
+        // Feedback vizual
         public void MarkAIClicked(int id, GraphicsView graphicsView)
         {
             _aiClickedFeedback.Add(id);
@@ -177,6 +240,19 @@ namespace MauiPerfDebugOverlay.InternalControls
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
+        public void MarkGlobalAIClicked(GraphicsView graphicsView)
+        {
+            _globalAskClickedFeedback = true;
+            graphicsView.Invalidate();
+
+            Task.Delay(300).ContinueWith(_ =>
+            {
+                _globalAskClickedFeedback = false;
+                graphicsView.Invalidate();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        // Utilitare
         public List<NetworkMetric> GetSelectedMetrics()
         {
             var items = DiagnosticsListener.Instance.GetAllNetwork();

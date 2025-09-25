@@ -36,7 +36,32 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             if (_graphicsView.Drawable is DiagnosticsNetworkDrawable drawable)
             {
-                // click [Ask AI]
+                // [Ask AI] global
+                if (drawable.HitTestGlobalAI(x, y))
+                {
+                    drawable.MarkGlobalAIClicked(_graphicsView);
+
+                    var selectedData = drawable.GetSelectedMetrics();
+                    if (!selectedData.Any())
+                        selectedData = DiagnosticsListener.Instance.GetAllNetwork().ToList();
+
+                    if (selectedData.Any())
+                        GeminiService.Instance.AskForNetworkMetrics(selectedData);
+
+                    drawable.ClearSelection();
+                    _graphicsView.Invalidate();
+                    return;
+                }
+
+                // Checkbox global
+                if (drawable.HitTestGlobalCheckbox(x, y))
+                {
+                    drawable.ToggleSelectAll();
+                    _graphicsView.Invalidate();
+                    return;
+                }
+
+                // [Ask AI] per metric
                 var clickedMetrics = drawable.HitTestAI(x, y);
                 if (clickedMetrics.Any())
                 {
@@ -50,18 +75,16 @@ namespace MauiPerfDebugOverlay.InternalControls
 
                     _graphicsView.Invalidate();
 
-                    // trimite selecția la Gemini
                     var selectedData = drawable.GetSelectedMetrics();
                     if (selectedData.Any())
                         GeminiService.Instance.AskForNetworkMetrics(selectedData);
 
-                    // resetează selecția
                     drawable.ClearSelection();
                     _graphicsView.Invalidate();
                     return;
                 }
 
-                // click checkbox
+                // Checkbox per metric
                 foreach (var id in drawable.GetAllMetricIds())
                 {
                     if (drawable.HitTestCheckbox(id, x, y))
@@ -76,7 +99,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                     }
                 }
 
-                // click linie normală: expand/collapse
+                // Expand/collapse linie
                 var clickedNode = drawable.HitTest(x, y);
                 if (clickedNode > 0)
                 {
