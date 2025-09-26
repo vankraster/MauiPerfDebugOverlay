@@ -20,6 +20,12 @@ namespace MauiPerfDebugOverlay.Services
         private readonly Dictionary<string, object> _metrics = new();
         private readonly object _lock = new();
 
+        private static readonly HashSet<string> _ignoredHosts = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "api.nuget.org",
+            "generativelanguage.googleapis.com"
+        };
+
         /// <summary>
         /// Raised whenever the metrics collection changes.
         /// Arguments: action type ("Add" or "Clear"), metric key, metric value (if applicable).
@@ -107,6 +113,10 @@ namespace MauiPerfDebugOverlay.Services
             }
             else if (metricName.StartsWith("http.client") || metricName.StartsWith("dns"))
             {
+                // verificăm tag-urile înainte să adăugăm metrica
+                if (ShouldIgnoreRequest(tags))
+                    return;
+
                 // Stochează și în lista de rețea pentru analiză ulterioară
                 lock (_lockNetwork)
                 {
@@ -148,6 +158,46 @@ namespace MauiPerfDebugOverlay.Services
                     CollectionChanged?.Invoke("Add", tagKey, value);
                 }
             }
+        }
+
+        private bool ShouldIgnoreRequest(ReadOnlySpan<KeyValuePair<string, object?>> tags)
+        {
+            foreach (var tag in tags)
+            {
+                if (tag.Value is string value)
+                {
+                    // verificăm dacă vreun host din listă apare în valoare
+                    foreach (var ignored in _ignoredHosts)
+                    {
+                        if (value.Contains(ignored, StringComparison.OrdinalIgnoreCase))
+                            return true;
+                    }
+                }
+            }
+             
+            //foreach (var tag in tags)
+            //{
+            //    if (tag.Key == "http.url" && tag.Value is string url)
+            //    {
+            //        // Ignoră toate request-urile către nuget.org
+            //        if (url.Contains("api.nuget.org", StringComparison.OrdinalIgnoreCase))
+            //            return true;
+            //    }
+
+            //    if (tag.Key == "server.address" && tag.Value is string host)
+            //    {
+            //        if (host.Equals("api.nuget.org", StringComparison.OrdinalIgnoreCase))
+            //            return true;
+            //    }
+
+            //    if (tag.Key == "dns.question.name" && tag.Value is string dns)
+            //    {
+            //        if (dns.Equals("api.nuget.org", StringComparison.OrdinalIgnoreCase))
+            //            return true;
+            //    }
+            //}
+
+            return false;
         }
 
         public object? GetValue(string key)

@@ -1,4 +1,6 @@
 ﻿using MauiPerfDebugOverlay.Models.Internal;
+using MauiPerfDebugOverlay.Utils;
+using System.Globalization;
 using System.Text.Json;
 
 namespace MauiPerfDebugOverlay.Services
@@ -80,7 +82,7 @@ namespace MauiPerfDebugOverlay.Services
             string serializedTree = TreeNode.SerializeTree(clickedNode);
 
             string treePrompt = $@" I have a XAML subtree from a .NET MAUI page.
-
+                                        {CultureInfo.CurrentCulture.GetCultureDetailsForAI()}
                                     Please analyze this subtree for potential issues, but follow these rules:
 
                                     1. Performance: Identify only CLEAR performance bottlenecks based on SelfMs/HandlerChanged timings.
@@ -115,7 +117,7 @@ namespace MauiPerfDebugOverlay.Services
             }));
 
             string networkPrompt = $@"I have collected some .NET runtime network metrics.
-
+                                            {CultureInfo.CurrentCulture.GetCultureDetailsForAI()}
                                     Please analyze these metrics for potential **real issues**, following these strict rules:
 
                                     1. Performance: Identify only CLEAR network performance problems (e.g., DNS resolution delays, repeated failures, unusually long response times, high error rates).
