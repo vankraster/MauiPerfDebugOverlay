@@ -40,6 +40,16 @@ namespace MauiPerfDebugOverlay.InternalControls
             const float indentPerLevel = 22f;
             float startXNode = StartX + level * indentPerLevel;
 
+            //   salvăm rect pentru hit-testing
+            var rect = new RectF(startXNode, y, 500, LineHeight);
+            _nodeRects[node] = rect;
+
+            if (_aiButtonClicked.Contains(node))
+            {
+                canvas.FillColor = Colors.Gray;
+                canvas.FillRectangle(rect);
+            }
+
 
             var selfMs = LoadTimeMetricsStore.Instance.GetSelfMsByNode(node);
 
@@ -83,7 +93,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 string aiButton = "[Ask AI]";
                 lastX += 10; // spațiu de 10px după timp
-                canvas.FontColor = _aiButtonClicked.Contains(node) ? Colors.Gray : Colors.Cyan;
+                canvas.FontColor = Colors.Orange;
                 canvas.DrawString(aiButton, new RectF(lastX, y, 55, LineHeight),
                                   HorizontalAlignment.Left, VerticalAlignment.Top);
 
@@ -111,9 +121,6 @@ namespace MauiPerfDebugOverlay.InternalControls
             canvas.FillRectangle(new RectF(lastX + 10, y + 4, barWidth, LineHeight - 8));
 
 
-            // 6️⃣ salvăm rect pentru hit-testing
-            var rect = new RectF(startXNode, y, 500, LineHeight);
-            _nodeRects[node] = rect;
 
             y += LineHeight;
 

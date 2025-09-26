@@ -133,7 +133,7 @@ namespace MauiPerfDebugOverlay.Services
             ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
 
-        internal async void AskForMetrics(Dictionary<string, object> allMetrics)
+        internal async void AskForMetrics(IReadOnlyDictionary<string, object> allMetrics)
         {
             if (allMetrics == null || allMetrics.Count == 0)
                 return;
