@@ -96,9 +96,40 @@ namespace MauiPerfDebugOverlay.Services
             ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
 
-        internal void AskForNetworkMetrics(List<NetworkMetric> selectedData)
+        internal async void AskForNetworkMetrics(List<NetworkMetric> selectedData)
         {
- 
+            if (selectedData == null || selectedData.Count == 0)
+                return;
+
+            LastAnalyzerResponse = "Waiting the response from Gemini while analyzing selected network metrics...";
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
+
+            // Serializăm datele rețelei într-un format text clar
+            var serialized = string.Join("\n", selectedData.Select(m =>
+            {
+                string tags = (m.Tags != null && m.Tags.Length > 0)
+                    ? string.Join(", ", m.Tags.Select(t => $"{t.Key}={t.Value}"))
+                    : "no-tags";
+
+                return $"[{m.Timestamp:HH:mm:ss.fff}] {m.Name} = {m.Value} (Tags: {tags})";
+            }));
+
+            string networkPrompt = $@"I have collected some .NET runtime network metrics.
+
+                                    Please analyze these metrics for potential **real issues**, following these strict rules:
+
+                                    1. Performance: Identify only CLEAR network performance problems (e.g., DNS resolution delays, repeated failures, unusually long response times, high error rates).
+                                    2. Patterns: Highlight only OBSERVABLE patterns or anomalies (e.g., spikes, repetitive retries, abnormal values).
+                                    3. Avoid guessing or inventing causes that are not visible in the data. Do not give generic networking tips.
+                                    4. If no real problems are evident, explicitly state: ""No clear issues detected"".
+                                    5. Answer briefly and in a structured format (Performance, Patterns, Other).
+
+                                    Here are the collected metrics: 
+                                    {serialized}";
+
+            LastAnalyzerResponse = await GetResponseAsync(networkPrompt);
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
+
     }
 }
