@@ -53,6 +53,9 @@ namespace MauiPerfDebugOverlay.InternalControls
                         : DiagnosticsListener.Instance.GetAll();
 
                 GeminiService.Instance.AskForMetrics(metricsForHeader);
+
+                drawable.MarkHeaderLineAIClicked(header, _graphicsView); // feedback vizual
+
                 return;
             }
 

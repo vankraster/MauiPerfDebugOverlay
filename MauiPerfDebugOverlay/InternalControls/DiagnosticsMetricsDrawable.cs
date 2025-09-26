@@ -12,6 +12,7 @@ namespace MauiPerfDebugOverlay.InternalControls
         private readonly Dictionary<string, RectF> _headerAskAIButtons = new(); // pentru headere
         private readonly Dictionary<string, RectF> _lineAskAIButtons = new();   // pentru fiecare linie
         private readonly HashSet<string> _aiClickedFeedbackLines = new(); // feedback vizual linie
+        private readonly HashSet<string> _aiClickedHeaderFeedbackLines = new(); // feedback vizual linie header
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
@@ -61,7 +62,10 @@ namespace MauiPerfDebugOverlay.InternalControls
             string aiButton = "[Ask AI]";
             float aiButtonWidth = 70;
             var askAiRect = new RectF(dirtyRect.Width - aiButtonWidth - 10, y - LineHeight / 2, aiButtonWidth, LineHeight);
-            canvas.FontColor = Colors.Cyan;
+            Color bgColor = Colors.Cyan;
+            if (_aiClickedHeaderFeedbackLines.Contains(title))
+                bgColor = Colors.Gray; // feedback vizual când dai click AI pe linie
+            canvas.FontColor = bgColor;
             canvas.DrawString(aiButton, askAiRect, HorizontalAlignment.Left, VerticalAlignment.Center);
 
             _headerAskAIButtons[title] = askAiRect;
@@ -79,7 +83,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                 _rects[kvp.Key] = rect;
 
                 // fundal alternativ + feedback vizual
-                Color bgColor = (index % 2 == 0) ? Color.FromArgb("#BB222222") : Color.FromArgb("#BB333333");
+                bgColor = (index % 2 == 0) ? Color.FromArgb("#BB222222") : Color.FromArgb("#BB333333");
                 if (_aiClickedFeedbackLines.Contains(kvp.Key))
                     bgColor = Colors.Gray; // feedback vizual când dai click AI pe linie
                 canvas.FillColor = bgColor;
@@ -136,6 +140,20 @@ namespace MauiPerfDebugOverlay.InternalControls
             Task.Delay(300).ContinueWith(_ =>
             {
                 _aiClickedFeedbackLines.Remove(key);
+                graphicsView.Invalidate();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+
+
+        public void MarkHeaderLineAIClicked(string key, GraphicsView graphicsView)
+        {
+            _aiClickedHeaderFeedbackLines.Add(key);
+            graphicsView.Invalidate();
+
+            Task.Delay(300).ContinueWith(_ =>
+            {
+                _aiClickedHeaderFeedbackLines.Remove(key);
                 graphicsView.Invalidate();
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
