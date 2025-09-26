@@ -1,4 +1,5 @@
 ﻿using MauiPerfDebugOverlay.Controls;
+using System.Globalization;
 
 namespace MauiPerfDebugOverlay.Utils
 {
@@ -22,6 +23,14 @@ namespace MauiPerfDebugOverlay.Utils
             return ms >= 1000
                 ? $"{ms / 1000:F3}s"
                 : $"{ms:F4}ms";
+        }
+
+        public static string GetCultureDetailsForAI(this CultureInfo? culture)
+        {
+            return $"⚠️ Numbers are formatted using the '{culture.Name}' culture " +
+                   $"({culture.EnglishName}), where the decimal separator is " +
+                   $"'{culture.NumberFormat.NumberDecimalSeparator}' and the thousands separator is " +
+                   $"'{culture.NumberFormat.NumberGroupSeparator}'.";
         }
     }
 }

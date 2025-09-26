@@ -8,6 +8,7 @@ namespace MauiPerfDebugOverlay.InternalControls
     public class TreeDrawable : IDrawable
     {
         private readonly TreeNode _root;
+        private readonly GraphicsView _graphics;
         internal const float LineHeight = 26;
         private const float StartX = 10;
 
@@ -15,9 +16,10 @@ namespace MauiPerfDebugOverlay.InternalControls
         private readonly Dictionary<TreeNode, RectF> _nodeRects = new();
         private readonly Dictionary<TreeNode, RectF> _aiButtonRects = new();
 
-        public TreeDrawable(TreeNode root)
+        public TreeDrawable(GraphicsView graphics, TreeNode root)
         {
             _root = root;
+            _graphics = graphics;
         }
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
@@ -39,8 +41,8 @@ namespace MauiPerfDebugOverlay.InternalControls
             float startXNode = StartX + level * indentPerLevel;
 
 
-            var selfMs = LoadTimeMetricsStore.Instance.GetSelfMsByNode(node); 
-             
+            var selfMs = LoadTimeMetricsStore.Instance.GetSelfMsByNode(node);
+
             // 1️⃣ simbol expand/collapse
             string expandSymbol = node.Children.Count > 0 ? (node.IsExpanded ? "[-]" : "[+]") : "   ";
             canvas.FontColor = node.Children.Count > 0 ? Colors.Orange : Colors.White;
@@ -52,20 +54,6 @@ namespace MauiPerfDebugOverlay.InternalControls
             canvas.FontColor = Colors.White;
             canvas.DrawString(node.Name, new RectF(textX, y, 200, LineHeight),
                               HorizontalAlignment.Left, VerticalAlignment.Top);
-
-            //// 2️⃣➕ buton AI (vizibil doar dacă opțiunea e activă)
-            //if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
-            //{
-            //    string aiButton = "[AI]";
-            //    float aiButtonX = textX + 210; // după nume
-            //    canvas.FontColor = Colors.Cyan;
-            //    canvas.DrawString(aiButton, new RectF(aiButtonX, y, 40, LineHeight),
-            //                      HorizontalAlignment.Left, VerticalAlignment.Top);
-
-            //    // salvezi rectul pentru hit-test
-            //    var aiRect = new RectF(aiButtonX, y, 40, LineHeight);
-            //    _aiButtonRects[node] = aiRect;
-            //}
 
             // 3️⃣ indicator de prag
             string indicator = "";
@@ -94,14 +82,13 @@ namespace MauiPerfDebugOverlay.InternalControls
             if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ViewTabAI)
             {
                 string aiButton = "[Ask AI]";
-                float aiButtonX = lastX + 10; // spațiu de 20px după timp
-                canvas.FontColor = Colors.Cyan;
-                canvas.DrawString(aiButton, new RectF(aiButtonX, y, 55, LineHeight),
+                lastX += 10; // spațiu de 10px după timp
+                canvas.FontColor = _aiButtonClicked.Contains(node) ? Colors.Gray : Colors.Cyan;
+                canvas.DrawString(aiButton, new RectF(lastX, y, 55, LineHeight),
                                   HorizontalAlignment.Left, VerticalAlignment.Top);
 
-                _aiButtonRects[node] = new RectF(aiButtonX, y, 40, LineHeight);
-
-                lastX += 55;
+                _aiButtonRects[node] = new RectF(lastX, y, 40, LineHeight);
+                lastX += 45;
             }
 
             canvas.FontColor = indicatorColor;
@@ -163,6 +150,21 @@ namespace MauiPerfDebugOverlay.InternalControls
                     return kvp.Key;
             }
             return null;
+        }
+
+        private readonly HashSet<TreeNode> _aiButtonClicked = new();
+
+        public void MarkAIButtonClicked(TreeNode node)
+        {
+            _aiButtonClicked.Add(node);
+            _graphics?.Invalidate(); // redesenează pentru a aplica culoarea
+
+            // Resetăm feedback-ul după 300ms
+            Task.Delay(300).ContinueWith(_ =>
+            {
+                _aiButtonClicked.Remove(node);
+                _graphics?.Invalidate();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
     }
 }

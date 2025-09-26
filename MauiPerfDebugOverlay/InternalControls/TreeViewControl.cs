@@ -48,7 +48,7 @@ namespace MauiPerfDebugOverlay.InternalControls
         {
             if (bindable is TreeViewControl control && newValue is TreeNode root)
             {
-                var treeDrawable = new TreeDrawable(root);
+                var treeDrawable = new TreeDrawable(control._graphicsView, root);
                 control._graphicsView.Drawable = treeDrawable;
                 control._graphicsView.HeightRequest = (1 + control.CountVisibleRows(root)) * TreeDrawable.LineHeight;
 
@@ -67,6 +67,9 @@ namespace MauiPerfDebugOverlay.InternalControls
                     clickedNode = drawable.HitTestAI(x, y);
                     if (clickedNode != null)
                     {
+                        // 🔹 Feedback vizual: colorăm butonul temporar
+                        drawable.MarkAIButtonClicked(clickedNode);
+
                         GeminiService.Instance.AskForTreeNode(clickedNode);
                         return;
                     }
