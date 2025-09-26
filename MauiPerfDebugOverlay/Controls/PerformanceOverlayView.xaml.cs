@@ -499,12 +499,6 @@ namespace MauiPerfDebugOverlay.Controls
                     //ToggleButton.Text = "▼"; // simbol compact
                 }
             }
-            else if (CurrentState == TState.TabDiagnostics)
-            {
-                _isCompact = !_isCompact;
-
-                OnTabClicked(BtnTabScroll, null);
-            }
         }
 
 
@@ -548,22 +542,13 @@ namespace MauiPerfDebugOverlay.Controls
                             AiView.IsVisible = false;
 
                             DiagnosticsMetrics.Refresh();
-                            if (_isCompact)
-                            {
-                                boundsY.Width = -1;
-                                boundsY.Height = -1;
 
-                                DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10) / 2;
-                                DiagnosticsMetrics.HeightRequest = 200;
-                            }
-                            else
-                            {
-                                boundsY.Width = (this.Parent as AbsoluteLayout).Width;
-                                boundsY.Height = (this.Parent as AbsoluteLayout).Height;
+                            boundsY.Width = (this.Parent as AbsoluteLayout).Width;
+                            boundsY.Height = (this.Parent as AbsoluteLayout).Height;
 
-                                DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10);
-                                DiagnosticsMetrics.HeightRequest = ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
-                            }
+                            DiagnosticsMetrics.WidthRequest = ((this.Parent as AbsoluteLayout).Width - 10);
+                            DiagnosticsMetrics.HeightRequest = ((this.Parent as AbsoluteLayout).Height - 10 - HeaderStack.Height);
+
                             break;
                         case TState.TabNetwork:
                             MetricsStack.IsVisible = false;

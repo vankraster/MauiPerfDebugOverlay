@@ -133,5 +133,54 @@ namespace MauiPerfDebugOverlay.Services
             ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
 
+        internal async void AskForMetrics(Dictionary<string, object> allMetrics)
+        {
+            if (allMetrics == null || allMetrics.Count == 0)
+                return;
+
+            LastAnalyzerResponse = "Waiting the response from Gemini while analyzing all collected metrics...";
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
+
+            var serialized = string.Join("\n", allMetrics.Select(m =>
+                $"{m.Key.Replace("dotnet.", "")} = {m.Value}"));
+
+            string prompt = $@"I have collected some .NET runtime metrics.
+                            {CultureInfo.CurrentCulture.GetCultureDetailsForAI()}
+                      Please analyze these metrics for potential **real issues**, following these strict rules:
+
+                      1. Performance: Identify only CLEAR performance problems or anomalies that are visible in the values.
+                      2. Patterns: Highlight only OBSERVABLE patterns or outliers (e.g., unusually high counts, abnormal spikes).
+                      3. Avoid guessing causes or giving generic optimization advice. Focus only on what is visible in the data.
+                      4. If no real problems are evident, explicitly state: ""No clear issues detected"".
+                      5. Give a brief, structured answer (Performance, Patterns, Other).
+
+                      Here are the collected metrics:
+                      {serialized}";
+
+            LastAnalyzerResponse = await GetResponseAsync(prompt);
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
+        }
+
+        internal async void AskForSingleMetric(string key, object value)
+        {
+            LastAnalyzerResponse = $"Waiting the response from Gemini while analyzing metric: {key}";
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
+
+            string prompt = $@"I have a single .NET runtime metric.
+                            {CultureInfo.CurrentCulture.GetCultureDetailsForAI()}
+                      Please analyze this metric for potential **real issues**, following these strict rules:
+
+                      1. Performance: Identify only CLEAR problems observable from this value.
+                      2. Avoid inventing causes or giving generic tips. Only mention what is directly observable.
+                      3. If no issues are evident, explicitly state: ""No clear issues detected"".
+                      4. Keep the answer short and structured.
+
+                      Metric detail:
+                      {key.Replace("dotnet.", "")} = {value}";
+
+            LastAnalyzerResponse = await GetResponseAsync(prompt);
+            ResponseChanged?.Invoke(LastAnalyzerResponse);
+        }
+
     }
 }
