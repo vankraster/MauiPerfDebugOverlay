@@ -1,6 +1,7 @@
 ﻿using MauiPerfDebugOverlay.Extensions;
 using MauiPerfDebugOverlay.Models.Internal;
 using MauiPerfDebugOverlay.Services;
+using System;
 
 namespace MauiPerfDebugOverlay.InternalControls
 {
@@ -105,9 +106,14 @@ namespace MauiPerfDebugOverlay.InternalControls
             foreach (var kvp in items)
             {
                 _rects[kvp.Id] = new RectF(0, y - LineHeight / 2, dirtyRect.Width, LineHeight);
-                canvas.FillColor = _selectedMetrics.Contains(kvp.Id)
+                Color bgColor = _selectedMetrics.Contains(kvp.Id)
                     ? Colors.DarkSlateGray
                     : Color.FromArgb("#BB222222");
+
+
+                if (_aiClickedFeedback.Contains(kvp.Id))
+                    bgColor = Colors.Gray; // feedback vizual când dai click AI pe linie
+                canvas.FillColor = bgColor;
                 canvas.FillRectangle(_rects[kvp.Id]);
 
                 // Checkbox per rând
@@ -150,7 +156,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                 {
                     string aiButton = "[Ask AI]";
                     float aiButtonX = dirtyRect.Width - 70;
-                    canvas.FontColor = _aiClickedFeedback.Contains(kvp.Id) ? Colors.Gray : Colors.Cyan;
+                    canvas.FontColor = Colors.Orange;
                     var aiRect = new RectF(aiButtonX, y - LineHeight / 2, 60, LineHeight);
                     canvas.DrawString(aiButton, aiRect, HorizontalAlignment.Left, VerticalAlignment.Center);
                     _aiButtonRects[kvp.Id] = aiRect;

@@ -38,48 +38,56 @@ namespace MauiPerfDebugOverlay.InternalControls
                 Application.Current.Dispatcher.Dispatch(Refresh);
         }
 
-        public void Refresh()
-        {
-            var metricsDrawable = (_graphicsView.Drawable as DiagnosticsMetricsDrawable);
-            var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 1) * DiagnosticsMetricsDrawable.LineHeight;
-            if (newHeight != _graphicsView.HeightRequest)
-                _graphicsView.HeightRequest = newHeight;
-
-            _graphicsView.Invalidate();
-        }
-
         private void Tapped(float x, float y)
         {
-            if (_graphicsView.Drawable is DiagnosticsMetricsDrawable drawable)
+            if (_graphicsView.Drawable is not DiagnosticsMetricsDrawable drawable)
+                return;
+
+            // Hit-test pe header
+            var header = drawable.HitTestHeaderAI(x, y);
+            if (header != null)
             {
-                // Click global [Ask AI]
-                if (drawable.HitTestGlobalAI(x, y))
-                {
-                    drawable.MarkGlobalAIClicked(_graphicsView);
+                var metricsForHeader =
+                    header == "Exception metrics"
+                        ? DiagnosticsListener.Instance.GetAllExceptions()
+                        : DiagnosticsListener.Instance.GetAll();
 
-                    var allMetrics = DiagnosticsListener.Instance.GetAll()
-                        .Concat(DiagnosticsListener.Instance.GetAllExceptions())
-                        .ToDictionary(k => k.Key, v => v.Value);
+                GeminiService.Instance.AskForMetrics(metricsForHeader);
 
-                    GeminiService.Instance.AskForMetrics(allMetrics);
-                    return;
-                }
+                drawable.MarkHeaderLineAIClicked(header, _graphicsView); // feedback vizual
 
-                // Click pe rând [Ask AI]
-                var rowId = drawable.HitTestRowAI(x, y);
-                if (rowId != null)
-                {
-                    drawable.MarkRowAIClicked(rowId, _graphicsView);
+                return;
+            }
 
-                    var metric = DiagnosticsListener.Instance.GetAll()
-                        .Concat(DiagnosticsListener.Instance.GetAllExceptions())
-                        .FirstOrDefault(m => m.Key == rowId);
+            // Hit-test pe linie
+            var lineKey = drawable.HitTestLineAI(x, y);
+            if (lineKey != null)
+            {
+                var items = DiagnosticsListener.Instance.GetAll();
+                var exceptions = DiagnosticsListener.Instance.GetAllExceptions();
 
-                    if (!metric.Equals(default(KeyValuePair<string, object>)))
-                        GeminiService.Instance.AskForSingleMetric(metric.Key, metric.Value);
+                if (items.ContainsKey(lineKey))
+                    GeminiService.Instance.AskForSingleMetric(lineKey, items[lineKey]);
+                else if (exceptions.ContainsKey(lineKey))
+                    GeminiService.Instance.AskForSingleMetric(lineKey, exceptions[lineKey]);
 
-                    return;
-                }
+                drawable.MarkLineAIClicked(lineKey, _graphicsView); // feedback vizual
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Reîmprospătează datele și redesenează controlul
+        /// </summary>
+        public void Refresh()
+        {
+            if (_graphicsView.Drawable is DiagnosticsMetricsDrawable metricsDrawable)
+            {
+                var newHeight = ((metricsDrawable?.CountMetrics() ?? 0) + 3) * DiagnosticsMetricsDrawable.LineHeight;
+                if (newHeight != _graphicsView.HeightRequest)
+                    _graphicsView.HeightRequest = newHeight;
+
+                _graphicsView.Invalidate();
             }
         }
     }
