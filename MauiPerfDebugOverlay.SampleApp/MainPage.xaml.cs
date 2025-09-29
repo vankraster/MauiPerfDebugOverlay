@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using MauiPerfDebugOverlay.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.Metrics;
 
 namespace MauiPerfDebugOverlay.SampleApp
@@ -77,6 +78,18 @@ namespace MauiPerfDebugOverlay.SampleApp
             new Measurement<int>(1, new KeyValuePair<string,object?>("customer.country", "Mexico")),
         });
 
+        }
+
+
+        bool isvisible = true;
+        private void ToggleDebug_Clicked(object sender, EventArgs e)
+        {
+            if (isvisible)
+                PerformanceOverlayManager.Instance.Hide();
+            else
+                PerformanceOverlayManager.Instance.Show();
+
+            isvisible = !isvisible;
         }
     }
 

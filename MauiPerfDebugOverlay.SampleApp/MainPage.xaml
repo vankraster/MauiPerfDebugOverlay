@@ -41,6 +41,13 @@
                     HorizontalOptions="Fill" />
 
 
+
+            <Button x:Name="ToggleDebug"
+                    Text="Toggle debug overlay"
+                    SemanticProperties.Hint="Toggle debug overlay"
+                    Clicked="ToggleDebug_Clicked"
+                    HorizontalOptions="Fill" />
+
         </VerticalStackLayout>
     </ScrollView>
 

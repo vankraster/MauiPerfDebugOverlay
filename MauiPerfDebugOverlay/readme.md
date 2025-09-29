@@ -140,11 +140,11 @@ Overlay is fully configurable and extensible.
 
 ```bash
 
-PerformanceOverlayManager.Instance.Enable() – show the overlay
+PerformanceOverlayManager.Instance.Show() – show the overlay
 
 
 
-PerformanceOverlayManager.Instance.Disable() – hide the overlay
+PerformanceOverlayManager.Instance.Hide() – hide the overlay
 
 ```
 

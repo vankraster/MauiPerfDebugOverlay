@@ -21,7 +21,7 @@ namespace MauiPerfDebugOverlay.Services
         public void Enable()
         {
             Application.Current.PageAppearing += OnPageAppearing;
-             
+
             #region CheckLatestVersion
             //https://api.nuget.org/v3-flatcontainer/PerformanceDebugOverlay/index.json
 
@@ -73,6 +73,25 @@ namespace MauiPerfDebugOverlay.Services
                 abs.Children.Add(overlay);
                 overlay.Start();
             }
+        }
+
+
+
+
+
+
+        public event Action<bool>? VisibilityChanged;
+        public static bool LastVisibilityState = true;
+        public void Hide()
+        {
+            LastVisibilityState = false;
+            VisibilityChanged?.Invoke(false);
+        }
+
+        public void Show()
+        {
+            LastVisibilityState = true;
+            VisibilityChanged?.Invoke(true);
         }
     }
 }
