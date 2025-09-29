@@ -1,4 +1,4 @@
-\## PerformanceDebugOverlay (v2.0.3)
+\## PerformanceDebugOverlay (v1.0.9)
 ---
   
 A real-time performance overlay for .NET MAUI that tracks FPS, CPU, memory, GC, battery, and network usage, while providing a load-time component tree—all without major changes to your app code.
@@ -22,7 +22,7 @@ GC activity – collections per generation
 
 Battery consumption – approximate consumption in mW (Android only)
 
-Network stats – total requests, bytes sent/received, average request time + AI
+Network stats – total requests, bytes sent/received, average request time  + AI
 
 Compact / Expanded view – show/hide individual metrics
 
@@ -45,7 +45,7 @@ Add the NuGet package to your project:
 
 
 
-dotnet add package PerformanceDebugOverlay --version 2.0.3
+dotnet add package PerformanceDebugOverlay --version 1.0.9
 
 
 
@@ -140,11 +140,11 @@ Overlay is fully configurable and extensible.
 
 ```bash
 
-PerformanceOverlayManager.Instance.Enable() – show the overlay
+PerformanceOverlayManager.Instance.Show() – show the overlay
 
 
 
-PerformanceOverlayManager.Instance.Disable() – hide the overlay
+PerformanceOverlayManager.Instance.Hide() – hide the overlay
 
 ```
 

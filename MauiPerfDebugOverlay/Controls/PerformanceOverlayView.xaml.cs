@@ -117,6 +117,14 @@ namespace MauiPerfDebugOverlay.Controls
 
                 };
             }
+
+            this.IsVisible = PerformanceOverlayManager.LastVisibilityState;
+            PerformanceOverlayManager.Instance.VisibilityChanged += Instance_VisibilityChanged;
+        }
+
+        private void Instance_VisibilityChanged(bool obj)
+        {
+            this.IsVisible = obj;
         }
 
         private void showUiItems()
@@ -615,6 +623,10 @@ namespace MauiPerfDebugOverlay.Controls
                 NewVersionLabel.IsVisible = true;
             }
         }
+
+
+
+
 
     }
 }

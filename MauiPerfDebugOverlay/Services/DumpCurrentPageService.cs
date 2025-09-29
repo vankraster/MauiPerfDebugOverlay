@@ -3,6 +3,7 @@ using MauiPerfDebugOverlay.Models.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,16 @@ namespace MauiPerfDebugOverlay.Services
 {
     internal class DumpCurrentPageService
     {
+        static readonly HashSet<string> IgnoredProperties = new()
+        {
+            "Content",
+            "Navigation",
+            "Window",
+            "Width",
+            "Height",
+            "IsFocused",
+            "ContentSize"
+        };
 
         //Method copied from https://github.com/davidortinau/Plugin.Maui.DebugOverlay
         //original author David Ortinau
@@ -71,7 +82,6 @@ namespace MauiPerfDebugOverlay.Services
             return mainPage;
         }
 
-
         public TreeNode DumpCurrentPage()
         {
             var currentPage = GetCurrentActivePage();
@@ -81,13 +91,15 @@ namespace MauiPerfDebugOverlay.Services
             return DumpElement(currentPage);
         }
 
-
         private TreeNode DumpElement(Element element)
         {
             var node = new TreeNode
             {
                 Id = element.Id,
                 Name = element.GetType().Name,
+                Properties = element is BindableObject bo
+                    ? DumpExplicitProperties(bo)
+                    : null,
                 Children = new List<TreeNode>()
             };
 
@@ -129,5 +141,98 @@ namespace MauiPerfDebugOverlay.Services
 
             return node;
         }
+
+        private Dictionary<string, object> DumpExplicitProperties(BindableObject obj)
+        {
+            var props = new Dictionary<string, object>();
+            var type = obj.GetType();
+            var fields = type.GetFields(
+                BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+            // 1️⃣ aflăm proprietățile din Style (dacă există)
+            var ignoredFromStyle = new HashSet<string>();
+            if (obj is VisualElement ve && ve.Style != null)
+            {
+                foreach (var setter in ve.Style.Setters)
+                {
+                    if (setter is Setter s && s.Property != null)
+                    {
+                        var styledValue = s.Value;
+                        var currentValue = obj.GetValue(s.Property);
+                        if (Equals(currentValue, styledValue))
+                        {
+                            ignoredFromStyle.Add(s.Property.PropertyName);
+                        }
+                    }
+                }
+            }
+
+            // 2️⃣ parcurgem toate BindableProperty
+            foreach (var field in fields)
+            {
+                if (field.FieldType == typeof(BindableProperty))
+                {
+                    var bp = (BindableProperty)field.GetValue(null);
+
+                    // ignoră anumite proprietăți globale
+                    if (IgnoredProperties.Contains(bp.PropertyName))
+                        continue;
+
+                    // ignoră proprietățile venite din style
+                    if (ignoredFromStyle.Contains(bp.PropertyName))
+                        continue;
+
+                    var currentValue = obj.GetValue(bp);
+                    var defaultValue = bp.DefaultValue;
+
+                    if (!IsDefaultValue(currentValue, defaultValue))
+                    {
+                        props[bp.PropertyName] = FormatValue(currentValue);
+                    }
+                }
+            }
+
+            return props;
+        }
+
+
+
+
+        private bool IsDefaultValue(object currentValue, object defaultValue)
+        {
+            if (Equals(currentValue, defaultValue))
+                return true;
+
+            // string special case: null vs ""
+            if (defaultValue == null && currentValue is string s && string.IsNullOrEmpty(s))
+                return true;
+
+            // collection special case: null vs empty
+            if (defaultValue == null && currentValue is System.Collections.ICollection col && col.Count == 0)
+                return true;
+
+            return false;
+        }
+
+        private string FormatValue(object value)
+        {
+            switch (value)
+            {
+                case Thickness t:
+                    return $"{t.Left},{t.Top},{t.Right},{t.Bottom}";
+                case Color c:
+                    return c.ToArgbHex();
+                case Microsoft.Maui.Font f:
+                    return f.ToString();
+                case Style s:
+                    var setters = string.Join(", ", s.Setters.Select(setter =>
+                        setter is Setter ss ? $"{ss.Property.PropertyName}={ss.Value}" : ""));
+                    return $"Style(Target={s.TargetType?.Name}, Setters=[{setters}])";
+                default:
+                    return value?.ToString() ?? "null";
+            }
+        }
+
+
     }
 }
