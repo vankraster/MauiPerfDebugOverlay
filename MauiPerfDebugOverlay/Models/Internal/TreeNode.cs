@@ -8,6 +8,8 @@ namespace MauiPerfDebugOverlay.Models.Internal
         public Guid Id { get; set; } = Guid.Empty;
         public string Name { get; set; } = string.Empty;
         public List<TreeNode> Children { get; set; } = new();
+        public Dictionary<string, string>? Properties { get; set; }  // aici salvăm proprietățile
+
         public bool IsExpanded { get; set; } = true; // default: expandat
 
 

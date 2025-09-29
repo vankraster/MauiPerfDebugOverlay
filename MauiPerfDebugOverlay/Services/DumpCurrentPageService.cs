@@ -3,6 +3,7 @@ using MauiPerfDebugOverlay.Models.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,12 @@ namespace MauiPerfDebugOverlay.Services
 {
     internal class DumpCurrentPageService
     {
+        static readonly HashSet<string> IgnoredProperties = new()
+        {
+            "Content",
+            "Navigation",
+            "Window"
+        };
 
         //Method copied from https://github.com/davidortinau/Plugin.Maui.DebugOverlay
         //original author David Ortinau
@@ -71,7 +78,6 @@ namespace MauiPerfDebugOverlay.Services
             return mainPage;
         }
 
-
         public TreeNode DumpCurrentPage()
         {
             var currentPage = GetCurrentActivePage();
@@ -81,13 +87,15 @@ namespace MauiPerfDebugOverlay.Services
             return DumpElement(currentPage);
         }
 
-
         private TreeNode DumpElement(Element element)
         {
             var node = new TreeNode
             {
                 Id = element.Id,
                 Name = element.GetType().Name,
+                Properties = element is BindableObject bo
+                    ? DumpExplicitProperties(bo)
+                    : null,
                 Children = new List<TreeNode>()
             };
 
@@ -128,6 +136,56 @@ namespace MauiPerfDebugOverlay.Services
             }
 
             return node;
+        }
+
+
+        private Dictionary<string, string> DumpExplicitProperties(BindableObject obj)
+        {
+            var result = new Dictionary<string, string>();
+            var type = obj.GetType();
+
+            var fields = type.GetFields(
+                BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+            foreach (var field in fields)
+            {
+                if (field.FieldType == typeof(BindableProperty))
+                {
+                    var bp = (BindableProperty)field.GetValue(null);
+
+                    // skip proprietăți ignorate
+                    if (IgnoredProperties.Contains(bp.PropertyName))
+                        continue;
+
+                    var currentValue = obj.GetValue(bp);
+                    var defaultValue = bp.DefaultValue;
+
+                    if (!IsDefaultValue(currentValue, defaultValue))
+                    {
+                        string valueStr = currentValue?.ToString() ?? "null";
+                        result[bp.PropertyName] = valueStr;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+        private bool IsDefaultValue(object currentValue, object defaultValue)
+        {
+            if (Equals(currentValue, defaultValue))
+                return true;
+
+            // string special case: null vs ""
+            if (defaultValue == null && currentValue is string s && string.IsNullOrEmpty(s))
+                return true;
+
+            // collection special case: null vs empty
+            if (defaultValue == null && currentValue is System.Collections.ICollection col && col.Count == 0)
+                return true;
+
+            return false;
         }
     }
 }
