@@ -122,9 +122,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                     count += CountVisibleRows(child);
                 }
             }
-
-          
-
+             
             return count;
         }
     }

@@ -73,31 +73,33 @@ namespace MauiPerfDebugOverlay.Services
             }
 
         }
-
-
+         
         internal async Task AskForTreeNode(TreeNode clickedNode)
         {
             LastAnalyzerResponse = "Waiting the response from Gemini while analyzing node: " + clickedNode.Name;
             ResponseChanged?.Invoke(LastAnalyzerResponse);
+
             string serializedTree = TreeNode.SerializeTree(clickedNode);
 
             string treePrompt = $@" I have a XAML subtree from a .NET MAUI page.
-                                        {CultureInfo.CurrentCulture.GetCultureDetailsForAI()}
-                                    Please analyze this subtree for potential issues, but follow these rules:
+                    {CultureInfo.CurrentCulture.GetCultureDetailsForAI()}
 
-                                    1. Performance: Identify only CLEAR performance bottlenecks based on SelfMs/HandlerChanged timings.
-                                    2. Structural/Layout: Identify only CLEAR structural/layout problems, e.g., excessive nesting, inappropriate layout usage, or patterns that could degrade performance or maintainability.
-                                    3. If there are no real issues in a category, just say ""No clear issues detected"" for that category.
-                                    4. Avoid inventing problems or giving generic optimization tips. Only mention real, observable concerns.
-                                    5. Give a brief, structured answer.
+                    Please analyze this subtree for potential issues, but follow these rules:
 
-                                    Subtree details:
-                                    {serializedTree} ";
+                    1. Performance: Identify only CLEAR performance bottlenecks based on SelfMs/HandlerChanged timings.
+                    2. Structural/Layout: Identify only CLEAR structural/layout problems, e.g., excessive nesting, inappropriate layout usage, or patterns that could degrade performance or maintainability.
+                    3. Properties: Also review explicitly set properties for potential misuse (e.g., conflicting options, unnecessary settings). If none, say ""No clear issues detected"".
+                    4. If there are no real issues in a category, just say ""No clear issues detected"" for that category.
+                    5. Avoid inventing problems or giving generic optimization tips. Only mention real, observable concerns.
+                    6. Give a brief, structured answer.
+
+                    Subtree details:
+                    {serializedTree} ";
 
             LastAnalyzerResponse = await GetResponseAsync(treePrompt);
             ResponseChanged?.Invoke(LastAnalyzerResponse);
         }
-
+         
         internal async void AskForNetworkMetrics(List<NetworkMetric> selectedData)
         {
             if (selectedData == null || selectedData.Count == 0)

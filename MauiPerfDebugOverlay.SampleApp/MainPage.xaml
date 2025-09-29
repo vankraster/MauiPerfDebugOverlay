@@ -35,7 +35,7 @@
 
 
             <Button x:Name="CustomMetrics"
-                    Text="Click me"
+                    Text="Add custom metrics"
                     SemanticProperties.Hint="Add custom metrics"
                     Clicked="CustomMetrics_Clicked"
                     HorizontalOptions="Fill" />

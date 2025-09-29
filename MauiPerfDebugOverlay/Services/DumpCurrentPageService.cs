@@ -15,7 +15,11 @@ namespace MauiPerfDebugOverlay.Services
         {
             "Content",
             "Navigation",
-            "Window"
+            "Window",
+            "Width",
+            "Height",
+            "IsFocused",
+            "ContentSize"
         };
 
         //Method copied from https://github.com/davidortinau/Plugin.Maui.DebugOverlay
@@ -138,23 +142,44 @@ namespace MauiPerfDebugOverlay.Services
             return node;
         }
 
-
-        private Dictionary<string, string> DumpExplicitProperties(BindableObject obj)
+        private Dictionary<string, object> DumpExplicitProperties(BindableObject obj)
         {
-            var result = new Dictionary<string, string>();
+            var props = new Dictionary<string, object>();
             var type = obj.GetType();
-
             var fields = type.GetFields(
                 BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
 
+            // 1️⃣ aflăm proprietățile din Style (dacă există)
+            var ignoredFromStyle = new HashSet<string>();
+            if (obj is VisualElement ve && ve.Style != null)
+            {
+                foreach (var setter in ve.Style.Setters)
+                {
+                    if (setter is Setter s && s.Property != null)
+                    {
+                        var styledValue = s.Value;
+                        var currentValue = obj.GetValue(s.Property);
+                        if (Equals(currentValue, styledValue))
+                        {
+                            ignoredFromStyle.Add(s.Property.PropertyName);
+                        }
+                    }
+                }
+            }
+
+            // 2️⃣ parcurgem toate BindableProperty
             foreach (var field in fields)
             {
                 if (field.FieldType == typeof(BindableProperty))
                 {
                     var bp = (BindableProperty)field.GetValue(null);
 
-                    // skip proprietăți ignorate
+                    // ignoră anumite proprietăți globale
                     if (IgnoredProperties.Contains(bp.PropertyName))
+                        continue;
+
+                    // ignoră proprietățile venite din style
+                    if (ignoredFromStyle.Contains(bp.PropertyName))
                         continue;
 
                     var currentValue = obj.GetValue(bp);
@@ -162,14 +187,15 @@ namespace MauiPerfDebugOverlay.Services
 
                     if (!IsDefaultValue(currentValue, defaultValue))
                     {
-                        string valueStr = currentValue?.ToString() ?? "null";
-                        result[bp.PropertyName] = valueStr;
+                        props[bp.PropertyName] = FormatValue(currentValue);
                     }
                 }
             }
 
-            return result;
+            return props;
         }
+
+
 
 
         private bool IsDefaultValue(object currentValue, object defaultValue)
@@ -187,5 +213,26 @@ namespace MauiPerfDebugOverlay.Services
 
             return false;
         }
+
+        private string FormatValue(object value)
+        {
+            switch (value)
+            {
+                case Thickness t:
+                    return $"{t.Left},{t.Top},{t.Right},{t.Bottom}";
+                case Color c:
+                    return c.ToArgbHex();
+                case Microsoft.Maui.Font f:
+                    return f.ToString();
+                case Style s:
+                    var setters = string.Join(", ", s.Setters.Select(setter =>
+                        setter is Setter ss ? $"{ss.Property.PropertyName}={ss.Value}" : ""));
+                    return $"Style(Target={s.TargetType?.Name}, Setters=[{setters}])";
+                default:
+                    return value?.ToString() ?? "null";
+            }
+        }
+
+
     }
 }
