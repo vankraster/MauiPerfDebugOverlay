@@ -41,7 +41,7 @@ namespace MauiPerfDebugOverlay.InternalControls
                 Content = _graphicsView
             };
 
-           
+
         }
 
         private static void OnRootNodeChanged(BindableObject bindable, object oldValue, object newValue)
@@ -50,7 +50,7 @@ namespace MauiPerfDebugOverlay.InternalControls
             {
                 var treeDrawable = new TreeDrawable(control._graphicsView, root);
                 control._graphicsView.Drawable = treeDrawable;
-                control._graphicsView.HeightRequest = (1 + control.CountVisibleRows(root)) * TreeDrawable.LineHeight;
+                control._graphicsView.HeightRequest = control.NewHeightRequest;
 
                 control._graphicsView.Invalidate(); // redesenează
             }
@@ -75,22 +75,45 @@ namespace MauiPerfDebugOverlay.InternalControls
                     }
                 }
 
+
+
                 clickedNode = drawable.HitTest(x, y);
                 if (clickedNode != null)
                 {
                     clickedNode.IsExpanded = !clickedNode.IsExpanded;
 
-                    _graphicsView.HeightRequest = (1 + CountVisibleRows(RootNode)) * TreeDrawable.LineHeight;
+                    _graphicsView.HeightRequest = NewHeightRequest;
 
                     _graphicsView.Invalidate();
+
+                    return;
                 }
 
+
+                clickedNode = drawable.HitTestProps(x, y);
+                if (clickedNode != null)
+                {
+                    clickedNode.ArePropertiesExpanded = !clickedNode.ArePropertiesExpanded;
+
+                    _graphicsView.HeightRequest = NewHeightRequest;
+
+                    _graphicsView.Invalidate();
+
+                    return;
+                }
             }
         }
 
+
+
+        double NewHeightRequest => (1 + CountVisibleRows(RootNode)) * TreeDrawable.LineHeight;
+
         public int CountVisibleRows(TreeNode node)
         {
-            int count = 1; // nodul curent
+            int count = 2; // nodul curent
+
+            if (node.ArePropertiesExpanded)
+                count += node.Properties?.Count() ?? 0;
 
             if (node.IsExpanded)
             {
@@ -99,6 +122,8 @@ namespace MauiPerfDebugOverlay.InternalControls
                     count += CountVisibleRows(child);
                 }
             }
+
+          
 
             return count;
         }

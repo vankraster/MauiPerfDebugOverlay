@@ -11,6 +11,7 @@ namespace MauiPerfDebugOverlay.Models.Internal
         public Dictionary<string, string>? Properties { get; set; }  // aici salvăm proprietățile
 
         public bool IsExpanded { get; set; } = true; // default: expandat
+        public bool ArePropertiesExpanded { get; set; } = false;
 
 
 
