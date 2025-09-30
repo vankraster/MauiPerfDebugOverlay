@@ -315,7 +315,9 @@ namespace MauiPerfDebugOverlay.Controls
         private void StartMetrics()
         {
             _stopwatch.Restart();
-            _prevCpuTime = _currentProcess.TotalProcessorTime;
+
+            if (PerformanceDebugOverlayExtensions.PerformanceOverlayOptions.ShowCPU_Usage)
+                _prevCpuTime = _currentProcess.TotalProcessorTime;
 
             Microsoft.Maui.Controls.Application.Current!.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
