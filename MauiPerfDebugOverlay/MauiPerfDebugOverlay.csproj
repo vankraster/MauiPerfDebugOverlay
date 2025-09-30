@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -22,7 +22,7 @@
 
 		<!-- NuGet metadata -->
 		<PackageId>PerformanceDebugOverlay</PackageId>
-		<Version>2.0.4</Version>
+		<Version>2.0.5</Version>
 		<Authors>Radu Bogdan Claudiu</Authors>
 		<Company></Company>
 		<Product>MauiPerfDebugOverlay</Product>
@@ -34,7 +34,7 @@
 			Seamlessly integrates into your app to deliver real-time diagnostics, profiling, and AI-driven optimization tips.
 		</Description>
 		<PackageTags>
-			MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;Profiling;.NET9
+			MAUI;HUD;Performance;FPS;CPU;Memory;Threads;GC;Battery;Networking;Diagnostics;LoadTime;Profiling;.NET8
 		</PackageTags>
 		<PackageReleaseNotes>
 			- Added Gemini AI integration for automated performance analysis and recommendations.

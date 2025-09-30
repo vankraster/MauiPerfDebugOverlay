@@ -12,6 +12,10 @@ namespace MauiPerfDebugOverlay.Extensions
 
         public static MauiAppBuilder UsePerformanceDebugOverlay(this MauiAppBuilder builder, PerformanceOverlayOptions options)
         {
+#if IOS
+            options.ShowCPU_Usage = false;
+#endif
+
             AppContext.SetSwitch("System.Diagnostics.Metrics.Meter.IsSupported", true);
 
             PerformanceOverlayOptions = options;
@@ -26,7 +30,7 @@ namespace MauiPerfDebugOverlay.Extensions
             //    builder.Services.AddSingleton<ProfilingHttpClient>();
             //    builder.Services.AddSingleton<HttpClient>(sp => sp.GetRequiredService<ProfilingHttpClient>());
             //}
-             
+
             if (options.ShowLoadTime)
             {
                 LoadTimeMetricsStore loadTimeMetricsStore = LoadTimeMetricsStore.Instance;
@@ -123,7 +127,7 @@ namespace MauiPerfDebugOverlay.Extensions
                     }
                 });
 
-            } 
+            }
 
             return builder;
         }
