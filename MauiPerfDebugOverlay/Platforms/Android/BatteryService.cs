@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Application = Android.App.Application;
@@ -26,9 +27,9 @@ namespace MauiPerfDebugOverlay.Platforms
             int voltage = batteryStatus?.GetIntExtra(BatteryManager.ExtraVoltage, -1) ?? -1; // mV
             int currentMicroA = _batteryManager?.GetIntProperty((int)BatteryProperty.CurrentNow) ?? -1; // µA
 
-            if (voltage > 0 && currentMicroA > 0)
+            if (voltage > 0 && currentMicroA != -1)
             {
-                return (currentMicroA / 1000.0) * (voltage / 1000.0); // mW
+                return (Math.Abs(currentMicroA) / 1000.0) * (voltage / 1000.0); // mW
             }
 
             return 0;
