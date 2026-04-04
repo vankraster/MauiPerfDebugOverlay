@@ -24,11 +24,11 @@ namespace MauiPerfDebugOverlay.Platforms
             var batteryStatus = Application.Context.RegisterReceiver(null, _batteryFilter);
 
             int voltage = batteryStatus?.GetIntExtra(BatteryManager.ExtraVoltage, -1) ?? -1; // mV
-            int currentMicroA = _batteryManager?.GetIntProperty((int)BatteryProperty.CurrentNow) ?? -1; // µA
-
-            if (voltage > 0 && currentMicroA > 0)
+            int currentMicroA = _batteryManager?.GetIntProperty((int)BatteryProperty.CurrentNow) ?? int.MinValue; // µA
+           
+            if (voltage > 0 && currentMicroA != int.MinValue && currentMicroA != 0)
             {
-                return (currentMicroA / 1000.0) * (voltage / 1000.0); // mW
+                return (currentMicroA / 1000.0) * (voltage / 1000.0); // mW 
             }
 
             return 0;
