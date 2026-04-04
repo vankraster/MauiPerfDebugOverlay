@@ -5,13 +5,15 @@
              xmlns:controls="clr-namespace:MauiPerfDebugOverlay.InternalControls"
              x:Name="Root"
              IsVisible="True"
-             Opacity="1">
+             Opacity="1"
+             InputTransparent="True">
 
     <Frame x:Name="OverlayFrame"
            BackgroundColor="#CC000000"
            Padding="8"
            CornerRadius="10"
-           HasShadow="True">
+           HasShadow="True"
+           InputTransparent="False">
 
         <Frame.GestureRecognizers>
             <PanGestureRecognizer PanUpdated="OnPanUpdated" />
